@@ -1,0 +1,3722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>IIIStudio - AI绘画提示词工具</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #dfe6e9;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #e17055;
+        }
+
+        .dark-mode {
+            --primary-color: #7c6ef5;
+            --secondary-color: #9c8ef7;
+            --bg-color: #1e2026;
+            --card-bg: #2d3036;
+            --text-color: #e1e5eb;
+            --border-color: #3a3f4b;
+            --success-color: #00d8a7;
+            --warning-color: #ffd166;
+            --danger-color: #ff7b54;
+        }
+
+        * {
+            margin: 0;
+
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .category-list {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .category-title span {
+            cursor: pointer;
+        }
+
+        .prompt-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .prompt-card {
+            background-color: var(--bg-color);
+            border-radius: 10px;
+            padding: 10px 10px 10px 15px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prompt-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .prompt-card.active {
+            border-color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+
+        .prompt-card h3 {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prompt-card p {
+            font-size: 0.85rem;
+            color: #888;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            background-color: var(--secondary-color);
+            color: white;
+            margin-right: 5px;
+        }
+
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        .icon-plus::before {
+            content: "\2b";
+            font-family: "Font Awesome 6 Free";
+            -webkit-font-smoothing: antialiased;
+            display: var(--fa-display, inline-block);
+            font-style: normal;
+            font-variant: normal;
+            line-height: 1;
+            text-rendering: auto;
+        }
+
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .editor-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-title i {
+            color: var(--primary-color);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* 提示词标签样式 */
+        .prompt-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            min-height: 40px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            border: 1px dashed var(--border-color);
+        }
+
+        .prompt-tag {
+            height: 28px;
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            min-height: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 2px rgba(51, 54, 67, .25);
+            color: #fff;
+            cursor: grab;
+            transition: all .2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            overflow: hidden;
+        }
+        .prompt-tag .seg-en {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 10px;
+            background: linear-gradient(#606060, #6c6c6c);
+            font-size: 0.85rem;
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+        .prompt-tag .seg-zh {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 10px;
+            background: linear-gradient(#a0b181, #57b049);
+            font-size: 0.85rem;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .prompt-tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(51, 54, 67, .25);
+        }
+
+        .prompt-tag.dragging {
+            opacity: 0.5;
+        }
+        /* 拖拽占位指示条 */
+        .tag-placeholder {
+            width: 6px;
+            height: 15px;
+            background: var(--primary-color);
+            border-radius: 3px;
+            margin: 6px 4px;
+            align-self: stretch;
+        }
+
+        .prompt-tag .delete-tag {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            background: rgba(0,0,0,.55);
+            border-radius: 10px;
+            width: 18px;
+            height: 18px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            line-height: 18px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: #fff;
+        }
+        .prompt-tag:hover .delete-tag {
+            display: inline-flex;
+        }
+
+        .prompt-tag .delete-tag:hover {
+            opacity: 1;
+        }
+        /* 点击置灰 + 按键凹陷效果（保留中英分段配色，仅做整体淡化与凹陷） */
+        .prompt-tag:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,.25);
+        }
+        .prompt-tag.inactive {
+            opacity: .55;                 /* 整体淡化 */
+            filter: grayscale(35%);       /* 轻度灰度，仍保留配色差异 */
+            transform: translateY(1px);   /* 轻微下压 */
+            box-shadow: inset 0 2px 8px rgba(0,0,0,.28); /* 内凹阴影 */
+            cursor: pointer;
+        }
+        .prompt-tag.inactive:hover {
+            transform: translateY(1px);   /* 悬停也保持按下，不上浮 */
+            box-shadow: inset 0 2px 10px rgba(0,0,0,.32);
+        }
+
+        /* 常用提示词区域样式 */
+        .common-tags-section {
+            margin-top: 16px;
+        }
+        .common-tags-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .common-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            border: 1px dashed var(--border-color);
+            min-height: 40px;
+        }
+        .common-tag {
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: linear-gradient(#406e6d, #749b98);
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 2px 2px rgba(51, 54, 67, .25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .common-tag.pinned {
+            background: linear-gradient(#8d79c0, #7a78dc);
+        }
+        .common-tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(51, 54, 67, .25);
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* 设置按钮（位于主题切换按钮之上） */
+        .settings-toggle {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        .settings-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0,0,0,.2);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 968px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .editor-card {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+        /* 居中模态框样式 */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal {
+            width: min(92vw, 480px);
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+        .modal-row {
+            display: grid;
+            gap: 6px;
+        }
+        .modal-row label {
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+        .modal-input {
+            /* width: 100%; */
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+        .modal-input:focus {
+            border-color: var(--primary-color);
+        }
+        .modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .hidden { display: none; }
+
+        /* 右键菜单 */
+        .context-menu {
+            position: fixed;
+            z-index: 2000;
+            min-width: 150px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.18);
+            padding: 6px 0;
+            display: none;
+        }
+        .context-menu .item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .context-menu .item:hover {
+            background: var(--bg-color);
+        }
+        /* 让通用提示模态位于最上层（覆盖其他模态） */
+        #modal-confirm {
+            z-index: 3000;
+        }
+        /* 提示词历史模态宽度扩展 */
+        #modal-history .modal {
+            width: min(92vw, 720px);
+        }
+        /* 提示词历史模态主体在内容过多时可滚动 */
+        #modal-history .modal-body {
+            max-height: 60vh;
+            overflow: auto;
+        }
+        /* 右键菜单设置模态：加宽并在内容过高时可滚动 */
+        #modal-ctxmenu .modal {
+            width: min(92vw, 720px);
+        }
+        #modal-ctxmenu .modal-body {
+            max-height: 60vh;
+            overflow: auto;
+        }
+        /* 类别按钮式选择的按压/选中态 */
+        .btn-toggle.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,.25);
+            border-color: var(--primary-color);
+        }
+        .btn-toggle:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,.25);
+        }
+        .token-counter {
+            text-align: right;
+            font-size: 12px;
+            opacity: .75;
+            margin-top: 6px;
+        }
+    /* 降低动画以满足系统减少动态偏好 */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="logo">
+                <a href="https://github.com/IIIStudio/PromptStudio" target="_blank" rel="noopener" style="display:flex;align-items:center;color:inherit;text-decoration:none;">
+                    <i class="fab fa-github logo-icon"></i>
+                    <h1>Prompt Studio</h1>
+                </a>
+            </div>
+            
+            <div class="category-list">
+                <div class="category-title">
+                    <span>常用提示词</span>
+                    <button class="btn btn-outline icon-plus" id="add-category-btn" title="新建标签"></button>
+                </div>
+                <div class="prompt-list">
+                    
+                    
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <h2>提示词编辑器</h2>
+                <div class="header-actions">
+                    <button class="btn btn-outline" id="download-json-btn">
+                        <i class="fas fa-save"></i> 下载JSON/上传
+                    </button>
+                    <button class="btn btn-primary" id="import-json-btn">
+                        <i class="fas fa-file-import"></i> 导入JSON
+                    </button>
+                    <button class="btn btn-outline" id="dropbox-config-btn">Dropbox</button>
+                    <button class="btn btn-outline" id="reset-all-btn">
+                        <i class="fas fa-trash"></i> 重置
+                    </button>
+                </div>
+            </div>
+            
+            <div class="editor-container">
+                <div class="editor-card">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-edit"></i> 提示词内容
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-outline" id="random-pick-btn">
+                                <i class="fas fa-dice"></i> 随机
+                            </button>
+                            <button class="btn btn-outline" onclick="resetPrompt()">
+                                <i class="fas fa-redo"></i> 重置
+                            </button>
+                            <button class="btn btn-outline" onclick="copyPrompt()">
+                                <i class="fas fa-copy"></i> 复制
+                            </button>
+                            <button class="btn btn-outline" id="save-prompt-btn">
+                                <i class="fas fa-bookmark"></i> 存储
+                            </button>
+                            <button class="btn btn-outline" id="view-history-btn">
+                                <i class="fas fa-list"></i> 查看
+                            </button>
+                        </div>
+                    </div>
+                    <textarea class="editor-textarea" id="prompt-editor"></textarea>
+
+                    
+                    <div class="prompt-tags" id="prompt-tags-container">
+                        <!-- 标签将通过JavaScript动态生成 -->
+                    </div>
+
+                    <div class="common-tags-section">
+                        <div class="common-tags-title">常用提示词
+                            <button class="btn btn-outline icon-plus" id="add-tag-btn" style="margin-left:8px" title="添加标签"></button>
+                            <button class="btn btn-outline" id="export-tags-image-btn" style="margin-left:8px" title="生成图片并下载">生成图片</button>
+                        </div>
+                        <div class="common-tags" id="common-tags">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 设置按钮 -->
+    <div class="settings-toggle" id="settings-toggle" title="右键菜单设置">
+        <i class="fas fa-cog"></i>
+    </div>
+    <!-- 主题切换按钮 -->
+    <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </div>
+    <input type="file" id="json-file-input" accept="application/json" style="display:none" />
+    <!-- 新建分类 模态框 -->
+    <div class="modal-backdrop" id="modal-category">
+        <div class="modal">
+            <div class="modal-header">
+                <span>新建大标签</span>
+                <button class="btn btn-outline" id="modal-cat-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <label for="modal-cat-name">分类名称</label>
+                    <input class="modal-input" id="modal-cat-name" type="text" placeholder="例如：人脸标签" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-cat-cancel">取消</button>
+                <button class="btn btn-primary" id="modal-cat-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+    <!-- 添加标签 模态框 -->
+    <div class="modal-backdrop" id="modal-tag">
+        <div class="modal">
+            <div class="modal-header">
+                <span id="modal-tag-title">添加标签</span>
+                <button class="btn btn-outline" id="modal-tag-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <label for="modal-tag-zh">中文</label>
+                    <input class="modal-input" id="modal-tag-zh" type="text" placeholder="例如：斗鸡眼" />
+                </div>
+                <div class="modal-row">
+                    <label for="modal-tag-en">英文</label>
+                    <input class="modal-input" id="modal-tag-en" type="text" placeholder="例如：cross-eyed" />
+                </div>
+                <div class="modal-row">
+                    <label>类别</label>
+                    <div id="modal-subcat-buttons" style="display:flex;flex-wrap:wrap;gap:8px;">
+                        <button class="btn btn-outline" id="modal-subcat-newbtn" type="button">新建类别</button>
+                        <!-- 下面的现有类别按钮将由 openTagModal 动态生成 -->
+                    </div>
+                </div>
+
+                <div class="modal-row">
+                    <label for="modal-cy-token">彩云翻译 Token</label>
+                    <input class="modal-input" id="modal-cy-token" type="password" placeholder="请输入你的彩云翻译 Token" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-tag-translate-mymemory" title="使用 Translated 翻译">Translated</button>
+                <button class="btn btn-outline" id="modal-tag-translate" title="将中文翻译为英文">彩云翻译</button>
+                <button class="btn btn-outline" id="modal-tag-cancel">取消</button>
+                <button class="btn btn-primary" id="modal-tag-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右键菜单容器 -->
+    <div id="context-menu" class="context-menu">
+        <div id="context-menu-list"></div>
+    </div>
+
+    <!-- 通用确认模态框 -->
+    <div class="modal-backdrop" id="modal-confirm">
+        <div class="modal">
+            <div class="modal-header">
+                <span id="modal-confirm-title">确认操作</span>
+                <button class="btn btn-outline" id="modal-confirm-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <div id="modal-confirm-message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-confirm-cancel">取消</button>
+                <button class="btn btn-primary" id="modal-confirm-ok">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史快照模态框 -->
+    <div class="modal-backdrop" id="modal-history">
+        <div class="modal">
+            <div class="modal-header">
+                <span>提示词历史</span>
+                <button class="btn btn-outline" id="modal-history-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div id="history-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-history-clear">清空全部</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右键菜单设置模态框 -->
+    <div class="modal-backdrop" id="modal-ctxmenu">
+        <div class="modal">
+            <div class="modal-header">
+                <span>右键菜单设置</span>
+                <button class="btn btn-outline" id="modal-ctx-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row" style="font-size:12px;opacity:.8;">
+                    支持占位符：{{中文}}、{{英文}}（将自动进行 URL 编码）
+                </div>
+                <div class="modal-row">
+                    <button class="btn btn-outline" id="ctx-add-btn">新增菜单项</button>
+                </div>
+                <div class="modal-row">
+                    <div id="ctx-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="modal-ctx-save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右键菜单设置模态框 -->
+    <div class="modal-backdrop" id="modal-ctxmenu">
+        <div class="modal">
+            <div class="modal-header">
+                <span>右键菜单设置</span>
+                <button class="btn btn-outline" id="modal-ctx-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row" style="font-size:12px;opacity:.8;">
+                    支持占位符：{{中文}}、{{英文}}（自动进行 URL 编码）
+                </div>
+                <div class="modal-row">
+                    <button class="btn btn-outline" id="ctx-add-btn">新增菜单项</button>
+                </div>
+                <div class="modal-row">
+                    <div id="ctx-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="modal-ctx-save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dropbox 配置模态框 -->
+    <div class="modal-backdrop" id="modal-dropbox">
+        <div class="modal">
+            <div class="modal-header">
+                <span>Dropbox 配置</span>
+                <button class="btn btn-outline" id="modal-db-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <label for="modal-db-key">App Key</label>
+                    <input class="modal-input" id="modal-db-key" type="text" placeholder="Dropbox App Key" />
+                </div>
+                <div class="modal-row">
+                    <label for="modal-db-secret">App Secret</label>
+                    <input class="modal-input" id="modal-db-secret" type="text" placeholder="Dropbox App Secret" />
+                </div>
+                <div class="modal-row">
+                    <label for="modal-db-refresh">Refresh Token / 授权码或回调URL</label>
+                    <input class="modal-input" id="modal-db-refresh" type="password" placeholder="可粘贴 Refresh Token，或直接粘贴回调后的整条URL（含 ?code=...）或仅 code" />
+                </div>
+                <div class="modal-row">
+                    <label for="modal-db-enabled">使用 Dropbox 进行上传/导入</label>
+                    <div>
+                        <input type="checkbox" id="modal-db-enabled" /> 启用云端（默认关闭）
+                    </div>
+                </div>
+                <div class="modal-row" style="font-size:12px;opacity:.75;">
+                  <ol>
+                      <li>访问 <a href="https://www.dropbox.com/developers/apps" target="_blank">Dropbox开发者平台</a></li>
+                      <li>创建或选择您的应用</li>
+                      <li>复制App key与App secret写入下方</li>
+                      <li>在 Permissions 勾选权限，files.content.write与files.content.read，点击Submit提交</li>
+                      <li>OAuth 2 Redirect URIs 写入 https://localhost/</li>
+                  </ol>
+                    使用说明：点击“授权”在弹窗中登录并同意授权。授权完成后若拿到 https://localhost/?code=...，可直接将整条地址或 code部分 粘贴到上方输入框并点“登录”，系统会自动先兑换 Refresh Token；若已拿到 Refresh Token，直接粘贴后点“登录”即可获取临时 Access Token。
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-db-cancel">取消</button>
+                <button class="btn btn-outline" id="modal-db-authorize">授权</button>
+                <button class="btn btn-success" id="modal-db-login">登录</button>
+                <button class="btn btn-primary" id="modal-db-save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 主题切换功能（持久化 + 跟随系统偏好）
+        const themeToggle = document.getElementById('theme-toggle');
+        const THEME_KEY = 'ops_theme';
+
+        function applyTheme(mode) {
+            const isDark = mode === 'dark';
+            document.body.classList.toggle('dark-mode', isDark);
+            const icon = themeToggle?.querySelector('i');
+            if (icon) {
+                if (isDark) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            }
+        }
+
+        // 首次加载：优先使用本地保存，其次使用系统偏好
+        (function initTheme() {
+            try {
+                const saved = localStorage.getItem(THEME_KEY);
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const mode = saved === 'dark' || saved === 'light' ? saved : (prefersDark ? 'dark' : 'light');
+                applyTheme(mode);
+            } catch(e) {
+                applyTheme('light');
+            }
+        })();
+
+        themeToggle?.addEventListener('click', () => {
+            const next = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+            applyTheme(next);
+            try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
+        });
+        
+        // 提示词编辑器
+        const promptEditor = document.getElementById('prompt-editor');
+
+        // 右键菜单配置存取
+        const MENU_KEY = 'ops_ctx_menu_items';
+        function getCtxMenus() {
+            try {
+                const raw = localStorage.getItem(MENU_KEY);
+                const arr = raw ? JSON.parse(raw) : [];
+                return Array.isArray(arr) ? arr.filter(x => x && typeof x === 'object') : [];
+            } catch(e) { return []; }
+        }
+        function setCtxMenus(arr) {
+            try { localStorage.setItem(MENU_KEY, JSON.stringify(Array.isArray(arr) ? arr : [])); } catch(e) {}
+        }
+        // URL 模板：支持 {{中文}} / {{英文}}，自动 URL 编码
+        function buildUrlFromTemplate(tpl, en, zh) {
+            const rep = s => encodeURIComponent(s || '');
+            return String(tpl || '')
+                .replace(/{{\s*英文\s*}}/g, rep(en || ''))
+                .replace(/{{\s*中文\s*}}/g, rep(zh || ''));
+        }
+
+        // 设置弹窗
+        function openCtxMenuModal() {
+            const wrap = document.getElementById('modal-ctxmenu');
+            const closeBtn = document.getElementById('modal-ctx-close');
+            const saveBtn = document.getElementById('modal-ctx-save');
+            const list = document.getElementById('ctx-list');
+            const addBtn = document.getElementById('ctx-add-btn');
+
+            let data = getCtxMenus().slice();
+
+            function renderList() {
+                list.innerHTML = '';
+                if (!data.length) {
+                    const empty = document.createElement('div');
+                    empty.style.opacity = '.7';
+                    empty.style.fontSize = '0.9rem';
+                    empty.textContent = '暂无菜单项，点击“新增菜单项”进行添加';
+                    list.appendChild(empty);
+                    return;
+                }
+                data.forEach((m, i) => {
+                    const row = document.createElement('div');
+                    row.style.border = '1px solid var(--border-color)';
+                    row.style.borderRadius = '8px';
+                    row.style.padding = '8px';
+                    row.style.display = 'grid';
+                    row.style.gap = '6px';
+
+                    const head = document.createElement('div');
+                    head.style.display = 'flex';
+                    head.style.justifyContent = 'space-between';
+                    head.style.alignItems = 'center';
+
+                    const title = document.createElement('div');
+                    title.style.display = 'flex';
+                    title.style.alignItems = 'center';
+                    title.style.gap = '8px';
+
+                    const iconEl = document.createElement('i');
+                    iconEl.className = (m.icon || 'fas fa-globe');
+                    const nameEl = document.createElement('span');
+                    nameEl.textContent = m.name || '(未命名)';
+                    nameEl.style.fontWeight = '600';
+
+                    title.appendChild(iconEl);
+                    title.appendChild(nameEl);
+
+                    const ops = document.createElement('div');
+                    ops.style.display = 'flex';
+                    ops.style.gap = '8px';
+
+                    const btnEdit = document.createElement('button');
+                    btnEdit.className = 'btn btn-outline';
+                    btnEdit.textContent = '编辑';
+                    btnEdit.addEventListener('click', async () => {
+                        const icon = await showIconPicker(m.icon || 'fas fa-globe');
+                        if (icon === null) return;
+                        const name = await showInputModal('名称', '谷歌翻译', m.name || '');
+                        if (name === null) return;
+                        const url = await showInputModal('链接模板', '例如：https://translate.google.com/?source=osdd&sl=auto&tl=zh-CN&text={{英文}}', m.url || '');
+                        if (url === null) return;
+                        data[i] = { icon: (icon || 'fas fa-globe').trim(), name: (name || '').trim(), url: (url || '').trim() };
+                        renderList();
+                    });
+
+                    const btnDel = document.createElement('button');
+                    btnDel.className = 'btn btn-outline';
+                    btnDel.textContent = '删除';
+                    btnDel.addEventListener('click', async () => {
+                        const ok = await showConfirm('确认删除该菜单项？', '删除菜单项');
+                        if (!ok) return;
+                        data.splice(i, 1);
+                        renderList();
+                    });
+
+                    const btnUp = document.createElement('button');
+                    btnUp.className = 'btn btn-outline';
+                    btnUp.textContent = '上移';
+                    btnUp.addEventListener('click', () => {
+                        if (i <= 0) return;
+                        const tmp = data[i - 1];
+                        data[i - 1] = data[i];
+                        data[i] = tmp;
+                        renderList();
+                    });
+
+                    const btnDown = document.createElement('button');
+                    btnDown.className = 'btn btn-outline';
+                    btnDown.textContent = '下移';
+                    btnDown.addEventListener('click', () => {
+                        if (i >= data.length - 1) return;
+                        const tmp = data[i + 1];
+                        data[i + 1] = data[i];
+                        data[i] = tmp;
+                        renderList();
+                    });
+
+                    ops.appendChild(btnEdit);
+                    ops.appendChild(btnUp);
+                    ops.appendChild(btnDown);
+                    ops.appendChild(btnDel);
+
+                    head.appendChild(title);
+                    head.appendChild(ops);
+
+                    const urlPreview = document.createElement('div');
+                    urlPreview.style.fontSize = '0.85rem';
+                    urlPreview.style.opacity = '.75';
+                    urlPreview.textContent = m.url || '';
+
+                    row.appendChild(head);
+                    row.appendChild(urlPreview);
+                    list.appendChild(row);
+                });
+            }
+
+            addBtn.onclick = async () => {
+                const icon = await showIconPicker('fas fa-globe');
+                if (icon === null) return;
+                const name = await showInputModal('名称', '菜单名字，例如：谷歌翻译', '');
+                if (name === null) return;
+                const url = await showInputModal('链接模板', '例如：https://translate.google.com/?source=osdd&sl=auto&tl=zh-CN&text={{英文}}', '');
+                if (url === null) return;
+                data.push({ icon: (icon || 'fas fa-globe').trim(), name: (name || '').trim(), url: (url || '').trim() });
+                renderList();
+            };
+
+            function onSave() {
+                const cleaned = data.filter(m => (m && (m.url || '').trim() && (m.name || '').trim()))
+                    .map(m => ({ icon: (m.icon || 'fas fa-globe').trim(), name: m.name.trim(), url: m.url.trim() }));
+                setCtxMenus(cleaned);
+                hide(wrap);
+            }
+            function onClose() { hide(wrap); }
+
+            saveBtn.onclick = onSave;
+            closeBtn.onclick = onClose;
+
+            renderList();
+            show(wrap);
+        }
+
+        // 绑定设置按钮
+        document.getElementById('settings-toggle')?.addEventListener('click', openCtxMenuModal);
+
+
+
+        // 设置弹窗
+        function openCtxMenuModal() {
+            const wrap = document.getElementById('modal-ctxmenu');
+            const closeBtn = document.getElementById('modal-ctx-close');
+            const saveBtn = document.getElementById('modal-ctx-save');
+            const list = document.getElementById('ctx-list');
+            const addBtn = document.getElementById('ctx-add-btn');
+
+            let data = getCtxMenus().slice();
+
+            function renderList() {
+                list.innerHTML = '';
+                if (!data.length) {
+                    const empty = document.createElement('div');
+                    empty.style.opacity = '.7';
+                    empty.style.fontSize = '0.9rem';
+                    empty.textContent = '暂无菜单项，点击“新增菜单项”进行添加';
+                    list.appendChild(empty);
+                    return;
+                }
+                data.forEach((m, i) => {
+                    const row = document.createElement('div');
+                    row.style.border = '1px solid var(--border-color)';
+                    row.style.borderRadius = '8px';
+                    row.style.padding = '8px';
+                    row.style.display = 'grid';
+                    row.style.gap = '6px';
+
+                    const head = document.createElement('div');
+                    head.style.display = 'flex';
+                    head.style.justifyContent = 'space-between';
+                    head.style.alignItems = 'center';
+
+                    const title = document.createElement('div');
+                    title.style.display = 'flex';
+                    title.style.alignItems = 'center';
+                    title.style.gap = '8px';
+
+                    const iconEl = document.createElement('i');
+                    iconEl.className = (m.icon || 'fas fa-globe');
+                    const nameEl = document.createElement('span');
+                    nameEl.textContent = m.name || '(未命名)';
+                    nameEl.style.fontWeight = '600';
+
+                    title.appendChild(iconEl);
+                    title.appendChild(nameEl);
+
+                    const ops = document.createElement('div');
+                    ops.style.display = 'flex';
+                    ops.style.gap = '8px';
+
+                    const btnEdit = document.createElement('button');
+                    btnEdit.className = 'btn btn-outline';
+                    btnEdit.textContent = '编辑';
+                    btnEdit.addEventListener('click', async () => {
+                        const icon = await showIconPicker(m.icon || 'fas fa-globe');
+                        if (icon === null) return;
+                        const name = await showInputModal('名称', '菜单名字，例如：谷歌翻译', m.name || '');
+                        if (name === null) return;
+                        const url = await showInputModal('链接模板', '例如：https://translate.google.com/?source=osdd&sl=auto&tl=zh-CN&text={{英文}}', m.url || '');
+                        if (url === null) return;
+                        data[i] = { icon: (icon || 'fas fa-globe').trim(), name: (name || '').trim(), url: (url || '').trim() };
+                        renderList();
+                    });
+
+                    const btnDel = document.createElement('button');
+                    btnDel.className = 'btn btn-outline';
+                    btnDel.textContent = '删除';
+                    btnDel.addEventListener('click', async () => {
+                        const ok = await showConfirm('确认删除该菜单项？', '删除菜单项');
+                        if (!ok) return;
+                        data.splice(i, 1);
+                        renderList();
+                    });
+
+                    const btnUp = document.createElement('button');
+                    btnUp.className = 'btn btn-outline';
+                    btnUp.textContent = '上移';
+                    btnUp.addEventListener('click', () => {
+                        if (i <= 0) return;
+                        const tmp = data[i - 1];
+                        data[i - 1] = data[i];
+                        data[i] = tmp;
+                        renderList();
+                    });
+
+                    const btnDown = document.createElement('button');
+                    btnDown.className = 'btn btn-outline';
+                    btnDown.textContent = '下移';
+                    btnDown.addEventListener('click', () => {
+                        if (i >= data.length - 1) return;
+                        const tmp = data[i + 1];
+                        data[i + 1] = data[i];
+                        data[i] = tmp;
+                        renderList();
+                    });
+
+                    ops.appendChild(btnEdit);
+                    ops.appendChild(btnUp);
+                    ops.appendChild(btnDown);
+                    ops.appendChild(btnDel);
+
+                    head.appendChild(title);
+                    head.appendChild(ops);
+
+                    const urlPreview = document.createElement('div');
+                    urlPreview.style.fontSize = '0.85rem';
+                    urlPreview.style.opacity = '.75';
+                    urlPreview.textContent = m.url || '';
+
+                    row.appendChild(head);
+                    row.appendChild(urlPreview);
+                    list.appendChild(row);
+                });
+            }
+
+            addBtn.onclick = async () => {
+                const icon = await showIconPicker('fas fa-globe');
+                if (icon === null) return;
+                const name = await showInputModal('名称', '菜单名字，例如：谷歌翻译', '');
+                if (name === null) return;
+                const url = await showInputModal('链接模板', '例如：https://translate.google.com/?source=osdd&sl=auto&tl=zh-CN&text={{英文}}', '');
+                if (url === null) return;
+                data.push({ icon: (icon || 'fas fa-globe').trim(), name: (name || '').trim(), url: (url || '').trim() });
+                renderList();
+            };
+
+            function onSave() {
+                const cleaned = data.filter(m => (m && (m.url || '').trim() && (m.name || '').trim()))
+                    .map(m => ({ icon: (m.icon || 'fas fa-globe').trim(), name: m.name.trim(), url: m.url.trim() }));
+                setCtxMenus(cleaned);
+                hide(wrap);
+            }
+            function onClose() { hide(wrap); }
+
+            saveBtn.onclick = onSave;
+            closeBtn.onclick = onClose;
+
+            renderList();
+            show(wrap);
+        }
+        const tagsContainer = document.getElementById('prompt-tags-container');
+        const commonTagsContainer = document.getElementById('common-tags');
+        // 确保 Token 计数器存在（若未在HTML中插入，则动态创建）
+        (function ensureTokenCounter() {
+            try {
+                let el = document.getElementById('token-counter');
+                if (!el) {
+                    el = document.createElement('div');
+                    el.id = 'token-counter';
+                    el.className = 'token-counter';
+                    el.textContent = 'Tokens: 0/75';
+                    // 插入到文本域之后
+                    if (promptEditor && promptEditor.parentNode) {
+                        promptEditor.parentNode.insertBefore(el, promptEditor.nextSibling);
+                    }
+                }
+            } catch(_) {}
+        })();
+
+        // 本地存储常用提示词（顶层为分类名，值为数组 {text, lang_zh}）
+        let commonData = {};
+        const sidebarList = document.querySelector('.prompt-list');
+        const STORAGE_KEY = 'ops_common_data';
+
+        // 分组工具函数
+        function isGroupedCategory(v) {
+            return v && typeof v === 'object' && !Array.isArray(v) && v.groups && typeof v.groups === 'object';
+        }
+        function getGroups(cat) {
+            const v = commonData?.[cat];
+            if (isGroupedCategory(v)) return v.groups;
+            return null;
+        }
+        function ensureGrouped(cat) {
+            const v = commonData?.[cat];
+            if (isGroupedCategory(v)) return; // 已是分组
+            const arr = Array.isArray(v) ? v : [];
+            if (arr.length > 0) {
+                // 旧有条目迁移到“未分组”
+                commonData[cat] = { groups: { '未分组': arr } };
+            } else {
+                // 空分类：不自动创建“未分组”
+                commonData[cat] = { groups: {}, groupsOrder: [] };
+            }
+        }
+        function normalizeItem(x) {
+            return {
+                text: (x?.text || '').trim(),
+                lang_zh: (x?.lang_zh || '').trim() || (x?.text || '').trim(),
+                pinned: !!x?.pinned
+            };
+        }
+        // 类别折叠状态（默认展开）
+        function getSubcatOpen(cat, subcat) {
+            try { return localStorage.getItem('ops_open_' + cat + '::' + subcat) !== '0'; } catch(e) { return true; }
+        }
+        function setSubcatOpen(cat, subcat, open) {
+            try { localStorage.setItem('ops_open_' + cat + '::' + subcat, open ? '1' : '0'); } catch(e) {}
+        }
+
+        function saveCommonData() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(commonData)); } catch(e) { console.error('保存失败', e); }
+        }
+
+        function loadCommonTagsFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                commonData = raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                commonData = {};
+            }
+            renderSidebar();
+        }
+
+        function renderSidebar() {
+            if (!sidebarList) return;
+            sidebarList.innerHTML = '';
+            const keys = Object.keys(commonData);
+            const active = getActiveCategory();
+            keys.forEach((key) => {
+                const card = document.createElement('div');
+                card.className = 'prompt-card' + (key === active ? ' active' : '');
+                card.setAttribute('data-cat', key);
+                card.innerHTML = `<h3><i class="fas fa-tag"></i> ${key}</h3>`;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.prompt-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    setActiveCategory(key);
+                    renderCommonTagsByCategory(key);
+                });
+                sidebarList.appendChild(card);
+            });
+            if (keys.length > 0) {
+                const current = active && commonData[active] ? active : keys[0];
+                setActiveCategory(current);
+                renderCommonTagsByCategory(current);
+                // 确保侧栏高亮
+                document.querySelectorAll('.prompt-card').forEach(c => {
+                    if (c.textContent.trim() === current) c.classList.add('active');
+                });
+            } else {
+                const commonTagsContainer = document.getElementById('common-tags');
+                if (commonTagsContainer) commonTagsContainer.innerHTML = '';
+                setActiveCategory('');
+            }
+        }
+
+        // 分类顺序调整：上移/下移
+        function moveCategory(cat, direction) {
+            if (!cat || !commonData) return;
+            const keys = Object.keys(commonData);
+            const idx = keys.indexOf(cat);
+            if (idx === -1) return;
+            const target = direction === 'up' ? idx - 1 : idx + 1;
+            if (target < 0) { showInfo('已经是第一个了', '提示'); return; }
+            if (target >= keys.length) { showInfo('已经是最后一个了', '提示'); return; }
+            const newKeys = keys.slice();
+            newKeys.splice(idx, 1);
+            newKeys.splice(target, 0, cat);
+            const reordered = {};
+            newKeys.forEach(k => { reordered[k] = commonData[k]; });
+            commonData = reordered;
+            saveCommonData();
+            setActiveCategory(cat);
+            renderSidebar();
+        }
+        function moveCategoryUp(cat) { moveCategory(cat, 'up'); }
+        function moveCategoryDown(cat) { moveCategory(cat, 'down'); }
+
+        function getActiveCategory() {
+            try { return localStorage.getItem('ops_active_cat') || ''; } catch(e) { return ''; }
+        }
+        function setActiveCategory(key) {
+            try { localStorage.setItem('ops_active_cat', key || ''); } catch(e) {}
+        }
+
+        // 已废弃：不再使用 | 分隔输入
+        // function parseTagInput() {}
+
+        function addCategory() {
+            openCategoryModal();
+        }
+
+        function addTagToCurrent() {
+            const cat = getActiveCategory();
+            if (!cat) return showInfo('请先创建或选择一个分类', '提示');
+            openTagModal(cat);
+        }
+
+        function getDropboxToken() {
+            try { return localStorage.getItem('ops_dbx_token') || ''; } catch(e) { return ''; }
+        }
+        function getDropboxConfig() {
+            try {
+                return {
+                    key: localStorage.getItem('ops_dbx_key') || '',
+                    secret: localStorage.getItem('ops_dbx_secret') || '',
+                    token: localStorage.getItem('ops_dbx_token') || '',
+                    refresh: localStorage.getItem('ops_dbx_refresh') || ''
+                };
+            } catch(e) { return { key:'', secret:'', token:'', refresh:'' }; }
+        }
+        function getDropboxSelectedFilename() {
+            try {
+                const v = localStorage.getItem('ops_dbx_filename');
+                return v && v.trim() ? v.trim() : '/OHAO AI Prompt Studio.json';
+            } catch(e) { return '/OHAO AI Prompt Studio.json'; }
+        }
+        function isDropboxEnabled() {
+            try { return localStorage.getItem('ops_dbx_enabled') === '1'; } catch(e) { return false; }
+        }
+        async function uploadToDropbox(filename, contentStr) {
+            const { token } = getDropboxConfig();
+            if (!token) throw new Error('未配置 Dropbox Access Token');
+            const isAscii = (s) => { try { return /^[\x00-\x7F]+$/.test(s); } catch(_) { return true; } };
+            const target = filename.startsWith('/') ? filename : '/' + filename;
+
+            // ASCII 文件名：直接上传（请求头可用）
+            if (isAscii(target)) {
+                const res = await fetch('https://content.dropboxapi.com/2/files/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/octet-stream',
+                        'Dropbox-API-Arg': JSON.stringify({
+                            path: target,
+                            mode: 'overwrite',
+                            mute: true,
+                            autorename: false
+                        })
+                    },
+                    body: new TextEncoder().encode(contentStr)
+                });
+                if (!res.ok) throw new Error('上传失败 HTTP ' + res.status);
+                return res.json();
+            }
+
+            // 非 ASCII 文件名：两步法
+            const tempPath = '/OHAOAI.upload.tmp.json'; // ASCII 临时文件名
+            // 1) 先上传到临时路径
+            const upRes = await fetch('https://content.dropboxapi.com/2/files/upload', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/octet-stream',
+                    'Dropbox-API-Arg': JSON.stringify({
+                        path: tempPath,
+                        mode: 'overwrite',
+                        mute: true,
+                        autorename: false
+                    })
+                },
+                body: new TextEncoder().encode(contentStr)
+            });
+            if (!upRes.ok) throw new Error('上传临时文件失败 HTTP ' + upRes.status);
+
+            // 2) 若目标已存在，先删除（避免 move 冲突）
+            try {
+                await fetch('https://api.dropboxapi.com/2/files/delete_v2', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ path: target })
+                });
+            } catch (_) { /* 忽略删除失败 */ }
+
+            // 3) 将临时文件移动到目标路径（JSON 请求体可含非 ASCII）
+            const mvRes = await fetch('https://api.dropboxapi.com/2/files/move_v2', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ from_path: tempPath, to_path: target, autorename: false })
+            });
+            if (!mvRes.ok) {
+                let msg = 'HTTP ' + mvRes.status;
+                try { const j = await mvRes.json(); msg += ' ' + (j.error_summary || JSON.stringify(j)); } catch(_) {}
+                throw new Error('移动到目标文件失败：' + msg);
+            }
+            return mvRes.json();
+        }
+        async function downloadFromDropbox(filename) {
+            const { token } = getDropboxConfig();
+            if (!token) throw new Error('未配置 Dropbox Access Token');
+            const isAscii = (s) => { try { return /^[\x00-\x7F]+$/.test(s); } catch(_) { return true; } };
+            if (!isAscii(filename)) {
+                // 非 ASCII：改用临时链接方式获取文件
+                const metaRes = await fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ path: filename.startsWith('/') ? filename : '/' + filename })
+                });
+                if (!metaRes.ok) {
+                    let msg = 'HTTP ' + metaRes.status;
+                    try { const j = await metaRes.json(); msg += ' ' + (j.error_summary || JSON.stringify(j)); } catch(_) {}
+                    throw new Error('获取临时链接失败：' + msg);
+                }
+                const j = await metaRes.json();
+                const link = j && j.link;
+                if (!link) throw new Error('未获取到临时下载链接');
+                const fileRes = await fetch(link);
+                if (!fileRes.ok) throw new Error('下载失败 HTTP ' + fileRes.status);
+                return fileRes.text();
+            }
+            // ASCII：走标准 content 下载接口
+            const res = await fetch('https://content.dropboxapi.com/2/files/download', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Dropbox-API-Arg': JSON.stringify({
+                        path: filename.startsWith('/') ? filename : '/' + filename
+                    })
+                }
+            });
+            if (!res.ok) throw new Error('下载失败 HTTP ' + res.status);
+            return res.text();
+        }
+
+        function downloadJson() {
+            // 同时导出“常用提示词”和“提示词历史”
+            const exportObj = {
+                common: commonData || {},
+                history: (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
+                menus: (function(){ try { const raw = localStorage.getItem('ops_ctx_menu_items'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })()
+            };
+            const dataStr = JSON.stringify(exportObj, null, 2);
+            const { token } = getDropboxConfig();
+            const useCloud = isDropboxEnabled();
+            if (useCloud) {
+                if (!token) { showInfo('未登录 Dropbox，请先在 Dropbox 配置中完成登录。', '提示'); return; }
+                // 上传到 Dropbox
+                const filename = getDropboxSelectedFilename();
+                uploadToDropbox(filename, dataStr)
+                    .then(() => showInfo('已上传到 Dropbox: ' + filename, '上传成功'))
+                    .catch(err => showInfo('Dropbox 上传失败：' + (err?.message || err), '上传失败'));
+                return;
+            }
+            // 本地下载
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'OHAO AI Prompt Studio.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function importJsonText(text) {
+            const data = JSON.parse(text);
+            if (!data || typeof data !== 'object') throw new Error('无效JSON');
+
+            // 兼容三种结构：
+            // 1) 纯旧版：{ 分类: [数组] }
+            // 2) 新版封装：{ common: {...}, history: [...] }
+            // 3) 分组版：{ 分类: { groups: { 子类: [数组] } } }
+            let nextCommon = {};
+            let nextHistory = [];
+            let nextMenus = Array.isArray(data?.menus) ? data.menus : null;
+
+            function importCategoryValue(val) {
+                if (Array.isArray(val)) {
+                    return val.map(x => ({
+                        text: (x?.text || '').trim(),
+                        lang_zh: (x?.lang_zh || '').trim() || (x?.text || '').trim(),
+                        pinned: !!x?.pinned
+                    })).filter(x => x.text);
+                }
+                if (isGroupedCategory(val)) {
+                    const out = { groups: {} };
+                    const g = val.groups || {};
+                    Object.keys(g).forEach(sub => {
+                        out.groups[sub] = (Array.isArray(g[sub]) ? g[sub] : []).map(x => ({
+                            text: (x?.text || '').trim(),
+                            lang_zh: (x?.lang_zh || '').trim() || (x?.text || '').trim(),
+                            pinned: !!x?.pinned
+                        })).filter(x => x.text);
+                    });
+                    return out;
+                }
+                return [];
+            }
+
+            if (data.common && typeof data.common === 'object') {
+                const src = data.common || {};
+                Object.keys(src).forEach(k => {
+                    nextCommon[k] = importCategoryValue(src[k]);
+                });
+                if (Array.isArray(data.history)) {
+                    nextHistory = data.history
+                        .map(x => ({ ts: Number(x?.ts) || Date.now(), text: String(x?.text || '').trim() }))
+                        .filter(x => x.text);
+                }
+            } else {
+                Object.keys(data).forEach(k => {
+                    nextCommon[k] = importCategoryValue(data[k]);
+                });
+            }
+
+            commonData = nextCommon;
+            saveCommonData();
+            if (nextHistory.length) {
+                try { localStorage.setItem('ops_prompt_history', JSON.stringify(nextHistory)); } catch(e) {}
+            }
+            if (Array.isArray(nextMenus)) {
+                try { localStorage.setItem('ops_ctx_menu_items', JSON.stringify(nextMenus)); } catch(e) {}
+            }
+            renderSidebar();
+            showInfo('JSON 导入完成' + (nextHistory.length ? '（含历史）' : ''), '导入成功');
+        }
+
+        async function importJsonFile(file) {
+            try {
+                const text = await file.text();
+                await importJsonText(text);
+                // 提示成功可选
+            } catch (e) {
+                showInfo('导入失败：' + (e?.message || e), '导入失败');
+            }
+        }
+
+        async function importFromDropbox() {
+            try {
+                const filename = getDropboxSelectedFilename();
+                const text = await downloadFromDropbox(filename);
+                await importJsonText(text);
+                showInfo('已从 Dropbox 导入 ' + filename, '导入成功');
+            } catch (e) {
+                showInfo('从 Dropbox 下载失败：' + (e?.message || e), '下载失败');
+            }
+        }
+
+        // 导出 #prompt-tags-container 为图片并下载
+        async function ensureHtml2Canvas() {
+            if (window.html2canvas) return window.html2canvas;
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                s.onload = () => resolve();
+                s.onerror = () => reject(new Error('加载 html2canvas 失败'));
+                document.head.appendChild(s);
+            });
+            return window.html2canvas;
+        }
+        async function exportPromptTagsImage() {
+            try {
+                const el = document.getElementById('prompt-tags-container');
+                if (!el) { showInfo('未找到提示词区域', '错误'); return; }
+
+                const html2canvas = await ensureHtml2Canvas();
+
+                // 1) 临时移除容器背景与边框，仅保留标签本身
+                const prev = {
+                    background: el.style.background,
+                    backgroundColor: el.style.backgroundColor,
+                    border: el.style.border,
+                    boxShadow: el.style.boxShadow
+                };
+                el.style.background = 'transparent';
+                el.style.backgroundColor = 'transparent';
+                el.style.border = 'none';
+                el.style.boxShadow = 'none';
+
+                // 2) 提升清晰度：按设备像素比放大
+                const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
+
+                const canvas = await html2canvas(el, {
+                    backgroundColor: null,   // 透明背景
+                    scale,
+                    useCORS: true
+                });
+
+                // 恢复样式
+                el.style.background = prev.background;
+                el.style.backgroundColor = prev.backgroundColor;
+                el.style.border = prev.border;
+                el.style.boxShadow = prev.boxShadow;
+
+                const dataUrl = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = "Prompt Studio.png";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (e) {
+                showInfo('生成图片失败：' + (e?.message || e), '失败');
+            }
+        }
+
+        function setupUIEvents() {
+            document.getElementById('add-category-btn')?.addEventListener('click', addCategory);
+            document.getElementById('add-tag-btn')?.addEventListener('click', addTagToCurrent);
+            document.getElementById('export-tags-image-btn')?.addEventListener('click', exportPromptTagsImage);
+            document.getElementById('download-json-btn')?.addEventListener('click', downloadJson);
+            document.getElementById('reset-all-btn')?.addEventListener('click', resetAll);
+            document.getElementById('random-pick-btn')?.addEventListener('click', randomPickAll);
+            document.getElementById('import-json-btn')?.addEventListener('click', () => {
+                const { token } = getDropboxConfig();
+                const useCloud = isDropboxEnabled();
+                if (useCloud) {
+                    if (!token) { showInfo('未登录 Dropbox，请先在 Dropbox 配置中完成登录。', '提示'); return; }
+                    importFromDropbox();
+                } else {
+                    document.getElementById('json-file-input')?.click();
+                }
+            });
+            document.getElementById('dropbox-config-btn')?.addEventListener('click', openDropboxModal);
+            document.getElementById('json-file-input')?.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (file) importJsonFile(file);
+                e.target.value = '';
+            });
+
+            // 新增：存储与查看
+            document.getElementById('save-prompt-btn')?.addEventListener('click', savePromptSnapshot);
+            document.getElementById('view-history-btn')?.addEventListener('click', openHistoryModal);
+        }
+
+        function openDropboxModal() {
+            const wrap = document.getElementById('modal-dropbox');
+            const keyEl = document.getElementById('modal-db-key');
+            const secEl = document.getElementById('modal-db-secret');
+            const refreshEl = document.getElementById('modal-db-refresh');
+            const enabledEl = document.getElementById('modal-db-enabled');
+            const saveBtn = document.getElementById('modal-db-save');
+            const cancelBtn = document.getElementById('modal-db-cancel');
+            const closeBtn = document.getElementById('modal-db-close');
+            const authBtn = document.getElementById('modal-db-authorize');
+            const loginBtn = document.getElementById('modal-db-login');
+
+            // 预填
+            const cfg = getDropboxConfig();
+            keyEl.value = cfg.key || '';
+            secEl.value = cfg.secret || '';
+            refreshEl.value = cfg.refresh || '';
+            if (enabledEl) enabledEl.checked = isDropboxEnabled();
+
+            show(wrap);
+
+            // 动态插入“选择JSON文件”与“刷新列表”
+            const bodyEl = wrap.querySelector('.modal-body');
+            let fileRow = wrap.querySelector('#modal-db-file-row');
+            let fileSel = wrap.querySelector('#modal-db-file');
+            let fileRefreshBtn = wrap.querySelector('#modal-db-refresh-list');
+            if (!fileRow && bodyEl) {
+                fileRow = document.createElement('div');
+                fileRow.className = 'modal-row';
+                fileRow.id = 'modal-db-file-row';
+                const label = document.createElement('label');
+                label.textContent = '选择JSON文件（Dropbox 应用目录 Prompt Studio）';
+                const rowInner = document.createElement('div');
+                rowInner.style.display = 'flex';
+                rowInner.style.gap = '8px';
+                fileSel = document.createElement('select');
+                fileSel.className = 'modal-input';
+                fileSel.id = 'modal-db-file';
+                fileRefreshBtn = document.createElement('button');
+                fileRefreshBtn.className = 'btn btn-outline';
+                fileRefreshBtn.id = 'modal-db-refresh-list';
+                fileRefreshBtn.textContent = '刷新';
+                rowInner.appendChild(fileSel);
+                rowInner.appendChild(fileRefreshBtn);
+                fileRow.appendChild(label);
+                fileRow.appendChild(rowInner);
+                bodyEl.appendChild(fileRow);
+            }
+            // 预填文件选择
+            if (fileSel) {
+                const preSel = getDropboxSelectedFilename();
+                fileSel.innerHTML = '';
+                const opt = document.createElement('option');
+                opt.value = preSel;
+                opt.textContent = preSel;
+                fileSel.appendChild(opt);
+                fileSel.value = preSel;
+            }
+
+            async function listDropboxJsonFiles(token) {
+                // 列出根目录下所有 .json
+                const res = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ path: '', recursive: false })
+                });
+                if (!res.ok) {
+                    let msg = 'HTTP ' + res.status;
+                    try { const j = await res.json(); msg += ' ' + (j.error_summary || JSON.stringify(j)); } catch(_) {}
+                    throw new Error(msg);
+                }
+                const j = await res.json();
+                const entries = Array.isArray(j?.entries) ? j.entries : [];
+                const files = entries
+                    .filter(e => e['.tag'] === 'file' && typeof e.name === 'string' && e.name.toLowerCase().endsWith('.json'))
+                    .map(e => '/' + e.name);
+                return files;
+            }
+
+            async function exchangeAccessTokenWithRefresh(key, secret, refreshToken) {
+                const basic = btoa(`${key}:${secret}`);
+                const body = new URLSearchParams({
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken
+                }).toString();
+                const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Basic ' + basic,
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body
+                });
+                if (!res.ok) {
+                    let msg = 'HTTP ' + res.status;
+                    try { const j = await res.json(); msg += ' ' + (j.error_description || JSON.stringify(j)); } catch(_) {}
+                    throw new Error(msg);
+                }
+                return res.json();
+            }
+
+            const onAuthorize = () => {
+                const key = keyEl.value.trim();
+                if (!key) { showInfo('请先填写 App Key', '提示'); keyEl.focus(); return; }
+                const redirect = encodeURIComponent('https://localhost/');
+                // 生成 state 以便后端校验（此处仅传递，不在前端校验）
+                const state = Math.random().toString(36).slice(2);
+                const url = `https://www.dropbox.com/oauth2/authorize?response_type=code&client_id=${encodeURIComponent(key)}&redirect_uri=${redirect}&token_access_type=offline&state=${encodeURIComponent(state)}`;
+                // 以居中小窗打开授权页
+                const w = 600, h = 700;
+                const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
+                const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
+                const width = window.innerWidth || document.documentElement.clientWidth || screen.width;
+                const height = window.innerHeight || document.documentElement.clientHeight || screen.height;
+                const left = dualScreenLeft + (width - w) / 2;
+                const top = dualScreenTop + (height - h) / 2;
+                const features = `scrollbars=yes,resizable=yes,width=${w},height=${h},top=${Math.max(0, top)},left=${Math.max(0, left)}`;
+                const win = window.open(url, 'dropbox_auth_popup', features);
+                if (!win) {
+                    showInfo('弹窗被浏览器拦截，请允许弹窗或改用新标签页方式。', '提示');
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                    return;
+                }
+                // 提示用户在弹窗中完成登录与授权
+                showInfo('已打开 Dropbox 授权窗口，请在弹窗内登录并同意授权。授权完成后 Dropbox 将回跳至 https://localhost/，请在你的后端用回调换取 Refresh Token，然后回到此处点击“登录”。', '授权提示');
+            };
+
+            const onLogin = async () => {
+                const key = keyEl.value.trim();
+                const sec = secEl.value.trim();
+                let inputVal = refreshEl.value.trim();
+                if (!key) { showInfo('请填写 App Key', '提示'); keyEl.focus(); return; }
+                if (!sec) { showInfo('请填写 App Secret', '提示'); secEl.focus(); return; }
+                if (!inputVal) { showInfo('请粘贴 Refresh Token 或 回调URL/code', '提示'); refreshEl.focus(); return; }
+
+                // 工具：从可能的完整URL或query片段中提取 code
+                function extractCode(str) {
+                    try {
+                        if (/^https?:\/\//i.test(str)) {
+                            const u = new URL(str);
+                            return u.searchParams.get('code') || '';
+                        }
+                        // 若是 query 片段或包含 code= 的字符串
+                        const m = str.match(/[?&]code=([^&]+)/);
+                        if (m) return decodeURIComponent(m[1]);
+                        // 若是纯 code（无特殊字符且长度较短），简单判断
+                        if (/^[A-Za-z0-9_-]+$/.test(str) && str.length <= 200) return str;
+                    } catch (_) {}
+                    return '';
+                }
+
+                async function exchangeCodeForTokens(key, secret, code) {
+                    const basic = btoa(`${key}:${secret}`);
+                    const body = new URLSearchParams({
+                        grant_type: 'authorization_code',
+                        code,
+                        redirect_uri: 'https://localhost/'
+                    }).toString();
+                    const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Basic ' + basic,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body
+                    });
+                    if (!res.ok) {
+                        let msg = 'HTTP ' + res.status;
+                        try { const j = await res.json(); msg += ' ' + (j.error_description || JSON.stringify(j)); } catch(_) {}
+                        throw new Error(msg);
+                    }
+                    return res.json(); // 期望返回 access_token、refresh_token 等
+                }
+
+                try {
+                    const maybeCode = extractCode(inputVal);
+                    let refreshToken = '';
+                    let accessToken = '';
+
+                    if (maybeCode) {
+                        // 先用授权码兑换 refresh_token 和 access_token
+                        const data = await exchangeCodeForTokens(key, sec, maybeCode);
+                        refreshToken = data.refresh_token || '';
+                        accessToken = data.access_token || '';
+                        if (!refreshToken) {
+                            throw new Error('未返回 refresh_token，请确认授权时已请求离线权限（token_access_type=offline）且重定向URI完全一致。');
+                        }
+                    } else {
+                        // 直接认为是 refresh_token，走 refresh 换取 access_token
+                        refreshToken = inputVal;
+                        const data = await exchangeAccessTokenWithRefresh(key, sec, refreshToken);
+                        accessToken = data.access_token || '';
+                    }
+
+                    if (!accessToken) {
+                        // 用 refresh 再换一次 access 保险
+                        const data2 = await exchangeAccessTokenWithRefresh(key, sec, refreshToken);
+                        accessToken = data2.access_token || '';
+                    }
+                    if (!accessToken) throw new Error('未获取到 access_token');
+
+                    // 保存
+                    try {
+                        localStorage.setItem('ops_dbx_key', key);
+                        localStorage.setItem('ops_dbx_secret', sec);
+                        localStorage.setItem('ops_dbx_refresh', refreshToken);
+                        localStorage.setItem('ops_dbx_token', accessToken);
+                    } catch(e) {}
+
+                    showInfo('登录成功：已保存 Refresh Token 并获取 Access Token，可立即进行 Dropbox 上传/下载。', '登录成功');
+                } catch (err) {
+                    showInfo('登录失败：' + (err?.message || err), '登录失败');
+                }
+            };
+
+            const onSave = () => {
+                try {
+                    localStorage.setItem('ops_dbx_key', keyEl.value.trim());
+                    localStorage.setItem('ops_dbx_secret', secEl.value.trim());
+                    localStorage.setItem('ops_dbx_refresh', refreshEl.value.trim());
+                    if (enabledEl) {
+                        localStorage.setItem('ops_dbx_enabled', enabledEl.checked ? '1' : '0');
+                    }
+                    const sel = wrap.querySelector('#modal-db-file');
+                    const v = sel && (sel.value || '').trim();
+                    if (v) localStorage.setItem('ops_dbx_filename', v);
+                } catch(e) {}
+                cleanup();
+            };
+            const onCancel = () => cleanup();
+
+            function cleanup() {
+                saveBtn.removeEventListener('click', onSave);
+                cancelBtn.removeEventListener('click', onCancel);
+                closeBtn.removeEventListener('click', onCancel);
+                authBtn.removeEventListener('click', onAuthorize);
+                loginBtn.removeEventListener('click', onLogin);
+                hide(wrap);
+            }
+
+            saveBtn.addEventListener('click', onSave);
+            cancelBtn.addEventListener('click', onCancel);
+            closeBtn.addEventListener('click', onCancel);
+            authBtn.addEventListener('click', onAuthorize);
+            loginBtn.addEventListener('click', onLogin);
+
+            // 刷新文件列表按钮
+            const fileRefreshBtn2 = wrap.querySelector('#modal-db-refresh-list');
+            const fileSel2 = wrap.querySelector('#modal-db-file');
+            if (fileRefreshBtn2) {
+                fileRefreshBtn2.onclick = async () => {
+                    try {
+                        const { token } = getDropboxConfig();
+                        if (!token) { showInfo('请先登录 Dropbox', '提示'); return; }
+                        const files = await listDropboxJsonFiles(token);
+                        const def = getDropboxSelectedFilename();
+                        if (fileSel2) {
+                            fileSel2.innerHTML = '';
+                            const list = files.length ? files : [def];
+                            list.forEach(name => {
+                                const opt = document.createElement('option');
+                                opt.value = name;
+                                opt.textContent = name;
+                                fileSel2.appendChild(opt);
+                            });
+                            fileSel2.value = def;
+                        }
+                    } catch (err) {
+                        showInfo('获取文件列表失败：' + (err?.message || err), '失败');
+                    }
+                };
+            }
+        }
+
+        function renderCommonTagsByCategory(catKey) {
+            if (!commonTagsContainer) return;
+            commonTagsContainer.innerHTML = '';
+
+            const data = commonData?.[catKey];
+
+            // 旧版结构：数组 => 维持原样平铺
+            if (Array.isArray(data)) {
+                data.forEach((item, index) => {
+                    const label = item?.lang_zh || item?.text || '';
+                    const value = item?.text || '';
+                    if (!label || !value) return;
+                    const span = document.createElement('span');
+                    span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
+                    span.dataset.cat = catKey;
+                    span.dataset.index = String(index);
+                    span.dataset.subcat = '';
+                    span.textContent = label;
+                    span.title = value;
+                    span.addEventListener('click', () => {
+                        const cur = promptEditor.value.trim();
+                        const suffix = value.trim();
+                        promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                        updateTags();
+                        promptEditor.focus();
+                    });
+                    commonTagsContainer.appendChild(span);
+                });
+                return;
+            }
+
+            // 分组结构：{ groups: { 类别: [items] } }
+            if (isGroupedCategory(data)) {
+                const groups = data.groups || {};
+                const order = Array.isArray(data.groupsOrder)
+                    ? data.groupsOrder.filter(n => Object.prototype.hasOwnProperty.call(groups, n))
+                        .concat(Object.keys(groups).filter(n => !data.groupsOrder.includes(n)))
+                    : Object.keys(groups);
+                order.forEach(sub => {
+                    const section = document.createElement('div');
+                    section.style.border = '1px solid var(--border-color)';
+                    section.style.borderRadius = '8px';
+                    section.style.marginBottom = '8px';
+                    section.style.overflow = 'hidden';
+                    section.style.width = '100%';
+
+                    const header = document.createElement('div');
+                    header.style.padding = '8px 10px';
+                    header.style.background = 'var(--bg-color)';
+                    header.style.display = 'flex';
+                    header.style.alignItems = 'center';
+                    header.style.justifyContent = 'space-between';
+                    header.style.width = '100%';
+
+                    const left = document.createElement('div');
+                    left.style.display = 'flex';
+                    left.style.alignItems = 'center';
+                    left.style.gap = '8px';
+
+                    const title = document.createElement('span');
+                    title.textContent = sub;
+
+                    const right = document.createElement('div');
+                    right.style.display = 'flex';
+                    right.style.gap = '8px';
+
+                    const toggle = document.createElement('button');
+                    toggle.className = 'btn btn-outline';
+                    toggle.textContent = '折叠/展开';
+
+                    const btnNew = document.createElement('button');
+                    btnNew.className = 'btn btn-outline';
+                    btnNew.textContent = '新建';
+
+                    const btnRename = document.createElement('button');
+                    btnRename.className = 'btn btn-outline';
+                    btnRename.textContent = '修改名称';
+
+                    const btnDelete = document.createElement('button');
+                    btnDelete.className = 'btn btn-outline';
+                    btnDelete.textContent = '删除';
+
+                    const btnUp = document.createElement('button');
+                    btnUp.className = 'btn btn-outline';
+                    btnUp.textContent = '上移';
+
+                    const btnDown = document.createElement('button');
+                    btnDown.className = 'btn btn-outline';
+                    btnDown.textContent = '下移';
+
+                    const body = document.createElement('div');
+                    body.style.display = getSubcatOpen(catKey, sub) ? 'flex' : 'none';
+                    body.style.flexWrap = 'wrap';
+                    body.style.gap = '8px';
+                    body.style.padding = '10px';
+                    body.style.width = '100%';
+
+                    const arr = Array.isArray(groups[sub]) ? groups[sub] : [];
+                    arr.forEach((item, index) => {
+                        const label = item?.lang_zh || item?.text || '';
+                        const value = item?.text || '';
+                        if (!label || !value) return;
+                        const span = document.createElement('span');
+                        span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
+                        span.dataset.cat = catKey;
+                        span.dataset.subcat = sub;
+                        span.dataset.index = String(index);
+                        span.textContent = label;
+                        span.title = value;
+                        span.addEventListener('click', () => {
+                            const cur = promptEditor.value.trim();
+                            const suffix = value.trim();
+                            promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                            updateTags();
+                            promptEditor.focus();
+                        });
+                        body.appendChild(span);
+                    });
+
+                    toggle.addEventListener('click', () => {
+                        const next = body.style.display === 'none';
+                        body.style.display = next ? 'flex' : 'none';
+                        setSubcatOpen(catKey, sub, next);
+                    });
+
+                    btnNew.addEventListener('click', async () => {
+                        const name = await showInputModal('新建类别', '输入名称', '');
+                        const val = (name || '').trim();
+                        if (!val) return;
+                        ensureGrouped(catKey);
+                        const catObj = commonData[catKey];
+                        const g = catObj.groups || (catObj.groups = {});
+                        if (!g[val]) g[val] = [];
+                        if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
+                        if (!catObj.groupsOrder.includes(val)) catObj.groupsOrder.push(val);
+                        saveCommonData();
+                        renderCommonTagsByCategory(catKey);
+                    });
+
+                    btnRename.addEventListener('click', async () => {
+                        const name = await showInputModal('修改类别名称', '输入新名称', sub);
+                        const val = (name || '').trim();
+                        if (!val || val === sub) return;
+                        ensureGrouped(catKey);
+                        const catObj = commonData[catKey];
+                        const g = catObj.groups || {};
+                        if (g[val]) { showInfo('已存在同名类别', '提示'); return; }
+                        g[val] = g[sub] || [];
+                        delete g[sub];
+                        // 同步顺序
+                        if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
+                        const pos = catObj.groupsOrder.indexOf(sub);
+                        if (pos >= 0) catObj.groupsOrder.splice(pos, 1, val);
+                        saveCommonData();
+                        renderCommonTagsByCategory(catKey);
+                    });
+
+                    btnDelete.addEventListener('click', async () => {
+                        const ok = await showConfirm(`确认删除类别「${sub}」？${sub==='未分组' ? '（将删除其中所有条目）' : '（其中条目将移动到“未分组”）'}`, '删除类别');
+                        if (!ok) return;
+                        ensureGrouped(catKey);
+                        const catObj = commonData[catKey];
+                        const g = catObj.groups || {};
+                        if (sub === '未分组') {
+                            // 删除未分组：直接删除整个未分组及其内容
+                            delete g['未分组'];
+                            if (Array.isArray(catObj.groupsOrder)) {
+                                const i = catObj.groupsOrder.indexOf('未分组');
+                                if (i >= 0) catObj.groupsOrder.splice(i, 1);
+                            }
+                        } else {
+                            const arrOld = g[sub] || [];
+                            if (arrOld.length === 0) {
+                                // 空类别：直接删除，不迁移到“未分组”，不创建“未分组”
+                                delete g[sub];
+                                if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
+                                const i = catObj.groupsOrder.indexOf(sub);
+                                if (i >= 0) catObj.groupsOrder.splice(i, 1);
+                            } else {
+                                // 非空类别：将条目迁移到“未分组”，再删除分组
+                                const uf = g['未分组'] || (g['未分组'] = []);
+                                arrOld.forEach(it => uf.push(it));
+                                delete g[sub];
+                                if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
+                                // 确保“未分组”在顺序中存在
+                                if (!catObj.groupsOrder.includes('未分组') && g['未分组']) {
+                                    catObj.groupsOrder.unshift('未分组');
+                                }
+                                const i = catObj.groupsOrder.indexOf(sub);
+                                if (i >= 0) catObj.groupsOrder.splice(i, 1);
+                            }
+                        }
+                        saveCommonData();
+                        renderCommonTagsByCategory(catKey);
+                    });
+
+                    left.appendChild(title);
+                    right.appendChild(toggle);
+
+                    right.appendChild(btnRename);
+                    right.appendChild(btnDelete);
+                    right.appendChild(btnUp);
+                    right.appendChild(btnDown);
+                    header.appendChild(left);
+                    header.appendChild(right);
+                    section.appendChild(header);
+                    section.appendChild(body);
+
+                    // 移动类别顺序
+                    btnUp.addEventListener('click', () => moveSubcat(catKey, sub, 'up'));
+                    btnDown.addEventListener('click', () => moveSubcat(catKey, sub, 'down'));
+
+                    commonTagsContainer.appendChild(section);
+                });
+            }
+        }
+        
+        // 依据英文提示词查找中文描述（从 commonData 中查，支持分组）
+        function findZh(enText) {
+            if (!enText) return '';
+            try {
+                const keys = Object.keys(commonData || {});
+                for (const k of keys) {
+                    const v = commonData[k];
+                    if (Array.isArray(v)) {
+                        for (const it of v) {
+                            if ((it?.text || '').trim().toLowerCase() === enText.trim().toLowerCase()) {
+                                return (it?.lang_zh || '').trim();
+                            }
+                        }
+                    } else if (isGroupedCategory(v)) {
+                        const groups = v.groups || {};
+                        for (const g of Object.keys(groups)) {
+                            const arr = groups[g] || [];
+                            for (const it of arr) {
+                                if ((it?.text || '').trim().toLowerCase() === enText.trim().toLowerCase()) {
+                                    return (it?.lang_zh || '').trim();
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch(_) {}
+            return '';
+        }
+
+        // 令牌数量统计（按逗号/中文逗号分割，忽略空项与尾部多余逗号）
+        function updateTokenCounter() {
+            try {
+                const val = (promptEditor.value || '').trim();
+                // 分割并过滤空白
+                const parts = val.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+                const count = parts.length;
+                const el = document.getElementById('token-counter');
+                if (el) el.textContent = 'Tokens: ' + count + '/75';
+            } catch (_) {}
+        }
+
+        // 维护：被置灰的标签集合与上一次渲染的标签顺序
+        window.__disabledTagSet = window.__disabledTagSet || new Set();
+        window.__lastRenderList = window.__lastRenderList || [];
+
+        // 初始化标签（支持点击置灰/恢复，保持原位置不变）
+        function updateTags() {
+            const text = promptEditor.value;
+            const active = text.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+
+            // 若首次渲染，用输入框的顺序初始化
+            if (!Array.isArray(window.__lastRenderList) || window.__lastRenderList.length === 0) {
+                window.__lastRenderList = active.slice();
+            } else {
+                // 1) 从顺序表移除已不存在且未被置灰的项
+                window.__lastRenderList = window.__lastRenderList.filter(t => active.includes(t) || window.__disabledTagSet.has(t));
+                // 2) 将新出现（用户手动输入）的激活项追加到末尾
+                active.forEach(t => {
+                    if (!window.__lastRenderList.includes(t)) window.__lastRenderList.push(t);
+                });
+            }
+
+            // 渲染列表严格按照顺序表，但仅展示：激活项或置灰项
+            const renderList = window.__lastRenderList.slice();
+
+            tagsContainer.innerHTML = '';
+
+            renderList.forEach((tag, index) => {
+                const tagElement = document.createElement('div');
+                const zh = findZh(tag) || '';
+                const isInactive = window.__disabledTagSet.has(tag);
+                tagElement.className = 'prompt-tag' + (isInactive ? ' inactive' : '');
+                tagElement.draggable = true;
+                tagElement.setAttribute('data-index', index);
+                tagElement.innerHTML = `
+                    <span class="seg-en">${tag}</span>
+                    ${zh ? '<span class="seg-zh">' + zh + '</span>' : ''}
+                    <span class="delete-tag" data-role="del">×</span>
+                `;
+
+                // 点击标签：切换启用/禁用，并同步输入框（保持原位置）
+                tagElement.addEventListener('click', (e) => {
+                    if (e.target && e.target.closest('[data-role="del"]')) return; // 删除按钮不触发
+                    const wasInactive = window.__disabledTagSet.has(tag);
+                    if (wasInactive) {
+                        // 恢复：移出禁用集合，并按顺序表重建输入框内容
+                        window.__disabledTagSet.delete(tag);
+                        const orderedActive = (window.__lastRenderList || []).filter(t => !window.__disabledTagSet.has(t));
+                        promptEditor.value = orderedActive.join(', ');
+                    } else {
+                        // 置灰：加入禁用集合，并从输入框移除一次
+                        window.__disabledTagSet.add(tag);
+                        const parts = (promptEditor.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
+                        const pos = parts.indexOf(tag);
+                        if (pos >= 0) { parts.splice(pos, 1); }
+                        promptEditor.value = parts.join(', ');
+                    }
+                    // 重新渲染
+                    updateTags();
+                });
+
+                // 删除按钮：彻底移除（从输入框与禁用集合与渲染序列）
+                const delBtn = tagElement.querySelector('[data-role="del"]');
+                if (delBtn) {
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // 从输入框中去掉所有该项
+                        let parts = (promptEditor.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
+                        parts = parts.filter(t => t !== tag);
+                        promptEditor.value = parts.join(', ');
+                        // 从禁用集合中移除
+                        if (window.__disabledTagSet.has(tag)) window.__disabledTagSet.delete(tag);
+                        // 从渲染顺序中移除（下次 updateTags 会覆盖写入）
+                        window.__lastRenderList = (window.__lastRenderList || []).filter(t => t !== tag);
+                        updateTags();
+                    });
+                }
+
+                // 拖拽事件（沿用原逻辑）
+                tagElement.addEventListener('dragstart', handleDragStart);
+                tagElement.addEventListener('dragover', handleDragOver);
+                tagElement.addEventListener('drop', handleDrop);
+                tagElement.addEventListener('dragend', handleDragEnd);
+
+                tagsContainer.appendChild(tagElement);
+            });
+
+            // 同步更新计数（按输入框里激活的项）
+            updateTokenCounter();
+        }
+        
+        // 拖拽功能
+        let draggedItem = null;
+        let placeholderEl = null;
+        
+        function handleDragStart(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+        
+        function handleDragOver(e) {
+            // 统一交给容器级处理，确保空白区域也可放置
+            return onContainerDragOver(e);
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 当前渲染顺序（包含置灰项），以它为准进行重排
+            const list = Array.isArray(window.__lastRenderList) ? window.__lastRenderList.slice() : [];
+            if (!draggedItem || !list.length) { updateTags(); return false; }
+
+            const fromIndex = parseInt(draggedItem.getAttribute('data-index'), 10);
+
+            // 计算目标索引：占位条（placeholderEl）之前的 .prompt-tag 数量
+            let toIndex = fromIndex;
+            const children = Array.from(tagsContainer.children);
+            if (placeholderEl && tagsContainer.contains(placeholderEl)) {
+                let countBefore = 0;
+                let hit = false;
+                for (const el of children) {
+                    if (el === placeholderEl) { hit = true; break; }
+                    if (el.classList && el.classList.contains('prompt-tag')) countBefore++;
+                }
+                toIndex = hit ? countBefore : countBefore; // 若占位在末尾，countBefore 即为末尾索引
+            } else {
+                // 兜底：以当前目标元素位置估算
+                let countBefore = 0;
+                for (const el of children) {
+                    if (el === this) break;
+                    if (el.classList && el.classList.contains('prompt-tag')) countBefore++;
+                }
+                toIndex = countBefore;
+            }
+
+            if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex) && fromIndex !== toIndex) {
+                const [moved] = list.splice(fromIndex, 1);
+                // 防御：约束范围
+                const safeTo = Math.max(0, Math.min(toIndex, list.length));
+                list.splice(safeTo, 0, moved);
+                window.__lastRenderList = list;
+
+                // 仅用“激活项”（排除置灰项）写回文本
+                const disabledSet = window.__disabledTagSet || new Set();
+                const orderedActive = list.filter(t => !disabledSet.has(t));
+                promptEditor.value = orderedActive.join(', ');
+            }
+
+            updateTags();
+            return false;
+        }
+        
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.prompt-tag').forEach(tag => {
+                tag.classList.remove('dragging');
+            });
+            // 清理占位条
+            if (placeholderEl && placeholderEl.parentNode) {
+                placeholderEl.parentNode.removeChild(placeholderEl);
+            }
+            placeholderEl = null;
+        }
+
+        // 容器级拖拽：允许在空白区域放置，并精确计算插入索引（支持多行）
+        function getInsertIndexByPoint(x, y) {
+            const items = Array.from(tagsContainer.querySelectorAll('.prompt-tag'));
+            if (!items.length) return 0;
+            const TOL = 8; // 行判定的垂直容差
+
+            // 1) 先尝试找到与鼠标 Y 同行（含容差）的所有元素
+            const sameRow = items.filter(el => {
+                const r = el.getBoundingClientRect();
+                return y >= r.top - TOL && y <= r.bottom + TOL;
+            });
+
+            if (sameRow.length) {
+                // 在该行内按 X 决定插入到哪个元素之前
+                for (let i = 0; i < sameRow.length; i++) {
+                    const r = sameRow[i].getBoundingClientRect();
+                    const mid = r.left + r.width / 2;
+                    if (x < mid) return items.indexOf(sameRow[i]);
+                }
+                // 若都在所有元素中点右侧，插入到同行最后一个之后
+                return items.indexOf(sameRow[sameRow.length - 1]) + 1;
+            }
+
+            // 2) 若没有同行元素，选择垂直距离最近的一行中的一个锚点元素
+            let anchor = items[items.length - 1];
+            let minDist = Infinity;
+            items.forEach(el => {
+                const r = el.getBoundingClientRect();
+                const cy = r.top + r.height / 2;
+                const d = Math.abs(y - cy);
+                if (d < minDist) { minDist = d; anchor = el; }
+            });
+            const r = anchor.getBoundingClientRect();
+            const mid = r.left + r.width / 2;
+            const baseIdx = items.indexOf(anchor);
+            return x < mid ? baseIdx : baseIdx + 1;
+        }
+
+        function onContainerDragOver(e) {
+            if (!draggedItem) return false;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            if (!placeholderEl) {
+                placeholderEl = document.createElement('div');
+                placeholderEl.className = 'tag-placeholder';
+            }
+            const idx = getInsertIndexByPoint(e.clientX, e.clientY);
+            const items = Array.from(tagsContainer.querySelectorAll('.prompt-tag'));
+            if (idx >= items.length) {
+                if (placeholderEl.parentNode !== tagsContainer || placeholderEl.nextElementSibling !== null) {
+                    tagsContainer.appendChild(placeholderEl);
+                }
+            } else {
+                const ref = items[idx];
+                if (ref.previousSibling !== placeholderEl) {
+                    tagsContainer.insertBefore(placeholderEl, ref);
+                }
+            }
+            return false;
+        }
+
+        function onContainerDrop(e) {
+            if (!draggedItem) return false;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const list = Array.isArray(window.__lastRenderList) ? window.__lastRenderList.slice() : [];
+            if (!list.length) { updateTags(); return false; }
+
+            const fromIndex = parseInt(draggedItem.getAttribute('data-index'), 10);
+            let toIndex = getInsertIndexByPoint(e.clientX, e.clientY);
+
+            if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex) && fromIndex !== toIndex) {
+                const [moved] = list.splice(fromIndex, 1);
+                // 拖起位置在目标之前时，移除后目标索引左移一位
+                if (fromIndex < toIndex) toIndex -= 1;
+                const safeTo = Math.max(0, Math.min(toIndex, list.length));
+                list.splice(safeTo, 0, moved);
+                window.__lastRenderList = list;
+
+                const disabledSet = window.__disabledTagSet || new Set();
+                const orderedActive = list.filter(t => !disabledSet.has(t));
+                promptEditor.value = orderedActive.join(', ');
+            }
+
+            // 清理占位条
+            if (placeholderEl && placeholderEl.parentNode) {
+                placeholderEl.parentNode.removeChild(placeholderEl);
+            }
+            placeholderEl = null;
+
+            updateTags();
+            return false;
+        }
+
+        // 绑定容器级事件（确保空白区域可放置）
+        if (tagsContainer) {
+            tagsContainer.addEventListener('dragover', onContainerDragOver);
+            tagsContainer.addEventListener('drop', onContainerDrop);
+        }
+        
+        // 移除标签
+        function removeTag(index) {
+            const tags = promptEditor.value.split(/[,，]/).map(tag => tag.trim()).filter(tag => tag.length > 0);
+            tags.splice(index, 1);
+            promptEditor.value = tags.join(', ');
+            updateTags();
+        }
+        
+        // 重置提示词
+        function resetPrompt() {
+            promptEditor.value = '';
+            updateTags();
+            promptEditor.focus();
+        }
+        
+        // 复制提示词
+        async function copyPrompt() {
+            const text = promptEditor.value || '';
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch (e) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } finally { document.body.removeChild(ta); }
+            }
+        }
+
+        // 随机选择当前分类的标签并追加到编辑器
+        function randomPickFromActive() {
+            const cat = getActiveCategory();
+            if (!cat) { showInfo('请先创建或选择一个分类', '提示'); return; }
+            const v = commonData[cat];
+            const picks = [];
+            if (isGroupedCategory(v)) {
+                const groups = v.groups || {};
+                const groupNames = Object.keys(groups).filter(name => Array.isArray(groups[name]) && groups[name].length > 0);
+                if (!groupNames.length) { showInfo('该分类下没有可用的小标签', '提示'); return; }
+                const k = Math.floor(Math.random() * groupNames.length) + 1; // 1..N
+                const shuffled = groupNames.slice().sort(() => Math.random() - 0.5);
+                const chosen = shuffled.slice(0, k);
+                chosen.forEach(name => {
+                    const arr = groups[name];
+                    const it = arr[Math.floor(Math.random() * arr.length)];
+                    if (it && it.text) picks.push(it.text);
+                });
+            } else if (Array.isArray(v)) {
+                if (!v.length) { showInfo('该分类下没有标签', '提示'); return; }
+                const max = Math.min(4, v.length);
+                const k = Math.floor(Math.random() * max) + 1; // 1..max
+                const idxs = [...Array(v.length).keys()].sort(() => Math.random() - 0.5).slice(0, k);
+                idxs.forEach(i => { const it = v[i]; if (it && it.text) picks.push(it.text); });
+            } else {
+                showInfo('该分类暂无标签', '提示'); return;
+            }
+            if (!picks.length) { showInfo('未选出可用标签', '提示'); return; }
+            const cur = promptEditor.value.trim();
+            const add = picks.join(', ');
+            promptEditor.value = cur ? (cur + ', ' + add) : add;
+            updateTags();
+            promptEditor.focus();
+        }
+
+        // 全局随机：每个大标签至少1个；若为分组结构则每个小标签至多1个
+        function randomPickAll() {
+            const picks = [];
+            const cats = Object.keys(commonData || {});
+            cats.forEach(cat => {
+                const v = commonData[cat];
+                if (v && typeof v === 'object' && !Array.isArray(v) && v.groups && typeof v.groups === 'object') {
+                    // 分组结构：每个非空小标签取1条
+                    const groups = v.groups || {};
+                    Object.keys(groups).forEach(sub => {
+                        const arr = Array.isArray(groups[sub]) ? groups[sub] : [];
+                        if (arr.length > 0) {
+                            const it = arr[Math.floor(Math.random() * arr.length)];
+                            if (it && it.text) picks.push(it.text);
+                        }
+                    });
+                } else if (Array.isArray(v)) {
+                    // 非分组：该大标签取1条
+                    if (v.length > 0) {
+                        const it = v[Math.floor(Math.random() * v.length)];
+                        if (it && it.text) picks.push(it.text);
+                    }
+                }
+            });
+            if (!picks.length) { showInfo('暂无可随机的标签', '提示'); return; }
+            // 覆盖写入（先清空再写入）
+            promptEditor.value = picks.join(', ');
+            updateTags();
+            promptEditor.focus();
+        }
+
+        // 历史快照存储与查看
+        const HISTORY_KEY = 'ops_prompt_history';
+        function loadHistory() {
+            try {
+                const raw = localStorage.getItem(HISTORY_KEY);
+                const arr = raw ? JSON.parse(raw) : [];
+                return Array.isArray(arr) ? arr : [];
+            } catch(e) { return []; }
+        }
+        function saveHistory(arr) {
+            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); } catch(e) {}
+        }
+        function formatDate(ts) {
+            const d = new Date(ts);
+            const y = d.getFullYear();
+            const m = d.getMonth() + 1;
+            const day = d.getDate();
+            return `${y}年${m}月${day}日`;
+        }
+        function isToday(ts) {
+            const d = new Date(ts);
+            const now = new Date();
+            return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+        }
+        function savePromptSnapshot() {
+            const text = (promptEditor.value || '').trim();
+            if (!text) { showInfo('内容为空，无法存储', '提示'); return; }
+            const arr = loadHistory();
+            arr.push({ ts: Date.now(), text });
+            saveHistory(arr);
+            showInfo('已存储当前提示词内容', '存储成功');
+        }
+        function openHistoryModal() {
+            const wrap = document.getElementById('modal-history');
+            const list = document.getElementById('history-list');
+            const btnClose = document.getElementById('modal-history-close');
+            const btnClear = document.getElementById('modal-history-clear');
+
+            // 原始数组（用于删除定位）
+            const arrRaw = loadHistory();
+            // 排序并携带原始索引
+            const arrSorted = arrRaw.map((v, i) => ({ ...v, _idx: i })).sort((a, b) => b.ts - a.ts);
+
+            // 分组：按日期分组
+            const groups = {};
+            arrSorted.forEach(it => {
+                const k = formatDate(it.ts);
+                if (!groups[k]) groups[k] = [];
+                groups[k].push(it);
+            });
+
+            // 渲染
+            list.innerHTML = '';
+            const todayStr = formatDate(Date.now());
+            Object.keys(groups).forEach(dateStr => {
+                const items = groups[dateStr];
+                const sec = document.createElement('div');
+                sec.style.border = '1px solid var(--border-color)';
+                sec.style.borderRadius = '8px';
+                sec.style.overflow = 'hidden';
+
+                const header = document.createElement('div');
+                header.style.padding = '10px 12px';
+                header.style.background = 'var(--bg-color)';
+                header.style.display = 'flex';
+                header.style.justifyContent = 'space-between';
+                header.style.alignItems = 'center';
+
+                const title = document.createElement('span');
+                title.textContent = dateStr;
+
+                const toggle = document.createElement('button');
+                toggle.className = 'btn btn-outline';
+                toggle.textContent = '折叠/展开';
+
+                const body = document.createElement('div');
+                body.style.display = (dateStr === todayStr) ? 'block' : 'none';
+                body.style.padding = '10px 12px';
+
+                items.forEach(it => {
+                    const itemEl = document.createElement('div');
+                    itemEl.style.borderTop = '1px dashed var(--border-color)';
+                    itemEl.style.padding = '8px 0';
+
+                    // 顶部行：时间 + 操作按钮
+                    const topRow = document.createElement('div');
+                    topRow.style.display = 'flex';
+                    topRow.style.justifyContent = 'space-between';
+                    topRow.style.alignItems = 'center';
+
+                    const time = new Date(it.ts);
+                    const timeStr = `${time.getHours().toString().padStart(2,'0')}:${time.getMinutes().toString().padStart(2,'0')}:${time.getSeconds().toString().padStart(2,'0')}`;
+                    const timeEl = document.createElement('div');
+                    timeEl.style.fontSize = '0.85rem';
+                    timeEl.style.opacity = '.7';
+                    timeEl.textContent = timeStr;
+
+                    const ops = document.createElement('div');
+                    ops.style.display = 'flex';
+                    ops.style.gap = '8px';
+
+                    // 新增：导入按钮（清空后导入到编辑区）
+                    const btnImport = document.createElement('button');
+                    btnImport.className = 'btn btn-outline';
+                    btnImport.textContent = '导入';
+                    btnImport.addEventListener('click', () => {
+                        const t = it.text || '';
+                        promptEditor.value = '';      // 先清空
+                        promptEditor.value = t;       // 再写入
+                        updateTags();
+                        promptEditor.focus();
+                    });
+
+                    const btnCopy = document.createElement('button');
+                    btnCopy.className = 'btn btn-outline';
+                    btnCopy.textContent = '复制';
+                    btnCopy.addEventListener('click', async () => {
+                        try {
+                            await navigator.clipboard.writeText(it.text || '');
+                            showInfo('已复制到剪贴板', '复制成功');
+                        } catch (e) {
+                            showInfo('复制失败，请手动选择文本复制', '复制失败');
+                        }
+                    });
+
+                    const btnDel = document.createElement('button');
+                    btnDel.className = 'btn btn-outline';
+                    btnDel.textContent = '删除';
+                    btnDel.addEventListener('click', async () => {
+                        const ok = await showConfirm('确认删除该历史记录？', '删除记录');
+                        if (!ok) return;
+                        const idx = it._idx;
+                        if (typeof idx === 'number' && idx >= 0) {
+                            const arrNew = loadHistory();
+                            if (idx < arrNew.length && (arrNew[idx]?.ts === it.ts) && (arrNew[idx]?.text === it.text)) {
+                                arrNew.splice(idx, 1);
+                            } else {
+                                // 回退策略：按 ts+text 查找
+                                const pos = arrNew.findIndex(x => x.ts === it.ts && x.text === it.text);
+                                if (pos >= 0) arrNew.splice(pos, 1);
+                            }
+                            saveHistory(arrNew);
+                            openHistoryModal(); // 重新渲染
+                        }
+                    });
+
+                    // 顺序：导入、复制、删除
+                    ops.appendChild(btnImport);
+                    ops.appendChild(btnCopy);
+                    ops.appendChild(btnDel);
+                    topRow.appendChild(timeEl);
+                    topRow.appendChild(ops);
+
+                    // 正文
+                    const contentRow = document.createElement('pre');
+                    contentRow.style.whiteSpace = 'pre-wrap';
+                    contentRow.style.wordBreak = 'break-word';
+                    contentRow.style.margin = '6px 0 0 0';
+                    contentRow.textContent = it.text || '';
+
+                    // 中文标签行：从英文文本拆分并映射中文
+                    const zhRow = document.createElement('div');
+                    zhRow.style.display = 'flex';
+                    zhRow.style.flexWrap = 'wrap';
+                    zhRow.style.gap = '6px';
+                    zhRow.style.marginTop = '8px';
+
+                    const parts = (it.text || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
+                    parts.forEach(en => {
+                        const zh = findZh(en);
+                        if (!zh) return;
+                        const tag = document.createElement('span');
+                        tag.className = 'common-tag';
+                        tag.textContent = zh;
+                        tag.title = en;
+                        zhRow.appendChild(tag);
+                    });
+
+                    itemEl.appendChild(topRow);
+                    itemEl.appendChild(contentRow);
+                    itemEl.appendChild(zhRow);
+                    body.appendChild(itemEl);
+                });
+
+                toggle.addEventListener('click', () => {
+                    const now = body.style.display !== 'none';
+                    body.style.display = now ? 'none' : 'block';
+                });
+
+                header.appendChild(title);
+                header.appendChild(toggle);
+                sec.appendChild(header);
+                sec.appendChild(body);
+                list.appendChild(sec);
+            });
+
+            // 事件
+            function cleanup() {
+                btnClose.removeEventListener('click', onClose);
+                btnClear.removeEventListener('click', onClear);
+                hide(wrap);
+            }
+            function onClose() { cleanup(); }
+            async function onClear() {
+                const ok = await showConfirm('确认清空全部历史快照？', '清空历史');
+                if (!ok) return;
+                saveHistory([]);
+                openHistoryModal(); // 重新渲染
+            }
+
+            btnClose.addEventListener('click', onClose);
+            btnClear.addEventListener('click', onClear);
+            show(wrap);
+        }
+        
+        // 模态框逻辑
+        function show(el) { el.style.display = 'flex'; }
+        function hide(el) { el.style.display = 'none'; }
+
+        function openCategoryModal(oldName) {
+            const wrap = document.getElementById('modal-category');
+            const input = document.getElementById('modal-cat-name');
+            const confirmBtn = document.getElementById('modal-cat-confirm');
+            const cancelBtn = document.getElementById('modal-cat-cancel');
+            const closeBtn = document.getElementById('modal-cat-close');
+            input.value = oldName ? oldName : '';
+            show(wrap);
+            setTimeout(() => input.focus(), 0);
+
+            const onConfirm = () => {
+                const newName = (input.value || '').trim();
+                if (!newName) { input.focus(); return; }
+                if (oldName && newName !== oldName) {
+                    // 重命名分类
+                    if (commonData[newName]) {
+                        showInfo('已存在同名分类', '提示');
+                        return;
+                    }
+                    const items = commonData[oldName] || [];
+                    delete commonData[oldName];
+                    commonData[newName] = items;
+                    saveCommonData();
+                    setActiveCategory(newName);
+                    renderSidebar();
+                } else if (!oldName) {
+                    if (!commonData[newName]) commonData[newName] = [];
+                    saveCommonData();
+                    setActiveCategory(newName);
+                    renderSidebar();
+                }
+                cleanup();
+            };
+            const onCancel = () => cleanup();
+
+            function cleanup() {
+                confirmBtn.removeEventListener('click', onConfirm);
+                cancelBtn.removeEventListener('click', onCancel);
+                closeBtn.removeEventListener('click', onCancel);
+                input.removeEventListener('keydown', onKey);
+                hide(wrap);
+            }
+            function onKey(e) {
+                if (e.key === 'Enter') onConfirm();
+                if (e.key === 'Escape') onCancel();
+            }
+
+            confirmBtn.addEventListener('click', onConfirm);
+            cancelBtn.addEventListener('click', onCancel);
+            closeBtn.addEventListener('click', onCancel);
+            input.addEventListener('keydown', onKey);
+        }
+
+        function openTagModal(cat, index, subcat) {
+            const wrap = document.getElementById('modal-tag');
+            const title = document.getElementById('modal-tag-title');
+            const zh = document.getElementById('modal-tag-zh');
+            const en = document.getElementById('modal-tag-en');
+            const tokenInput = document.getElementById('modal-cy-token');
+            const translateBtn = document.getElementById('modal-tag-translate');
+            const translateMyBtn = document.getElementById('modal-tag-translate-mymemory');
+            const confirmBtn = document.getElementById('modal-tag-confirm');
+            const cancelBtn = document.getElementById('modal-tag-cancel');
+            const closeBtn = document.getElementById('modal-tag-close');
+            const subBtnsWrap = document.getElementById('modal-subcat-buttons');
+            const subNewBtn = document.getElementById('modal-subcat-newbtn');
+            const LAST_SUBCAT_KEY = 'ops_last_subcat_' + cat;
+
+            const editing = typeof index === 'number';
+            title.textContent = editing ? '编辑标签' : '添加标签';
+
+            // 类别按钮渲染（默认恢复上次选择；若无记录，稍后自动选第一个）
+            let selectedSub = subcat || (function(){ try { return localStorage.getItem(LAST_SUBCAT_KEY) || ''; } catch(e){ return ''; } })();
+            function renderSubButtons() {
+                if (!subBtnsWrap) return;
+                // 清空旧按钮（保留“新建类别”按钮）
+                Array.from(subBtnsWrap.querySelectorAll('button[data-subcat]')).forEach(el => el.remove());
+                const v0 = commonData?.[cat];
+                const names = [];
+                if (isGroupedCategory(v0)) {
+                    const g = v0.groups || {};
+                    const order = Array.isArray(v0.groupsOrder)
+                        ? v0.groupsOrder.filter(n => Object.prototype.hasOwnProperty.call(g, n))
+                            .concat(Object.keys(g).filter(n => !v0.groupsOrder.includes(n)))
+                        : Object.keys(g);
+                    order.forEach(k => names.push(k));
+                }
+                // 若当前没有选中小类别，则默认选中第一个
+                if (!selectedSub && names.length) {
+                    selectedSub = names[0];
+                    try { localStorage.setItem(LAST_SUBCAT_KEY, selectedSub); } catch(e) {}
+                }
+                names.forEach(name => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-outline btn-toggle' + (selectedSub === name ? ' active' : '');
+                    btn.type = 'button';
+                    btn.textContent = name;
+                    btn.dataset.subcat = name;
+                    btn.setAttribute('aria-pressed', selectedSub === name ? 'true' : 'false');
+                    btn.addEventListener('click', () => {
+                        selectedSub = name;
+                        try { localStorage.setItem(LAST_SUBCAT_KEY, selectedSub); } catch(e) {}
+                        renderSubButtons();
+                    });
+                    subBtnsWrap.appendChild(btn);
+                });
+            }
+            if (subNewBtn) {
+                // 覆盖式绑定，避免重复 addEventListener 导致多次弹窗
+                subNewBtn.onclick = null;
+                subNewBtn.onclick = async () => {
+                    const name = await showInputModal('新建类别', '输入名称', '');
+                    const val = (name || '').trim();
+                    if (!val) return;
+                    ensureGrouped(cat);
+                    const catObj = commonData[cat];
+                    const g = catObj.groups;
+                    if (!g[val]) g[val] = [];
+                    if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
+                    if (!catObj.groupsOrder.includes(val)) catObj.groupsOrder.push(val);
+                    selectedSub = val;
+                    try { localStorage.setItem(LAST_SUBCAT_KEY, selectedSub); } catch(e) {}
+                    saveCommonData();
+                    renderSubButtons(); // 刷新弹窗内按钮
+                    renderCommonTagsByCategory(cat); // 同步刷新主界面分组，无需关闭弹窗
+                };
+            }
+            renderSubButtons();
+
+            // 预填表单
+            const v = commonData?.[cat];
+            if (editing) {
+                if (isGroupedCategory(v) && subcat) {
+                    const item = ((v.groups?.[subcat]) || [])[index] || {};
+                    zh.value = item.lang_zh || '';
+                    en.value = item.text || '';
+                } else {
+                    const item = (Array.isArray(v) ? v : [])[index] || {};
+                    zh.value = item.lang_zh || '';
+                    en.value = item.text || '';
+                }
+            } else {
+                zh.value = '';
+                en.value = '';
+            }
+            // 预填 token
+            try { tokenInput.value = localStorage.getItem('ops_cy_token') || ''; } catch(e) {}
+
+            show(wrap);
+            setTimeout(() => (editing ? en : zh).focus(), 0);
+
+            // 翻译函数
+            const onTranslate = async () => {
+                const lang_zh = (zh.value || '').trim();
+                const token = (tokenInput.value || '').trim();
+                if (!lang_zh) { zh.focus(); return; }
+                if (!token) { tokenInput.focus(); return; }
+                try { localStorage.setItem('ops_cy_token', token); } catch(e) {}
+                try {
+                    const res = await fetch('https://api.interpreter.caiyunai.com/v1/translator', {
+                        method: 'POST',
+                        headers: {
+                            'content-type': 'application/json',
+                            'x-authorization': 'token ' + token
+                        },
+                        body: JSON.stringify({
+                            source: [lang_zh],
+                            trans_type: 'auto2en',
+                            request_id: 'ops',
+                            detect: true
+                        })
+                    });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const data = await res.json();
+                    const target = Array.isArray(data?.target) ? data.target[0] : (data?.target || '');
+                    if (!target) throw new Error('翻译结果为空');
+                    en.value = target;
+                } catch (err) {
+                    showInfo('翻译失败：' + (err?.message || err), '翻译失败');
+                }
+            };
+
+            // MyMemory 翻译：无需令牌，直接 GET
+            const onTranslateMyMemory = async () => {
+                const lang_zh = (zh.value || '').trim();
+                if (!lang_zh) { zh.focus(); return; }
+                try {
+                    const url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(lang_zh) + '&langpair=zh|en';
+                    const res = await fetch(url, { method: 'GET' });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const data = await res.json();
+                    const target = (data && data.responseData && data.responseData.translatedText) ? data.responseData.translatedText : '';
+                    if (!target) throw new Error('翻译结果为空');
+                    en.value = target;
+                } catch (err) {
+                    showInfo('MyMemory 翻译失败：' + (err?.message || err), '翻译失败');
+                }
+            };
+
+            const onConfirm = async () => {
+                const lang_zh2 = (zh.value || '').trim();
+                let text2 = (en.value || '').trim();
+
+                // 自动翻译：若存在 Token 且英文为空，仅有中文，则先翻译再保存
+                if (lang_zh2 && !text2) {
+                    let token = '';
+                    try { token = (tokenInput.value || '').trim() || (localStorage.getItem('ops_cy_token') || ''); } catch(e) {}
+                    if (token) {
+                        try {
+                            // 持久化 Token
+                            try { localStorage.setItem('ops_cy_token', token); } catch(e) {}
+                            const res = await fetch('https://api.interpreter.caiyunai.com/v1/translator', {
+                                method: 'POST',
+                                headers: {
+                                    'content-type': 'application/json',
+                                    'x-authorization': 'token ' + token
+                                },
+                                body: JSON.stringify({
+                                    source: [lang_zh2],
+                                    trans_type: 'auto2en',
+                                    request_id: 'ops',
+                                    detect: true
+                                })
+                            });
+                            if (!res.ok) throw new Error('HTTP ' + res.status);
+                            const data = await res.json();
+                            const target = Array.isArray(data?.target) ? data.target[0] : (data?.target || '');
+                            if (target) {
+                                text2 = target;
+                                en.value = target;
+                            }
+                        } catch (err) {
+                            // 翻译失败则回退到手动填写
+                        }
+                    }
+                }
+
+                if (!lang_zh2 || !text2) { (lang_zh2 ? en : zh).focus(); return; }
+
+                const targetSub = (selectedSub || '').trim();
+
+                const vNow = commonData?.[cat];
+
+                if (editing) {
+                    if (isGroupedCategory(vNow) && subcat) {
+                        const g = vNow.groups || {};
+                        const fromArr = g[subcat] || [];
+                        const old = fromArr[index] || {};
+                        if (targetSub && targetSub !== subcat) {
+                            // 移动到其他类别
+                            fromArr.splice(index, 1);
+                            if (!g[targetSub]) g[targetSub] = [];
+                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                        } else {
+                            // 就地更新
+                            fromArr[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                        }
+                    } else if (isGroupedCategory(vNow) && !subcat) {
+                        const g = vNow.groups || {};
+                        const uf = g['未分组'] || (g['未分组'] = []);
+                        const old = uf[index] || {};
+                        if (targetSub && targetSub !== '未分组') {
+                            uf.splice(index, 1);
+                            if (!g[targetSub]) g[targetSub] = [];
+                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                        } else {
+                            uf[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                        }
+                    } else {
+                        commonData[cat] = Array.isArray(vNow) ? vNow : [];
+                        // 旧数组模式
+                        if (targetSub) {
+                            // 升级为分组，并把旧数组作为“未分组”
+                            ensureGrouped(cat);
+                            const g = commonData[cat].groups;
+                            const uf = g['未分组'];
+                            const old = uf[index] || {};
+                            uf.splice(index, 1);
+                            if (!g[targetSub]) g[targetSub] = [];
+                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                        } else {
+                            const old = commonData[cat][index] || {};
+                            commonData[cat][index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                        }
+                    }
+                } else {
+                    if (targetSub) {
+                        ensureGrouped(cat);
+                        const groups = commonData[cat].groups;
+                        if (!groups[targetSub]) groups[targetSub] = [];
+                        groups[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: false });
+                    } else {
+                        if (Array.isArray(vNow)) {
+                            vNow.push({ text: text2, lang_zh: lang_zh2, pinned: false });
+                            commonData[cat] = vNow;
+                        } else if (isGroupedCategory(vNow)) {
+                            const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
+                            arr.push({ text: text2, lang_zh: lang_zh2, pinned: false });
+                        } else {
+                            commonData[cat] = [{ text: text2, lang_zh: lang_zh2, pinned: false }];
+                        }
+                    }
+                }
+
+                // 记录最后一次小类别选择
+                try {
+                    if (selectedSub) localStorage.setItem(LAST_SUBCAT_KEY, selectedSub);
+                } catch(e) {}
+
+                saveCommonData();
+                renderCommonTagsByCategory(cat);
+                cleanup();
+            };
+            const onCancel = () => cleanup();
+
+            function cleanup() {
+                translateBtn.removeEventListener('click', onTranslate);
+                translateMyBtn && translateMyBtn.removeEventListener('click', onTranslateMyMemory);
+                confirmBtn.removeEventListener('click', onConfirm);
+                cancelBtn.removeEventListener('click', onCancel);
+                closeBtn.removeEventListener('click', onCancel);
+                zh.removeEventListener('keydown', onKey);
+                en.removeEventListener('keydown', onKey);
+                hide(wrap);
+            }
+            function onKey(e) {
+                if (e.key === 'Enter') onConfirm();
+                if (e.key === 'Escape') onCancel();
+            }
+
+            translateBtn.addEventListener('click', onTranslate);
+            translateMyBtn && translateMyBtn.addEventListener('click', onTranslateMyMemory);
+            confirmBtn.addEventListener('click', onConfirm);
+            cancelBtn.addEventListener('click', onCancel);
+            closeBtn.addEventListener('click', onCancel);
+            zh.addEventListener('keydown', onKey);
+            en.addEventListener('keydown', onKey);
+        }
+
+        // 通用信息提示（居中模态，仅“确定”）
+        function showInfo(message, title = '提示') {
+            const wrap = document.getElementById('modal-confirm');
+            const titleEl = document.getElementById('modal-confirm-title');
+            const msgEl = document.getElementById('modal-confirm-message');
+            const okBtn = document.getElementById('modal-confirm-ok');
+            const cancelBtn = document.getElementById('modal-confirm-cancel');
+            const closeBtn = document.getElementById('modal-confirm-close');
+            titleEl.textContent = title || '提示';
+            msgEl.textContent = message || '';
+            const prevDisplay = cancelBtn.style.display;
+            cancelBtn.style.display = 'none';
+            show(wrap);
+            return new Promise((resolve) => {
+                const onOk = () => cleanup();
+                function onKey(e) {
+                    if (e.key === 'Enter' || e.key === 'Escape') cleanup();
+                }
+                function cleanup() {
+                    okBtn.removeEventListener('click', onOk);
+                    closeBtn.removeEventListener('click', onOk);
+                    document.removeEventListener('keydown', onKey);
+                    cancelBtn.style.display = prevDisplay || '';
+                    hide(wrap);
+                    resolve();
+                }
+                okBtn.addEventListener('click', onOk);
+                closeBtn.addEventListener('click', onOk);
+                document.addEventListener('keydown', onKey);
+            });
+        }
+
+        // 通用确认函数（居中模态）
+        function showConfirm(message, title = '确认操作') {
+            const wrap = document.getElementById('modal-confirm');
+            const titleEl = document.getElementById('modal-confirm-title');
+            const msgEl = document.getElementById('modal-confirm-message');
+            const okBtn = document.getElementById('modal-confirm-ok');
+            const cancelBtn = document.getElementById('modal-confirm-cancel');
+            const closeBtn = document.getElementById('modal-confirm-close');
+            titleEl.textContent = title || '确认操作';
+            msgEl.textContent = message || '';
+            show(wrap);
+            return new Promise((resolve) => {
+                const onOk = () => cleanup(true);
+                const onCancel = () => cleanup(false);
+                function onKey(e) {
+                    if (e.key === 'Enter') cleanup(true);
+                    if (e.key === 'Escape') cleanup(false);
+                }
+                function cleanup(result) {
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    closeBtn.removeEventListener('click', onCancel);
+                    document.removeEventListener('keydown', onKey);
+                    hide(wrap);
+                    resolve(!!result);
+                }
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                closeBtn.addEventListener('click', onCancel);
+                document.addEventListener('keydown', onKey);
+            });
+        }
+
+        // 输入弹窗（居中），返回 Promise<string|null>
+        function showInputModal(title = '请输入', placeholder = '', defaultValue = '') {
+            return new Promise((resolve) => {
+                // 创建容器
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+
+                const header = document.createElement('div');
+                header.className = 'modal-header';
+                const hTitle = document.createElement('span');
+                hTitle.textContent = title || '请输入';
+                const btnClose = document.createElement('button');
+                btnClose.className = 'btn btn-outline';
+                btnClose.textContent = '关闭';
+                header.appendChild(hTitle);
+                header.appendChild(btnClose);
+
+                const body = document.createElement('div');
+                body.className = 'modal-body';
+                const row = document.createElement('div');
+                row.className = 'modal-row';
+                const label = document.createElement('label');
+                label.textContent = placeholder || '';
+                const input = document.createElement('input');
+                input.className = 'modal-input';
+                input.type = 'text';
+                input.value = defaultValue || '';
+                input.placeholder = placeholder || '';
+                row.appendChild(label);
+                row.appendChild(input);
+                body.appendChild(row);
+
+                const footer = document.createElement('div');
+                footer.className = 'modal-footer';
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'btn btn-outline';
+                btnCancel.textContent = '取消';
+                const btnOk = document.createElement('button');
+                btnOk.className = 'btn btn-primary';
+                btnOk.textContent = '确定';
+                footer.appendChild(btnCancel);
+                footer.appendChild(btnOk);
+
+                modal.appendChild(header);
+                modal.appendChild(body);
+                modal.appendChild(footer);
+                backdrop.appendChild(modal);
+                document.body.appendChild(backdrop);
+                show(backdrop);
+                setTimeout(() => input.focus(), 0);
+
+                function cleanup(val) {
+                    btnOk.removeEventListener('click', onOk);
+                    btnCancel.removeEventListener('click', onCancel);
+                    btnClose.removeEventListener('click', onCancel);
+                    input.removeEventListener('keydown', onKey);
+                    hide(backdrop);
+                    document.body.removeChild(backdrop);
+                    resolve(val);
+                }
+                function onOk() { cleanup(input.value); }
+                function onCancel() { cleanup(null); }
+                function onKey(e) {
+                    if (e.key === 'Enter') onOk();
+                    if (e.key === 'Escape') onCancel();
+                }
+
+                btnOk.addEventListener('click', onOk);
+                btnCancel.addEventListener('click', onCancel);
+                btnClose.addEventListener('click', onCancel);
+                input.addEventListener('keydown', onKey);
+            });
+        }
+
+        // 图标选择器（固定集合）
+        async function showIconPicker(defaultIcon = 'fas fa-globe') {
+            return new Promise((resolve) => {
+                const icons = ['fas fa-images','fas fa-book','fas fa-tags','fas fa-search','fas fa-image','fas fa-globe'];
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+
+                const header = document.createElement('div');
+                header.className = 'modal-header';
+                const title = document.createElement('span');
+                title.textContent = '选择图标';
+                const btnClose = document.createElement('button');
+                btnClose.className = 'btn btn-outline';
+                btnClose.textContent = '关闭';
+                header.appendChild(title);
+                header.appendChild(btnClose);
+
+                const body = document.createElement('div');
+                body.className = 'modal-body';
+                const grid = document.createElement('div');
+                grid.style.display = 'grid';
+                grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                grid.style.gap = '8px';
+
+                let selected = defaultIcon || 'fas fa-globe';
+                icons.forEach(ic => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-outline btn-toggle' + (ic === selected ? ' active' : '');
+                    btn.style.display = 'flex';
+                    btn.style.alignItems = 'center';
+                    btn.style.gap = '8px';
+                    btn.setAttribute('data-icon', ic);
+                    const iEl = document.createElement('i');
+                    iEl.className = ic;
+                    const span = document.createElement('span');
+                    span.textContent = ic;
+                    btn.appendChild(iEl);
+                    btn.appendChild(span);
+                    btn.addEventListener('click', () => {
+                        selected = ic;
+                        Array.from(grid.querySelectorAll('button')).forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                    grid.appendChild(btn);
+                });
+                body.appendChild(grid);
+
+                const footer = document.createElement('div');
+                footer.className = 'modal-footer';
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'btn btn-outline';
+                btnCancel.textContent = '取消';
+                const btnOk = document.createElement('button');
+                btnOk.className = 'btn btn-primary';
+                btnOk.textContent = '确定';
+                footer.appendChild(btnCancel);
+                footer.appendChild(btnOk);
+
+                modal.appendChild(header);
+                modal.appendChild(body);
+                modal.appendChild(footer);
+                backdrop.appendChild(modal);
+                document.body.appendChild(backdrop);
+                show(backdrop);
+
+                function cleanup(val) {
+                    hide(backdrop);
+                    document.body.removeChild(backdrop);
+                    resolve(val);
+                }
+                btnOk.addEventListener('click', () => cleanup(selected));
+                btnCancel.addEventListener('click', () => cleanup(null));
+                btnClose.addEventListener('click', () => cleanup(null));
+            });
+        }
+
+        // 右键菜单逻辑（委托）
+        const ctxMenu = document.getElementById('context-menu');
+        const ctxList = document.getElementById('context-menu-list');
+
+        function hideContextMenu() {
+            ctxMenu.style.display = 'none';
+            ctxList.innerHTML = '';
+        }
+        function showContextMenu(x, y, items) {
+            ctxList.innerHTML = '';
+            items.forEach(({label, action, icon}) => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                if (icon) {
+                    const iEl = document.createElement('i');
+                    iEl.className = icon;
+                    iEl.style.marginRight = '8px';
+                    div.appendChild(iEl);
+                    const span = document.createElement('span');
+                    span.textContent = label;
+                    div.appendChild(span);
+                } else {
+                    div.textContent = label;
+                }
+                div.addEventListener('click', () => {
+                    hideContextMenu();
+                    action();
+                });
+                ctxList.appendChild(div);
+            });
+            ctxMenu.style.display = 'block';
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const rect = { w: 180, h: 40 * items.length };
+            const px = Math.min(x, vw - rect.w - 8);
+            const py = Math.min(y, vh - rect.h - 8);
+            ctxMenu.style.left = px + 'px';
+            ctxMenu.style.top = py + 'px';
+        }
+
+        document.addEventListener('click', hideContextMenu, { passive: true });
+        window.addEventListener('scroll', hideContextMenu, { passive: true });
+        window.addEventListener('resize', hideContextMenu, { passive: true });
+
+        document.addEventListener('contextmenu', (e) => {
+            const catCard = e.target.closest('.prompt-card');
+            const tagEl = e.target.closest('.common-tag');
+            if (catCard) {
+                e.preventDefault();
+                const cat = catCard.getAttribute('data-cat') || '';
+                if (!cat) return;
+                showContextMenu(e.clientX, e.clientY, [
+                    { label: '上移', icon: 'fas fa-arrow-up', action: () => moveCategoryUp(cat) },
+                    { label: '下移', icon: 'fas fa-arrow-down', action: () => moveCategoryDown(cat) },
+                    { label: '编辑名称', icon: 'fas fa-pen', action: () => openCategoryModal(cat) },
+                    { label: '删除', icon: 'fas fa-trash', action: async () => {
+                        const ok = await showConfirm(`确认删除分类「${cat}」及其所有标签？`, '删除分类');
+                        if (!ok) return;
+                        delete commonData[cat];
+                        saveCommonData();
+                        // 若删除的是当前分类，重设 active
+                        const keys = Object.keys(commonData);
+                        setActiveCategory(keys[0] || '');
+                        renderSidebar();
+                    } }
+                ]);
+            } else if (tagEl) {
+                e.preventDefault();
+                const cat = tagEl.getAttribute('data-cat') || getActiveCategory();
+                const idx = parseInt(tagEl.getAttribute('data-index') || '-1', 10);
+                const sub = tagEl.getAttribute('data-subcat') || '';
+                if (!cat || idx < 0) return;
+
+                let it = null, isPinned = false;
+                const v = commonData[cat];
+                if (Array.isArray(v)) {
+                    it = v[idx];
+                } else if (isGroupedCategory(v)) {
+                    it = (v.groups?.[sub] || [])[idx];
+                }
+                if (!it) return;
+                isPinned = !!it.pinned;
+
+                // 组装右键菜单：固定项 + 自定义项 + 删除
+                const menuItems = [
+                    { label: isPinned ? '取消置顶' : '置顶', icon: 'fas fa-thumbtack', action: () => pinTag(cat, sub, idx, !isPinned) },
+                    { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) }
+                ];
+
+                // 自定义外链项（出现在“删除”上方）
+                try {
+                    const customMenus = (typeof getCtxMenus === 'function') ? getCtxMenus() : [];
+                    if (Array.isArray(customMenus) && customMenus.length) {
+                        const en = (it && it.text) ? String(it.text).trim() : '';
+                        const zh = (it && it.lang_zh) ? String(it.lang_zh).trim() : '';
+                        customMenus.forEach(m => {
+                            const label = (m && m.name) ? String(m.name) : '链接';
+                            const icon = (m && m.icon) ? String(m.icon) : 'fas fa-globe';
+                            const tpl = (m && m.url) ? String(m.url) : '';
+                            menuItems.push({
+                                label,
+                                icon,
+                                action: () => {
+                                    const url = (typeof buildUrlFromTemplate === 'function') ? buildUrlFromTemplate(tpl, en, zh) : '';
+                                    if (!url) { showInfo('链接模板为空', '提示'); return; }
+                                    window.open(url, '_blank');
+                                }
+                            });
+                        });
+                    }
+                } catch(_) {}
+
+                // 删除放在最后
+                menuItems.push({
+                    label: '删除',
+                    icon: 'fas fa-trash',
+                    action: async () => {
+                        const v2 = commonData[cat];
+                        let it2 = null;
+                        if (Array.isArray(v2)) {
+                            it2 = v2[idx];
+                            if (!it2) return;
+                            const ok = await showConfirm(`确认删除标签「${it2.lang_zh || it2.text}」？`, '删除标签');
+                            if (!ok) return;
+                            v2.splice(idx, 1);
+                        } else if (isGroupedCategory(v2)) {
+                            const arr = v2.groups?.[sub] || [];
+                            it2 = arr[idx];
+                            if (!it2) return;
+                            const ok = await showConfirm(`确认删除标签「${it2.lang_zh || it2.text}」？`, '删除标签');
+                            if (!ok) return;
+                            arr.splice(idx, 1);
+                        }
+                        saveCommonData();
+                        renderCommonTagsByCategory(cat);
+                    }
+                });
+
+                showContextMenu(e.clientX, e.clientY, menuItems);
+            } else {
+                hideContextMenu();
+            }
+        });
+
+        // 置顶/取消置顶（支持分组）
+        function pinTag(cat, subcat, index, shouldPin) {
+            const v = commonData[cat];
+            if (Array.isArray(v)) {
+                if (!v[index]) return;
+                const [it] = v.splice(index, 1);
+                it.pinned = !!shouldPin;
+                if (shouldPin) v.unshift(it);
+                else v.splice(Math.min(index, v.length), 0, it);
+                commonData[cat] = v;
+            } else if (isGroupedCategory(v)) {
+                const arr = v.groups?.[subcat] || [];
+                if (!arr[index]) return;
+                const [it] = arr.splice(index, 1);
+                it.pinned = !!shouldPin;
+                if (shouldPin) arr.unshift(it);
+                else arr.splice(Math.min(index, arr.length), 0, it);
+            }
+            saveCommonData();
+            renderCommonTagsByCategory(cat);
+        }
+
+        // 上移/下移 类别分组顺序（以显式顺序数组 groupsOrder 控制渲染顺序）
+        function moveSubcat(catKey, sub, direction) {
+            const v = commonData[catKey];
+            if (!isGroupedCategory(v)) { return; }
+            const g = v.groups || {};
+            // 基于现有顺序或键集合构造 order
+            const baseOrder = Array.isArray(v.groupsOrder)
+                ? v.groupsOrder.filter(n => Object.prototype.hasOwnProperty.call(g, n))
+                    .concat(Object.keys(g).filter(n => !v.groupsOrder.includes(n)))
+                : Object.keys(g);
+            const idx = baseOrder.indexOf(sub);
+            if (idx === -1) return;
+            const target = direction === 'up' ? idx - 1 : idx + 1;
+            if (target < 0 || target >= baseOrder.length) return;
+
+            const newOrder = baseOrder.slice();
+            newOrder.splice(idx, 1);
+            newOrder.splice(target, 0, sub);
+
+            // 生成全新 groups，保证插入顺序一致
+            const reordered = {};
+            for (const k of newOrder) {
+                reordered[k] = Array.isArray(g[k]) ? g[k].slice() : (g[k] || []);
+            }
+            // 回写：同时写入 groups 与 groupsOrder
+            commonData[catKey] = { groups: reordered, groupsOrder: newOrder };
+            saveCommonData();
+            renderCommonTagsByCategory(catKey);
+        }
+
+        // 兼容函数：若需要外部调用，可通过 key 切换分类
+        function loadPrompt(catKey) {
+            document.querySelectorAll('.prompt-card').forEach(card => card.classList.remove('active'));
+            // 不强制设置 active，这里仅切换标签
+            renderCommonTagsByCategory(catKey);
+        }
+        
+        // 监听编辑器内容变化
+        promptEditor.addEventListener('input', () => {
+            updateTags();
+        });
+
+        // 重置：清空所有分类、类别与历史
+        async function resetAll() {
+            const ok = await showConfirm('确认清空所有分类、类别与历史记录？此操作不可恢复。', '重置数据');
+            if (!ok) return;
+            // 清空数据
+            commonData = {};
+            saveCommonData();
+            try {
+                localStorage.removeItem('ops_prompt_history');
+                localStorage.removeItem('ops_active_cat');
+                // 保留 Dropbox 配置与文件选择
+            } catch(e) {}
+            resetPrompt();
+            renderSidebar();
+            showInfo('已清空所有标签与分类', '完成');
+        }
+
+
+
+        // 初始化
+        updateTags();
+        loadCommonTagsFromStorage();
+        setupUIEvents();
+        // 绑定设置按钮
+        document.getElementById('settings-toggle')?.addEventListener('click', openCtxMenuModal);
+        // 确保初始计数显示
+        updateTokenCounter();
+    </script>
+</body>
+</html>
