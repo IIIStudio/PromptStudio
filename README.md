@@ -41,12 +41,13 @@
 
 ## 快速开始
 
-1. 直接在任意现代浏览器打开 `index.html`。
-2. 页面依赖在线资源：
+1. 下载 `index.html` 到本地。
+2. 直接在任意现代浏览器打开 `index.html`。
+3. 页面依赖在线资源：
    - Font Awesome（cdnjs）
    - html2canvas（jsDelivr，运行时动态加载）
    如需离线运行，请自行下载上述依赖并改为本地引用。
-3. 开始使用页面左侧分类与右侧编辑功能。
+4. 开始使用页面左侧分类与右侧编辑功能。
 
 ## 使用指南
 
@@ -109,9 +110,26 @@
 - 登录成功后将保存刷新令牌并获取访问令牌，可进行上传/下载。
 - 选择或刷新云端 JSON 文件列表，支持将数据上传到应用目录或从中导入。
 
+1. 打开网站：https://www.dropbox.com/developers/apps，登录点击Create app。
+2. 选择：App folder– Access to a single folder created specifically for your app.
+3. 输入 Name your app 名称，这个名称会在你应用中创建文件夹，提示词文件也放在这个文件夹，权限是只能获取到这个文件夹的文件。
+4. 复制App key与App secret
+5. OAuth 2 Redirect URIs 写入 https://localhost/
+6. 在 Permissions 勾选权限，files.content.write与files.content.read，点击Submit提交，这样就完成了
+
+> 如果找不到位置可以使用Ctrl+f搜索。
+
+> 说人话，可以使用我的App Key：5rf7xfl3li2j3tw，App Secret：kjmbl4fcp68gqz9，这样就不用自己去申请，直接用自己账户登录就行。
+
 说明：
 - 上传时对非 ASCII 文件名进行兼容处理：临时文件 + move 接口。
 - 下载时 ASCII 文件走标准 `content` 接口；非 ASCII 文件使用临时链接获取。
+
+## 彩云api（可选）
+
+- 地址：https://platform.caiyunapp.com/login
+- 好像是每月100万字翻译字符数，完全够用
+- 创建应用获取Token
 
 ## 技术栈与依赖
 
@@ -123,7 +141,7 @@
 
 ## 本地开发/定制
 
-- 直接编辑 `html/index.html`。
+- 直接编辑 `index.html`。
 - 若需要离线运行：
   - 将 Font Awesome 与 html2canvas 改为本地文件并调整引用路径。
 - 自定义右键菜单外链：
