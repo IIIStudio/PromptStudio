@@ -1721,6 +1721,37 @@
             }
         }
 
+        // 首次打开提示：导入默认测试数据（仅提示一次）
+        const ONBOARD_KEY = 'ops_onboard_done';
+        async function maybePromptDefaultImport() {
+            try {
+                const done = localStorage.getItem(ONBOARD_KEY) === '1';
+                const hasData = commonData && Object.keys(commonData).length > 0;
+                if (done || hasData) return;
+            } catch (_) {
+                // 若 localStorage 不可用，直接跳过
+                return;
+            }
+            try {
+                const ok = await showConfirm(
+                    `检测到当前没有任何本地数据。是否导入默认测试数据？
+文件：OHAO AI Prompt Studio.json`,
+                    '导入默认数据'
+                );
+                // 无论选择与否，都写入一次性标记，下次不再提醒
+                try { localStorage.setItem(ONBOARD_KEY, '1'); } catch(_) {}
+                if (!ok) return;
+
+                // 从同目录读取默认测试数据
+                const res = await fetch('OHAO AI Prompt Studio.json');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const text = await res.text();
+                await importJsonText(text);
+            } catch (err) {
+                showInfo('导入默认数据失败：' + (err?.message || err), '导入失败');
+            }
+        }
+
         // 导出 #prompt-tags-container 为图片并下载
         async function ensureHtml2Canvas() {
             if (window.html2canvas) return window.html2canvas;
@@ -3713,6 +3744,8 @@
         updateTags();
         loadCommonTagsFromStorage();
         setupUIEvents();
+        // 首次打开提示：若无数据则询问是否导入默认测试数据
+        maybePromptDefaultImport();
         // 绑定设置按钮
         document.getElementById('settings-toggle')?.addEventListener('click', openCtxMenuModal);
         // 确保初始计数显示
