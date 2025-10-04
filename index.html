@@ -700,7 +700,7 @@
             
             <div class="category-list">
                 <div class="category-title">
-                    <span>常用提示词</span>
+                    <span>提示词标签</span>
                     <button class="btn btn-outline icon-plus" id="add-category-btn" title="新建标签"></button>
                 </div>
                 <div class="prompt-list">
@@ -1412,6 +1412,13 @@
                     setActiveCategory(key);
                     renderCommonTagsByCategory(key);
                 });
+                // 启用侧栏分类拖拽
+                card.draggable = true;
+                card.addEventListener('dragstart', handleCatDragStart);
+                card.addEventListener('dragend', handleCatDragEnd);
+                // 子元素也监听 dragover/drop，确保在卡片上释放也能触发
+                card.addEventListener('dragover', onSidebarDragOver);
+                card.addEventListener('drop', onSidebarDrop);
                 sidebarList.appendChild(card);
             });
             if (keys.length > 0) {
@@ -1451,6 +1458,118 @@
         function moveCategoryUp(cat) { moveCategory(cat, 'up'); }
         function moveCategoryDown(cat) { moveCategory(cat, 'down'); }
 
+        // 侧栏分类拖拽排序逻辑
+        let catDraggedKey = null;
+        let catPlaceholderEl = null;
+
+        function handleCatDragStart(e) {
+            const key = this.getAttribute('data-cat') || '';
+            catDraggedKey = key || null;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', key);
+        }
+
+        function handleCatDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.prompt-card').forEach(card => card.classList.remove('dragging'));
+            if (catPlaceholderEl && catPlaceholderEl.parentNode) {
+                catPlaceholderEl.parentNode.removeChild(catPlaceholderEl);
+            }
+            catPlaceholderEl = null;
+            catDraggedKey = null;
+        }
+
+        function getCatInsertIndexByPoint(y) {
+            const items = Array.from(sidebarList.querySelectorAll('.prompt-card'));
+            if (!items.length) return 0;
+            // 找到垂直位置最近的卡片
+            let anchor = items[items.length - 1];
+            let minDist = Infinity;
+            items.forEach(el => {
+                const r = el.getBoundingClientRect();
+                const cy = r.top + r.height / 2;
+                const d = Math.abs(y - cy);
+                if (d < minDist) { minDist = d; anchor = el; }
+            });
+            const r = anchor.getBoundingClientRect();
+            const mid = r.top + r.height / 2;
+            const baseIdx = items.indexOf(anchor);
+            return y < mid ? baseIdx : baseIdx + 1;
+        }
+
+        function onSidebarDragOver(e) {
+            if (!catDraggedKey) return false;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (!catPlaceholderEl) {
+                catPlaceholderEl = document.createElement('div');
+                catPlaceholderEl.style.height = '10px';
+                catPlaceholderEl.style.margin = '6px 12px';
+                catPlaceholderEl.style.borderRadius = '4px';
+                catPlaceholderEl.style.background = 'var(--primary-color)';
+            }
+            const idx = getCatInsertIndexByPoint(e.clientY);
+            const cards = Array.from(sidebarList.querySelectorAll('.prompt-card'));
+            if (idx >= cards.length) {
+                if (catPlaceholderEl.parentNode !== sidebarList || catPlaceholderEl.nextElementSibling !== null) {
+                    sidebarList.appendChild(catPlaceholderEl);
+                }
+            } else {
+                const ref = cards[idx];
+                if (ref.previousSibling !== catPlaceholderEl) {
+                    sidebarList.insertBefore(catPlaceholderEl, ref);
+                }
+            }
+            return false;
+        }
+
+        function onSidebarDrop(e) {
+            if (!catDraggedKey) return false;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const keys = Object.keys(commonData);
+            const fromIndex = keys.indexOf(catDraggedKey);
+
+            // 优先使用占位条位置确定目标索引
+            let toIndex = -1;
+            if (catPlaceholderEl && sidebarList.contains(catPlaceholderEl)) {
+                const cards = Array.from(sidebarList.querySelectorAll('.prompt-card'));
+                let countBefore = 0;
+                for (const node of sidebarList.children) {
+                    if (node === catPlaceholderEl) break;
+                    if (node.classList && node.classList.contains('prompt-card')) countBefore++;
+                }
+                toIndex = countBefore;
+            } else {
+                // 回退：用坐标估算
+                toIndex = getCatInsertIndexByPoint(e.clientY);
+            }
+
+            if (fromIndex >= 0 && toIndex >= 0 && fromIndex !== toIndex) {
+                // 拖起位置在目标之前时，移除后目标索引左移一位
+                if (fromIndex < toIndex) toIndex -= 1;
+                const newKeys = keys.slice();
+                newKeys.splice(fromIndex, 1);
+                newKeys.splice(Math.max(0, Math.min(toIndex, newKeys.length)), 0, catDraggedKey);
+
+                const reordered = {};
+                newKeys.forEach(k => { reordered[k] = commonData[k]; });
+                commonData = reordered;
+                saveCommonData();
+                renderSidebar();
+            }
+
+            if (catPlaceholderEl && catPlaceholderEl.parentNode) {
+                catPlaceholderEl.parentNode.removeChild(catPlaceholderEl);
+            }
+            catPlaceholderEl = null;
+            catDraggedKey = null;
+
+            return false;
+        }
+
         function getActiveCategory() {
             try { return localStorage.getItem('ops_active_cat') || ''; } catch(e) { return ''; }
         }
@@ -1474,15 +1593,18 @@
         function getDropboxToken() {
             try { return localStorage.getItem('ops_dbx_token') || ''; } catch(e) { return ''; }
         }
+        // 固定 Dropbox 应用参数
+        const DBX_APP_KEY = '5rf7xfl3li2j3tw';
+        const DBX_APP_SECRET = 'kjmbl4fcp68gqz9';
         function getDropboxConfig() {
             try {
                 return {
-                    key: localStorage.getItem('ops_dbx_key') || '',
-                    secret: localStorage.getItem('ops_dbx_secret') || '',
+                    key: DBX_APP_KEY,
+                    secret: DBX_APP_SECRET,
                     token: localStorage.getItem('ops_dbx_token') || '',
                     refresh: localStorage.getItem('ops_dbx_refresh') || ''
                 };
-            } catch(e) { return { key:'', secret:'', token:'', refresh:'' }; }
+            } catch(e) { return { key: DBX_APP_KEY, secret: DBX_APP_SECRET, token:'', refresh:'' }; }
         }
         function getDropboxSelectedFilename() {
             try {
@@ -1852,8 +1974,9 @@
 
             // 预填
             const cfg = getDropboxConfig();
-            keyEl.value = cfg.key || '';
-            secEl.value = cfg.secret || '';
+            // 隐藏 App Key / Secret 输入框行
+            if (keyEl && keyEl.closest('.modal-row')) keyEl.closest('.modal-row').style.display = 'none';
+            if (secEl && secEl.closest('.modal-row')) secEl.closest('.modal-row').style.display = 'none';
             refreshEl.value = cfg.refresh || '';
             if (enabledEl) enabledEl.checked = isDropboxEnabled();
 
@@ -1943,8 +2066,7 @@
             }
 
             const onAuthorize = () => {
-                const key = keyEl.value.trim();
-                if (!key) { showInfo('请先填写 App Key', '提示'); keyEl.focus(); return; }
+                const key = getDropboxConfig().key;
                 const redirect = encodeURIComponent('https://localhost/');
                 // 生成 state 以便后端校验（此处仅传递，不在前端校验）
                 const state = Math.random().toString(36).slice(2);
@@ -1969,11 +2091,9 @@
             };
 
             const onLogin = async () => {
-                const key = keyEl.value.trim();
-                const sec = secEl.value.trim();
+                const key = getDropboxConfig().key;
+                const sec = getDropboxConfig().secret;
                 let inputVal = refreshEl.value.trim();
-                if (!key) { showInfo('请填写 App Key', '提示'); keyEl.focus(); return; }
-                if (!sec) { showInfo('请填写 App Secret', '提示'); secEl.focus(); return; }
                 if (!inputVal) { showInfo('请粘贴 Refresh Token 或 回调URL/code', '提示'); refreshEl.focus(); return; }
 
                 // 工具：从可能的完整URL或query片段中提取 code
@@ -2058,8 +2178,7 @@
 
             const onSave = () => {
                 try {
-                    localStorage.setItem('ops_dbx_key', keyEl.value.trim());
-                    localStorage.setItem('ops_dbx_secret', secEl.value.trim());
+                    // 不再保存 App Key/Secret，仅保存 Refresh 与开关、文件名
                     localStorage.setItem('ops_dbx_refresh', refreshEl.value.trim());
                     if (enabledEl) {
                         localStorage.setItem('ops_dbx_enabled', enabledEl.checked ? '1' : '0');
@@ -2847,6 +2966,8 @@
                         promptEditor.value = t;       // 再写入
                         updateTags();
                         promptEditor.focus();
+                        // 导入后关闭“提示词历史”弹窗
+                        onClose();
                     });
 
                     const btnCopy = document.createElement('button');
@@ -2933,9 +3054,13 @@
             });
 
             // 事件
+            function onKey(e) {
+                if (e.key === 'Escape') onClose();
+            }
             function cleanup() {
                 btnClose.removeEventListener('click', onClose);
                 btnClear.removeEventListener('click', onClear);
+                document.removeEventListener('keydown', onKey);
                 hide(wrap);
             }
             function onClose() { cleanup(); }
@@ -2948,6 +3073,7 @@
 
             btnClose.addEventListener('click', onClose);
             btnClear.addEventListener('click', onClear);
+            document.addEventListener('keydown', onKey);
             show(wrap);
         }
         
@@ -3564,15 +3690,12 @@
                 const cat = catCard.getAttribute('data-cat') || '';
                 if (!cat) return;
                 showContextMenu(e.clientX, e.clientY, [
-                    { label: '上移', icon: 'fas fa-arrow-up', action: () => moveCategoryUp(cat) },
-                    { label: '下移', icon: 'fas fa-arrow-down', action: () => moveCategoryDown(cat) },
                     { label: '编辑名称', icon: 'fas fa-pen', action: () => openCategoryModal(cat) },
                     { label: '删除', icon: 'fas fa-trash', action: async () => {
                         const ok = await showConfirm(`确认删除分类「${cat}」及其所有标签？`, '删除分类');
                         if (!ok) return;
                         delete commonData[cat];
                         saveCommonData();
-                        // 若删除的是当前分类，重设 active
                         const keys = Object.keys(commonData);
                         setActiveCategory(keys[0] || '');
                         renderSidebar();
@@ -3743,11 +3866,14 @@
         updateTags();
         loadCommonTagsFromStorage();
         setupUIEvents();
+        // 启用侧栏拖拽容器事件
+        if (sidebarList) {
+            sidebarList.addEventListener('dragover', onSidebarDragOver);
+            sidebarList.addEventListener('drop', onSidebarDrop);
+        }
         // 首次打开提示：若无数据则询问是否导入默认测试数据
         maybePromptDefaultImport();
-        // 绑定设置按钮
         document.getElementById('settings-toggle')?.addEventListener('click', openCtxMenuModal);
-        // 确保初始计数显示
         updateTokenCounter();
     </script>
 </body>
