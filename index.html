@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title>IIIStudio - AI绘画提示词工具</title>
+    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译" />
+    <meta name="description" content="一个纯前端的提示词管理与编辑页面。支持分类/分组管理、标签拖拽排序、历史快照存储、翻译、JSON 导入/导出、本地持久化，以及可选的 Dropbox 云同步；同时提供一键导出提示词区域为图片（html2canvas）。" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -762,7 +764,8 @@
                     <div class="common-tags-section">
                         <div class="common-tags-title">常用提示词
                             <button class="btn btn-outline icon-plus" id="add-tag-btn" style="margin-left:8px" title="添加标签"></button>
-                            <button class="btn btn-outline" id="export-tags-image-btn" style="margin-left:8px" title="生成图片并下载">生成图片</button>
+                            <button class="btn btn-outline" id="export-tags-image-btn" style="margin-left:8px" title="生成提示词图片并下载">提示词图片</button>
+                            <button class="btn btn-outline" id="compose-tags-image-btn" style="margin-left:8px" title="合成提示词图片到选择的图片">合成图片</button>
                         </div>
                         <div class="common-tags" id="common-tags">
 
@@ -1885,40 +1888,38 @@
             });
             return window.html2canvas;
         }
-        async function exportPromptTagsImage() {
+        async function renderPromptTagsToCanvas() {
+            const el = document.getElementById('prompt-tags-container');
+            if (!el) throw new Error('未找到提示词区域');
+            const html2canvas = await ensureHtml2Canvas();
+            const prev = {
+                background: el.style.background,
+                backgroundColor: el.style.backgroundColor,
+                border: el.style.border,
+                boxShadow: el.style.boxShadow
+            };
+            el.style.background = 'transparent';
+            el.style.backgroundColor = 'transparent';
+            el.style.border = 'none';
+            el.style.boxShadow = 'none';
+            const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
             try {
-                const el = document.getElementById('prompt-tags-container');
-                if (!el) { showInfo('未找到提示词区域', '错误'); return; }
-
-                const html2canvas = await ensureHtml2Canvas();
-
-                // 1) 临时移除容器背景与边框，仅保留标签本身
-                const prev = {
-                    background: el.style.background,
-                    backgroundColor: el.style.backgroundColor,
-                    border: el.style.border,
-                    boxShadow: el.style.boxShadow
-                };
-                el.style.background = 'transparent';
-                el.style.backgroundColor = 'transparent';
-                el.style.border = 'none';
-                el.style.boxShadow = 'none';
-
-                // 2) 提升清晰度：按设备像素比放大
-                const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
-
-                const canvas = await html2canvas(el, {
-                    backgroundColor: null,   // 透明背景
+                return await html2canvas(el, {
+                    backgroundColor: null,
                     scale,
                     useCORS: true
                 });
-
-                // 恢复样式
+            } finally {
                 el.style.background = prev.background;
                 el.style.backgroundColor = prev.backgroundColor;
                 el.style.border = prev.border;
                 el.style.boxShadow = prev.boxShadow;
+            }
+        }
 
+        async function exportPromptTagsImage() {
+            try {
+                const canvas = await renderPromptTagsToCanvas();
                 const dataUrl = canvas.toDataURL('image/png');
                 const a = document.createElement('a');
                 a.href = dataUrl;
@@ -1931,10 +1932,159 @@
             }
         }
 
+        async function composeTagsImageOntoSelectedImage() {
+            try {
+                const canvas = await renderPromptTagsToCanvas();
+                const tagsBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+                if (!tagsBlob) throw new Error('生成提示词图片失败');
+                const baseFile = await pickBaseImageFile();
+                if (!baseFile) return;
+                const composedBlob = await composeImages(baseFile, tagsBlob);
+                await offerComposedImageDownload(composedBlob);
+            } catch (e) {
+                showInfo('合成失败：' + (e?.message || e), '失败');
+            }
+        }
+
+        async function pickBaseImageFile() {
+            return new Promise((resolve) => {
+                let input = document.getElementById('compose-image-file-input');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'file';
+                    input.id = 'compose-image-file-input';
+                    input.accept = 'image/*';
+                    input.style.display = 'none';
+                    document.body.appendChild(input);
+                }
+                const handler = () => {
+                    input.removeEventListener('change', handler);
+                    const file = input.files && input.files[0];
+                    input.value = '';
+                    resolve(file || null);
+                };
+                input.addEventListener('change', handler);
+                input.click();
+            });
+        }
+
+        async function composeImages(baseFile, overlayBlob) {
+            const [baseImage, overlayImage] = await Promise.all([
+                loadImageFromFile(baseFile),
+                loadImageFromBlob(overlayBlob)
+            ]);
+
+            const composedCanvas = document.createElement('canvas');
+            composedCanvas.width = baseImage.width;
+            composedCanvas.height = baseImage.height;
+            const ctx = composedCanvas.getContext('2d');
+            if (!ctx) throw new Error('无法创建画布');
+            ctx.drawImage(baseImage, 0, 0);
+
+            const overlaySize = calculateOverlaySizeAndPosition(baseImage, overlayImage);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(
+                overlayImage,
+                overlaySize.x,
+                overlaySize.y,
+                overlaySize.width,
+                overlaySize.height
+            );
+
+            return await new Promise((resolve, reject) => {
+                composedCanvas.toBlob((blob) => {
+                    if (!blob) reject(new Error('导出合成图片失败'));
+                    else resolve(blob);
+                }, 'image/png');
+            });
+        }
+
+        function calculateOverlaySizeAndPosition(baseImage, overlayImage) {
+            const MIN_OVERLAY_WIDTH = 512;
+            const isLandscape = baseImage.width > baseImage.height;
+            const maxWidth = baseImage.width;
+            const maxHeight = baseImage.height;
+
+            let targetWidth;
+            if (isLandscape) {
+                const halfWidth = baseImage.width / 2;
+                const preferredWidth = Math.min(MIN_OVERLAY_WIDTH, maxWidth);
+                targetWidth = Math.max(halfWidth, preferredWidth);
+            } else {
+                targetWidth = maxWidth;
+            }
+
+            let scale = targetWidth / overlayImage.width;
+            let targetHeight = overlayImage.height * scale;
+
+            if (targetHeight > maxHeight) {
+                const heightScale = maxHeight / targetHeight;
+                targetHeight = maxHeight;
+                targetWidth = targetWidth * heightScale;
+                scale *= heightScale;
+            }
+
+            return {
+                width: targetWidth,
+                height: targetHeight,
+                x: 0,
+                y: maxHeight - targetHeight
+            };
+        }
+
+        function loadImageFromFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (typeof reader.result !== 'string') {
+                        reject(new Error('读取图片失败'));
+                        return;
+                    }
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('载入图片失败'));
+                    img.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('读取图片失败'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function loadImageFromBlob(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (typeof reader.result !== 'string') {
+                        reject(new Error('读取图片失败'));
+                        return;
+                    }
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('载入图片失败'));
+                    img.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('读取图片失败'));
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        async function offerComposedImageDownload(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Prompt Studio 合成图.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         function setupUIEvents() {
             document.getElementById('add-category-btn')?.addEventListener('click', addCategory);
             document.getElementById('add-tag-btn')?.addEventListener('click', addTagToCurrent);
             document.getElementById('export-tags-image-btn')?.addEventListener('click', exportPromptTagsImage);
+            document.getElementById('compose-tags-image-btn')?.addEventListener('click', composeTagsImageOntoSelectedImage);
             document.getElementById('download-json-btn')?.addEventListener('click', downloadJson);
             document.getElementById('reset-all-btn')?.addEventListener('click', resetAll);
             document.getElementById('random-pick-btn')?.addEventListener('click', randomPickAll);
