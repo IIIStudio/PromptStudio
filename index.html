@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title>IIIStudio - AI绘画提示词工具</title>
-    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译" />
+    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI" />
     <meta name="description" content="一个纯前端的提示词管理与编辑页面。支持分类/分组管理、标签拖拽排序、历史快照存储、翻译、JSON 导入/导出、本地持久化，以及可选的 Dropbox 云同步；同时提供一键导出提示词区域为图片（html2canvas）。" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
@@ -1346,8 +1346,64 @@
 
         // 本地存储常用提示词（顶层为分类名，值为数组 {text, lang_zh}）
         let commonData = {};
+        let zhToEnMap = null;
         const sidebarList = document.querySelector('.prompt-list');
         const STORAGE_KEY = 'ops_common_data';
+
+        function normalizeZhKey(text) {
+            if (typeof text !== 'string') return '';
+            return text.trim().replace(/\s+/g, '');
+        }
+
+        function extractZhVariants(raw) {
+            const base = typeof raw === 'string' ? raw.trim() : '';
+            if (!base) return [];
+            const variants = new Set([base]);
+            base.split(/[\|｜/、，,;；]+/).forEach(part => {
+                const trimmed = part.trim();
+                if (trimmed) variants.add(trimmed);
+            });
+            return Array.from(variants);
+        }
+
+        function refreshZhToEnCache() {
+            const map = new Map();
+            const addPair = (variant, enText) => {
+                const key = normalizeZhKey(variant);
+                if (!key || map.has(key)) return;
+                map.set(key, enText);
+            };
+            const collectFromArray = (arr) => {
+                arr.forEach(item => {
+                    const enText = (item?.text || '').trim();
+                    const zhRaw = (item?.lang_zh || '').trim();
+                    if (!enText || !zhRaw) return;
+                    extractZhVariants(zhRaw).forEach(variant => addPair(variant, enText));
+                });
+            };
+            try {
+                Object.keys(commonData || {}).forEach(cat => {
+                    const value = commonData[cat];
+                    if (Array.isArray(value)) {
+                        collectFromArray(value);
+                    } else if (isGroupedCategory(value)) {
+                        const groups = value.groups || {};
+                        Object.keys(groups).forEach(groupKey => {
+                            const arr = groups[groupKey];
+                            if (Array.isArray(arr)) collectFromArray(arr);
+                        });
+                    }
+                });
+            } catch (_) {}
+            zhToEnMap = map;
+        }
+
+        function findEn(zhText) {
+            const key = normalizeZhKey(zhText);
+            if (!key) return '';
+            if (!zhToEnMap) refreshZhToEnCache();
+            return zhToEnMap?.get(key) || '';
+        }
 
         // 分组工具函数
         function isGroupedCategory(v) {
@@ -1387,6 +1443,7 @@
 
         function saveCommonData() {
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify(commonData)); } catch(e) { console.error('保存失败', e); }
+            refreshZhToEnCache();
         }
 
         function loadCommonTagsFromStorage() {
@@ -1396,6 +1453,7 @@
             } catch (e) {
                 commonData = {};
             }
+            refreshZhToEnCache();
             renderSidebar();
         }
 
@@ -2407,6 +2465,7 @@
                         const cur = promptEditor.value.trim();
                         const suffix = value.trim();
                         promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                        normalizePromptInput();
                         updateTags();
                         promptEditor.focus();
                     });
@@ -2497,6 +2556,7 @@
                             const cur = promptEditor.value.trim();
                             const suffix = value.trim();
                             promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                            normalizePromptInput();
                             updateTags();
                             promptEditor.focus();
                         });
@@ -2630,6 +2690,35 @@
             return '';
         }
 
+        function normalizePromptInput(options = {}) {
+            if (!promptEditor) return;
+            const raw = promptEditor.value;
+            if (!raw) return;
+            const segments = raw.split(/[,，]/);
+            const normalized = [];
+            let changed = false;
+            segments.forEach(segment => {
+                const trimmed = segment.trim();
+                if (!trimmed) return;
+                const en = findEn(trimmed);
+                if (en) {
+                    normalized.push(en);
+                    if (en !== trimmed) changed = true;
+                } else {
+                    normalized.push(trimmed);
+                }
+            });
+            if (!changed) return;
+            const nextValue = normalized.join(', ');
+            promptEditor.value = nextValue;
+            if (options.restoreCaret) {
+                try {
+                    const pos = nextValue.length;
+                    promptEditor.setSelectionRange(pos, pos);
+                } catch (_) {}
+            }
+        }
+
         // 令牌数量统计（按逗号/中文逗号分割，忽略空项与尾部多余逗号）
         function updateTokenCounter() {
             try {
@@ -2648,6 +2737,7 @@
 
         // 初始化标签（支持点击置灰/恢复，保持原位置不变）
         function updateTags() {
+            normalizePromptInput();
             const text = promptEditor.value;
             const active = text.split(/[,，]/).map(s => s.trim()).filter(Boolean);
 
@@ -2690,6 +2780,7 @@
                         window.__disabledTagSet.delete(tag);
                         const orderedActive = (window.__lastRenderList || []).filter(t => !window.__disabledTagSet.has(t));
                         promptEditor.value = orderedActive.join(', ');
+                        normalizePromptInput();
                     } else {
                         // 置灰：加入禁用集合，并从输入框移除一次
                         window.__disabledTagSet.add(tag);
@@ -2697,6 +2788,7 @@
                         const pos = parts.indexOf(tag);
                         if (pos >= 0) { parts.splice(pos, 1); }
                         promptEditor.value = parts.join(', ');
+                        normalizePromptInput();
                     }
                     // 重新渲染
                     updateTags();
@@ -2711,6 +2803,7 @@
                         let parts = (promptEditor.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
                         parts = parts.filter(t => t !== tag);
                         promptEditor.value = parts.join(', ');
+                        normalizePromptInput();
                         // 从禁用集合中移除
                         if (window.__disabledTagSet.has(tag)) window.__disabledTagSet.delete(tag);
                         // 从渲染顺序中移除（下次 updateTags 会覆盖写入）
@@ -2790,6 +2883,7 @@
                 const disabledSet = window.__disabledTagSet || new Set();
                 const orderedActive = list.filter(t => !disabledSet.has(t));
                 promptEditor.value = orderedActive.join(', ');
+                normalizePromptInput();
             }
 
             updateTags();
@@ -2892,6 +2986,7 @@
                 const disabledSet = window.__disabledTagSet || new Set();
                 const orderedActive = list.filter(t => !disabledSet.has(t));
                 promptEditor.value = orderedActive.join(', ');
+                normalizePromptInput();
             }
 
             // 清理占位条
@@ -2921,6 +3016,7 @@
         // 重置提示词
         function resetPrompt() {
             promptEditor.value = '';
+            normalizePromptInput();
             updateTags();
             promptEditor.focus();
         }
@@ -2970,6 +3066,7 @@
             const cur = promptEditor.value.trim();
             const add = picks.join(', ');
             promptEditor.value = cur ? (cur + ', ' + add) : add;
+            normalizePromptInput();
             updateTags();
             promptEditor.focus();
         }
@@ -3001,6 +3098,7 @@
             if (!picks.length) { showInfo('暂无可随机的标签', '提示'); return; }
             // 覆盖写入（先清空再写入）
             promptEditor.value = picks.join(', ');
+            normalizePromptInput();
             updateTags();
             promptEditor.focus();
         }
@@ -3114,6 +3212,7 @@
                         const t = it.text || '';
                         promptEditor.value = '';      // 先清空
                         promptEditor.value = t;       // 再写入
+                        normalizePromptInput();
                         updateTags();
                         promptEditor.focus();
                         // 导入后关闭“提示词历史”弹窗
@@ -3990,6 +4089,7 @@
         
         // 监听编辑器内容变化
         promptEditor.addEventListener('input', () => {
+            normalizePromptInput({ restoreCaret: true });
             updateTags();
         });
 
