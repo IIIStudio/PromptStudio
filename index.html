@@ -309,11 +309,10 @@
         }
 
         .prompt-tag {
-            height: 28px;
             position: relative;
-            display: flex;
+            display: inline-flex;
             align-items: stretch;
-            min-height: 8px;
+            min-height: 28px;
             border-radius: 8px;
             box-shadow: 0 2px 2px rgba(51, 54, 67, .25);
             color: #fff;
@@ -323,6 +322,30 @@
             -webkit-user-select: none;
             -moz-user-select: none;
             overflow: hidden;
+        }
+        .prompt-tag .delete-tag {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 10px;
+            background: rgba(0,0,0,.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            line-height: 18px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color .2s ease;
+            z-index: 2;
+        }
+        .prompt-tag:hover .delete-tag {
+            display: inline-flex;
+        }
+        .prompt-tag .delete-tag:hover {
+            background: rgba(0,0,0,.75);
         }
         .prompt-tag .seg-en {
             display: inline-flex;
@@ -339,8 +362,62 @@
             padding: 0 10px;
             background: linear-gradient(#a0b181, #57b049);
             font-size: 0.85rem;
+        }
+        .prompt-tag.no-zh .seg-en {
             border-top-right-radius: 8px;
             border-bottom-right-radius: 8px;
+        }
+        .prompt-tag .weight-adjust {
+            display: inline-flex;
+            align-items: stretch;
+            background: linear-gradient(#454545, #555);
+            overflow: hidden;
+        }
+        .prompt-tag.weight-disabled .weight-adjust {
+            display: none !important;
+        }
+        .prompt-tag .weight-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color .2s ease, color .2s ease;
+        }
+        .prompt-tag .weight-btn + .weight-btn {
+            border-left: 1px solid rgba(255,255,255,0.12);
+        }
+        .prompt-tag .weight-btn:hover {
+            background-color: rgba(255,255,255,0.12);
+            color: #ffd166;
+        }
+        .prompt-tag .weight-value {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #ffdd7a;
+            min-width: 40px;
+            background: transparent;
+        }
+        .dark-mode .prompt-tag .weight-adjust {
+            background: linear-gradient(#2e2e2e, #3a3a3a);
+        }
+        .dark-mode .prompt-tag .weight-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        .dark-mode .prompt-tag .weight-value {
+            color: #ffe0a3;
+        }
+        .dark-mode .prompt-tag .delete-tag {
+            background: rgba(0,0,0,.6);
         }
 
         .prompt-tag:hover {
@@ -361,29 +438,6 @@
             align-self: stretch;
         }
 
-        .prompt-tag .delete-tag {
-            position: absolute;
-            right: 4px;
-            top: 4px;
-            background: rgba(0,0,0,.55);
-            border-radius: 10px;
-            width: 18px;
-            height: 18px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            line-height: 18px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            color: #fff;
-        }
-        .prompt-tag:hover .delete-tag {
-            display: inline-flex;
-        }
-
-        .prompt-tag .delete-tag:hover {
-            opacity: 1;
-        }
         /* 点击置灰 + 按键凹陷效果（保留中英分段配色，仅做整体淡化与凹陷） */
         .prompt-tag:active {
             transform: translateY(0);
@@ -1017,6 +1071,97 @@
         // 提示词编辑器
         const promptEditor = document.getElementById('prompt-editor');
 
+        const TAG_WEIGHT_MIN = 0.5;
+        const TAG_WEIGHT_MAX = 2;
+        const TAG_WEIGHT_STEP_TICKS = 1; // 单步对应 0.1
+        const TAG_WEIGHT_MIN_TICKS = Math.round(TAG_WEIGHT_MIN * 10);
+        const TAG_WEIGHT_MAX_TICKS = Math.round(TAG_WEIGHT_MAX * 10);
+
+        function parseWeightedTag(raw) {
+            const text = (raw || '').trim();
+            if (!text) {
+                return { base: '', weight: 1, hasWeight: false };
+            }
+            if (text.startsWith('(') && text.endsWith(')')) {
+                const inner = text.slice(1, -1);
+                const colonIndex = inner.lastIndexOf(':');
+                if (colonIndex > 0) {
+                    const base = inner.slice(0, colonIndex).trim();
+                    const weightStr = inner.slice(colonIndex + 1).trim();
+                    const weightNum = parseFloat(weightStr);
+                    if (base && !Number.isNaN(weightNum)) {
+                        return { base, weight: weightNum, hasWeight: true };
+                    }
+                }
+            }
+            return { base: text, weight: 1, hasWeight: false };
+        }
+
+        function clampWeightTicks(ticks) {
+            if (!Number.isFinite(ticks)) return Math.round(1 * 10);
+            if (ticks < TAG_WEIGHT_MIN_TICKS) return TAG_WEIGHT_MIN_TICKS;
+            if (ticks > TAG_WEIGHT_MAX_TICKS) return TAG_WEIGHT_MAX_TICKS;
+            return ticks;
+        }
+
+        function ticksToWeight(ticks) {
+            return clampWeightTicks(Math.round(ticks)) / 10;
+        }
+
+        function weightToTicks(weight) {
+            const safeWeight = Number.isFinite(weight) ? weight : 1;
+            return clampWeightTicks(Math.round(safeWeight * 10));
+        }
+
+        function formatWeightedTag(baseText, weightValue) {
+            const base = (baseText || '').trim();
+            if (!base) return '';
+            const ticks = weightToTicks(weightValue);
+            if (ticks === Math.round(1 * 10)) {
+                return base;
+            }
+            const normalizedWeight = ticks / 10;
+            const weightStr = (Math.round(normalizedWeight * 100) / 100).toFixed(2).replace(/\. ?0+$/, '');
+            return `(${base}:${weightStr})`;
+        }
+
+        function computeNextWeight(currentWeight, deltaSteps) {
+            const currentTicks = weightToTicks(currentWeight);
+            const nextTicks = clampWeightTicks(currentTicks + (deltaSteps * TAG_WEIGHT_STEP_TICKS));
+            return nextTicks / 10;
+        }
+
+        function adjustTagWeightBySteps(currentTag, deltaSteps) {
+            if (!currentTag) return;
+            const parsed = parseWeightedTag(currentTag);
+            const base = parsed.base;
+            const baseKey = base.toLowerCase();
+            const curW = Number.isFinite(parsed.weight) ? parsed.weight : 1;
+            const nextW = computeNextWeight(curW, deltaSteps);
+            const formatted = formatWeightedTag(base, nextW);
+
+            weightStateMap.set(baseKey, nextW);
+
+            if (Array.isArray(window.__lastRenderList)) {
+                const pos = window.__lastRenderList.indexOf(currentTag);
+                if (pos >= 0) window.__lastRenderList.splice(pos, 1, formatted);
+            }
+            if (window.__disabledTagSet.has(currentTag)) {
+                window.__disabledTagSet.delete(currentTag);
+                window.__disabledTagSet.add(formatted);
+            }
+            let parts = (promptEditor.value || '').split(/[,，]/)
+                .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                .filter(Boolean);
+            const idx = parts.indexOf(currentTag);
+            if (idx >= 0) {
+                parts[idx] = formatted;
+                promptEditor.value = parts.join(', ');
+            }
+            normalizePromptInput();
+            updateTags();
+        }
+
         // 右键菜单配置存取
         const MENU_KEY = 'ops_ctx_menu_items';
         function getCtxMenus() {
@@ -1327,19 +1472,72 @@
         }
         const tagsContainer = document.getElementById('prompt-tags-container');
         const commonTagsContainer = document.getElementById('common-tags');
-        // 确保 Token 计数器存在（若未在HTML中插入，则动态创建）
+        const weightStateMap = new Map();
+        const weightPrefKey = 'ops_weight_controls_enabled';
+        const savedWeightPref = localStorage.getItem(weightPrefKey);
+        if (savedWeightPref === null) {
+            window.__weightControlsEnabled = false;
+        } else {
+            window.__weightControlsEnabled = savedWeightPref === 'true';
+        }
+        function updateWeightControlVisibility() {
+            const enabled = window.__weightControlsEnabled;
+            if (!tagsContainer) return;
+            tagsContainer.querySelectorAll('.prompt-tag').forEach(tagEl => {
+                tagEl.classList.toggle('weight-disabled', !enabled);
+                const panel = tagEl.querySelector('[data-role="weight-panel"]');
+                if (panel) panel.style.display = enabled ? 'inline-flex' : 'none';
+            });
+        }
+        // 确保 Token 计数器存在，并添加权重开关
         (function ensureTokenCounter() {
             try {
-                let el = document.getElementById('token-counter');
-                if (!el) {
-                    el = document.createElement('div');
-                    el.id = 'token-counter';
-                    el.className = 'token-counter';
-                    el.textContent = 'Tokens: 0/75';
-                    // 插入到文本域之后
+                let wrap = document.getElementById('token-counter-wrap');
+                if (!wrap) {
+                    wrap = document.createElement('div');
+                    wrap.id = 'token-counter-wrap';
+                    wrap.style.display = 'flex';
+                    wrap.style.justifyContent = 'space-between';
+                    wrap.style.alignItems = 'center';
+                    wrap.style.gap = '12px';
+
+                    const toggleLabel = document.createElement('label');
+                    toggleLabel.className = 'weight-toggle';
+                    const initialEnabled = window.__weightControlsEnabled;
+                    toggleLabel.innerHTML = `
+                        <input type="checkbox" id="weight-visibility-toggle"${initialEnabled ? ' checked' : ''}>
+                        <span class="slider"></span>
+                        <span class="label-text">显示权重控制</span>
+                    `;
+
+                    const counter = document.createElement('div');
+                    counter.id = 'token-counter';
+                    counter.className = 'token-counter';
+                    counter.textContent = 'Tokens: 0/75';
+
+                    wrap.appendChild(toggleLabel);
+                    wrap.appendChild(counter);
+
                     if (promptEditor && promptEditor.parentNode) {
-                        promptEditor.parentNode.insertBefore(el, promptEditor.nextSibling);
+                        promptEditor.parentNode.insertBefore(wrap, promptEditor.nextSibling);
                     }
+
+                    const toggle = wrap.querySelector('#weight-visibility-toggle');
+                    if (toggle) {
+                        toggle.checked = window.__weightControlsEnabled;
+                        updateWeightControlVisibility();
+                        toggle.addEventListener('change', (e) => {
+                            const enabled = !!e.target.checked;
+                            window.__weightControlsEnabled = enabled;
+                            try {
+                                localStorage.setItem(weightPrefKey, String(enabled));
+                            } catch (_) {}
+                            updateWeightControlVisibility();
+                        });
+                    }
+                } else {
+                    const counter = document.getElementById('token-counter');
+                    if (counter) counter.textContent = 'Tokens: 0/75';
                 }
             } catch(_) {}
         })();
@@ -2700,12 +2898,16 @@
             segments.forEach(segment => {
                 const trimmed = segment.trim();
                 if (!trimmed) return;
-                const en = findEn(trimmed);
+                const parsed = parseWeightedTag(trimmed);
+                const en = findEn(parsed.base);
                 if (en) {
-                    normalized.push(en);
-                    if (en !== trimmed) changed = true;
+                    const formatted = formatWeightedTag(en, parsed.weight);
+                    normalized.push(formatted);
+                    if (formatted !== trimmed) changed = true;
                 } else {
-                    normalized.push(trimmed);
+                    const formatted = formatWeightedTag(parsed.base, parsed.weight);
+                    normalized.push(formatted);
+                    if (formatted !== trimmed) changed = true;
                 }
             });
             if (!changed) return;
@@ -2739,16 +2941,32 @@
         function updateTags() {
             normalizePromptInput();
             const text = promptEditor.value;
-            const active = text.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+            const active = text.split(/[,，]/)
+                .map(s => s.trim())
+                .filter(Boolean);
+
+            const normalizedActive = active.map(tag => {
+                const parsed = parseWeightedTag(tag);
+                const key = parsed.base.toLowerCase();
+                const storedWeight = weightStateMap.get(key);
+                if (Number.isFinite(storedWeight)) {
+                    parsed.weight = storedWeight;
+                }
+                const normalizedTag = formatWeightedTag(parsed.base, parsed.weight);
+                weightStateMap.set(key, parsed.weight);
+                return normalizedTag;
+            });
+
+            const normalizedUniqueSet = new Set(normalizedActive);
 
             // 若首次渲染，用输入框的顺序初始化
             if (!Array.isArray(window.__lastRenderList) || window.__lastRenderList.length === 0) {
-                window.__lastRenderList = active.slice();
+                window.__lastRenderList = normalizedActive.slice();
             } else {
                 // 1) 从顺序表移除已不存在且未被置灰的项
-                window.__lastRenderList = window.__lastRenderList.filter(t => active.includes(t) || window.__disabledTagSet.has(t));
+                window.__lastRenderList = window.__lastRenderList.filter(t => normalizedUniqueSet.has(t) || window.__disabledTagSet.has(t));
                 // 2) 将新出现（用户手动输入）的激活项追加到末尾
-                active.forEach(t => {
+                normalizedActive.forEach(t => {
                     if (!window.__lastRenderList.includes(t)) window.__lastRenderList.push(t);
                 });
             }
@@ -2759,60 +2977,163 @@
             tagsContainer.innerHTML = '';
 
             renderList.forEach((tag, index) => {
-                const tagElement = document.createElement('div');
-                const zh = findZh(tag) || '';
+                let parsedTag = parseWeightedTag(tag);
+                const baseText = parsedTag.base;
+                const baseKey = baseText.toLowerCase();
+                const storedWeight = weightStateMap.get(baseKey);
+                if (Number.isFinite(storedWeight)) {
+                    parsedTag = { ...parsedTag, weight: storedWeight };
+                }
+                let currentWeight = parsedTag.weight;
+                let currentTag = formatWeightedTag(baseText, currentWeight);
+
+                if (currentTag !== tag) {
+                    const listIndex = window.__lastRenderList.indexOf(tag);
+                    if (listIndex >= 0) {
+                        window.__lastRenderList[listIndex] = currentTag;
+                    }
+                    tag = currentTag;
+                }
+
+                weightStateMap.set(baseKey, currentWeight);
+
+                const zh = findZh(baseText) || '';
                 const isInactive = window.__disabledTagSet.has(tag);
+                const tagElement = document.createElement('div');
                 tagElement.className = 'prompt-tag' + (isInactive ? ' inactive' : '');
                 tagElement.draggable = true;
                 tagElement.setAttribute('data-index', index);
-                tagElement.innerHTML = `
-                    <span class="seg-en">${tag}</span>
-                    ${zh ? '<span class="seg-zh">' + zh + '</span>' : ''}
-                    <span class="delete-tag" data-role="del">×</span>
-                `;
+                tagElement.setAttribute('data-base', baseText);
+                tagElement.setAttribute('data-weight', String(currentWeight));
 
-                // 点击标签：切换启用/禁用，并同步输入框（保持原位置）
+                const deleteBtn = document.createElement('span');
+                deleteBtn.className = 'delete-tag';
+                deleteBtn.setAttribute('data-role', 'del');
+                deleteBtn.textContent = '×';
+
+                const enSegment = document.createElement('span');
+                enSegment.className = 'seg-en';
+                enSegment.textContent = currentTag;
+
+                const zhSegment = zh ? (() => {
+                    const span = document.createElement('span');
+                    span.className = 'seg-zh';
+                    span.textContent = zh;
+                    return span;
+                })() : null;
+
+                const weightPanel = document.createElement('div');
+                weightPanel.className = 'weight-adjust';
+                weightPanel.setAttribute('data-role', 'weight-panel');
+                const btnDecrease = document.createElement('button');
+                btnDecrease.className = 'weight-btn';
+                btnDecrease.setAttribute('data-role', 'decrease');
+                btnDecrease.title = '权重-';
+                btnDecrease.textContent = '−';
+                const weightLabelEl = document.createElement('span');
+                weightLabelEl.className = 'weight-value';
+                weightLabelEl.setAttribute('data-role', 'weight-label');
+                weightLabelEl.textContent = (Math.round(currentWeight * 100) / 100).toFixed(2);
+                const btnIncrease = document.createElement('button');
+                btnIncrease.className = 'weight-btn';
+                btnIncrease.setAttribute('data-role', 'increase');
+                btnIncrease.title = '权重+';
+                btnIncrease.textContent = '+';
+
+                weightPanel.appendChild(btnDecrease);
+                weightPanel.appendChild(weightLabelEl);
+                weightPanel.appendChild(btnIncrease);
+
+                tagElement.appendChild(deleteBtn);
+                tagElement.appendChild(enSegment);
+                if (zhSegment) tagElement.appendChild(zhSegment);
+                tagElement.appendChild(weightPanel);
+
+                const updateWeightView = () => {
+                    weightLabelEl.textContent = (Math.round(currentWeight * 100) / 100).toFixed(2);
+                    enSegment.textContent = currentTag;
+                    tagElement.setAttribute('data-weight', String(currentWeight));
+                };
+
+                const applyWeightVisibility = () => {
+                    const enabled = window.__weightControlsEnabled;
+                    tagElement.classList.toggle('weight-disabled', !enabled);
+                    weightPanel.style.display = enabled ? 'inline-flex' : 'none';
+                };
+                applyWeightVisibility();
+
                 tagElement.addEventListener('click', (e) => {
-                    if (e.target && e.target.closest('[data-role="del"]')) return; // 删除按钮不触发
-                    const wasInactive = window.__disabledTagSet.has(tag);
+                    if (e.target && (e.target.closest('[data-role="del"]') || e.target.closest('[data-role="weight-panel"]'))) return;
+                    const wasInactive = window.__disabledTagSet.has(currentTag);
                     if (wasInactive) {
-                        // 恢复：移出禁用集合，并按顺序表重建输入框内容
-                        window.__disabledTagSet.delete(tag);
+                        window.__disabledTagSet.delete(currentTag);
                         const orderedActive = (window.__lastRenderList || []).filter(t => !window.__disabledTagSet.has(t));
                         promptEditor.value = orderedActive.join(', ');
                         normalizePromptInput();
                     } else {
-                        // 置灰：加入禁用集合，并从输入框移除一次
-                        window.__disabledTagSet.add(tag);
-                        const parts = (promptEditor.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
-                        const pos = parts.indexOf(tag);
-                        if (pos >= 0) { parts.splice(pos, 1); }
+                        window.__disabledTagSet.add(currentTag);
+                        const parts = (promptEditor.value || '').split(/[,，]/)
+                            .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                            .filter(Boolean);
+                        const pos = parts.indexOf(currentTag);
+                        if (pos >= 0) {
+                            parts.splice(pos, 1);
+                        }
                         promptEditor.value = parts.join(', ');
                         normalizePromptInput();
                     }
-                    // 重新渲染
                     updateTags();
                 });
 
-                // 删除按钮：彻底移除（从输入框与禁用集合与渲染序列）
-                const delBtn = tagElement.querySelector('[data-role="del"]');
-                if (delBtn) {
-                    delBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        // 从输入框中去掉所有该项
-                        let parts = (promptEditor.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
-                        parts = parts.filter(t => t !== tag);
-                        promptEditor.value = parts.join(', ');
-                        normalizePromptInput();
-                        // 从禁用集合中移除
-                        if (window.__disabledTagSet.has(tag)) window.__disabledTagSet.delete(tag);
-                        // 从渲染顺序中移除（下次 updateTags 会覆盖写入）
-                        window.__lastRenderList = (window.__lastRenderList || []).filter(t => t !== tag);
-                        updateTags();
-                    });
-                }
+                const applyWeightChange = (deltaSteps) => {
+                    const previousTag = currentTag;
+                    const nextWeight = computeNextWeight(currentWeight, deltaSteps);
+                    if (nextWeight === currentWeight) return;
 
-                // 拖拽事件（沿用原逻辑）
+                    currentWeight = nextWeight;
+                    currentTag = formatWeightedTag(baseText, currentWeight);
+                    weightStateMap.set(baseKey, currentWeight);
+                    updateWeightView();
+
+                    if (Array.isArray(window.__lastRenderList)) {
+                        const idx = window.__lastRenderList.indexOf(previousTag);
+                        if (idx >= 0) {
+                            window.__lastRenderList.splice(idx, 1, currentTag);
+                        }
+                    }
+
+                    if (window.__disabledTagSet.has(previousTag)) {
+                        window.__disabledTagSet.delete(previousTag);
+                        window.__disabledTagSet.add(currentTag);
+                    }
+
+                    let parts = (promptEditor.value || '').split(/[,，]/)
+                        .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                        .filter(Boolean);
+                    const textIdx = parts.indexOf(previousTag);
+                    if (textIdx >= 0) {
+                        parts[textIdx] = currentTag;
+                        promptEditor.value = parts.join(', ');
+                    }
+
+                    normalizePromptInput();
+                    updateTokenCounter();
+                };
+
+                btnDecrease.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    applyWeightChange(-1);
+                });
+                btnIncrease.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    applyWeightChange(1);
+                });
+
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeWeightedTag(currentTag);
+                });
+
                 tagElement.addEventListener('dragstart', handleDragStart);
                 tagElement.addEventListener('dragover', handleDragOver);
                 tagElement.addEventListener('drop', handleDrop);
@@ -3010,6 +3331,21 @@
             const tags = promptEditor.value.split(/[,，]/).map(tag => tag.trim()).filter(tag => tag.length > 0);
             tags.splice(index, 1);
             promptEditor.value = tags.join(', ');
+            updateTags();
+        }
+
+        function removeWeightedTag(tag) {
+            const parsed = parseWeightedTag(tag);
+            const baseKey = parsed.base.toLowerCase();
+            let parts = (promptEditor.value || '').split(/[,，]/)
+                .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                .filter(Boolean);
+            parts = parts.filter(t => t !== tag);
+            promptEditor.value = parts.join(', ');
+            normalizePromptInput();
+            if (window.__disabledTagSet.has(tag)) window.__disabledTagSet.delete(tag);
+            window.__lastRenderList = (window.__lastRenderList || []).filter(t => t !== tag);
+            weightStateMap.delete(baseKey);
             updateTags();
         }
         
@@ -3933,6 +4269,9 @@
 
         document.addEventListener('contextmenu', (e) => {
             const catCard = e.target.closest('.prompt-card');
+            const promptTagEl = e.target.closest('.prompt-tag');
+            const weightPanelEl = e.target.closest('[data-role="weight-panel"]');
+            if (weightPanelEl) return; // 内联按钮保持默认行为
             const tagEl = e.target.closest('.common-tag');
             if (catCard) {
                 e.preventDefault();
@@ -3950,7 +4289,20 @@
                         renderSidebar();
                     } }
                 ]);
-            } else if (tagEl) {
+            } else if (promptTagEl) {
+                e.preventDefault();
+                const segEn = promptTagEl.querySelector('.seg-en');
+                const currentTag = segEn ? (segEn.textContent || '').trim() : '';
+                if (!currentTag) return;
+                showContextMenu(e.clientX, e.clientY, [
+                    { label: '权重+', icon: 'fas fa-plus', action: () => adjustTagWeightBySteps(currentTag, +1) },
+                    { label: '权重-', icon: 'fas fa-minus', action: () => adjustTagWeightBySteps(currentTag, -1) },
+                    { label: '删除', icon: 'fas fa-trash', action: () => removeWeightedTag(currentTag) }
+                ]);
+                return;
+            }
+
+            if (tagEl) {
                 e.preventDefault();
                 const cat = tagEl.getAttribute('data-cat') || getActiveCategory();
                 const idx = parseInt(tagEl.getAttribute('data-index') || '-1', 10);
@@ -3967,10 +4319,12 @@
                 if (!it) return;
                 isPinned = !!it.pinned;
 
-                // 组装右键菜单：固定项 + 自定义项 + 删除
+                // 组装右键菜单：固定项 + 权重 + 自定义项 + 删除
                 const menuItems = [
                     { label: isPinned ? '取消置顶' : '置顶', icon: 'fas fa-thumbtack', action: () => pinTag(cat, sub, idx, !isPinned) },
-                    { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) }
+                    { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) },
+                    { label: '权重+', icon: 'fas fa-plus', action: () => adjustTagWeightBySteps(it.text, +1) },
+                    { label: '权重-', icon: 'fas fa-minus', action: () => adjustTagWeightBySteps(it.text, -1) }
                 ];
 
                 // 自定义外链项（出现在“删除”上方）
