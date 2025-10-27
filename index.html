@@ -4319,12 +4319,10 @@
                 if (!it) return;
                 isPinned = !!it.pinned;
 
-                // 组装右键菜单：固定项 + 权重 + 自定义项 + 删除
+                // 组装右键菜单：固定项 + 自定义项 + 删除
                 const menuItems = [
                     { label: isPinned ? '取消置顶' : '置顶', icon: 'fas fa-thumbtack', action: () => pinTag(cat, sub, idx, !isPinned) },
-                    { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) },
-                    { label: '权重+', icon: 'fas fa-plus', action: () => adjustTagWeightBySteps(it.text, +1) },
-                    { label: '权重-', icon: 'fas fa-minus', action: () => adjustTagWeightBySteps(it.text, -1) }
+                    { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) }
                 ];
 
                 // 自定义外链项（出现在“删除”上方）
