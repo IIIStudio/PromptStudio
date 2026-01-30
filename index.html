@@ -70,24 +70,7 @@
             z-index: 100;
         }
 
-        .logo {
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--primary-color);
-            color: white;
-        }
 
-        .logo h1 {
-            font-size: 1.5rem;
-            margin-left: 10px;
-            font-weight: 600;
-        }
-
-        .logo-icon {
-            font-size: 1.8rem;
-        }
 
         .category-list {
             padding: 15px;
@@ -111,14 +94,14 @@
         .prompt-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 4px;
             margin-bottom: 20px;
         }
 
         .prompt-card {
             background-color: var(--bg-color);
-            border-radius: 10px;
-            padding: 10px 10px 10px 15px;
+            border-radius: 6px;
+            padding: 6px 8px 6px 8px;
             cursor: pointer;
             border: 1px solid var(--border-color);
             transition: all 0.2s ease;
@@ -128,8 +111,8 @@
 
         .prompt-card:hover {
             border-color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
         .prompt-card.active {
@@ -138,19 +121,21 @@
         }
 
         .prompt-card h3 {
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            margin: 0;
         }
 
         .prompt-card p {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #888;
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            margin: 4px 0 0 0;
         }
 
         .tag {
@@ -340,6 +325,31 @@
             cursor: pointer;
             transition: background-color .2s ease;
             z-index: 2;
+        }
+        /* 当权重控件显示时，删除按钮的位置需要调整 */
+        .prompt-tag:not(.weight-disabled) .delete-tag {
+            right: 2px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            font-size: 0.6rem;
+            line-height: 16px;
+            /* 移到左上角，或者稍微偏移避免与右上角的权重控件重叠？
+               权重控件是 .weight-adjust, 在 renderWeightedTag 中是追加到 span.prompt-tag 的末尾。
+               默认 flex-flow 是 row。
+               .prompt-tag 是 inline-flex。
+               
+               查看 renderWeightedTag 函数：
+               tagElement.innerHTML = `... <span class="seg-en">...</span> <span class="seg-zh">...</span> <div class="weight-adjust">...</div> <span class="delete-tag">...</span>`
+               
+               权重控件通常在最右侧。delete-tag 是 absolute定位到右上角。
+               如果不希望重叠，可以将 delete-tag 移到左上角，或者悬浮在中间，或者负margin。
+               
+               这里尝试将 delete-tag 移到左上角，当权重开启时。
+            */
+            right: auto;
+            left: 0px;
+            top: 6px;
         }
         .prompt-tag:hover .delete-tag {
             display: inline-flex;
@@ -707,6 +717,27 @@
             max-height: 60vh;
             overflow: auto;
         }
+        /* 储存模态框样式 */
+        #modal-save .modal {
+            width: min(92vw, 600px);
+        }
+        #modal-save .modal-body {
+            max-height: 60vh;
+            overflow: auto;
+        }
+        .group-item {
+            transition: all 0.2s;
+        }
+        .group-item:hover {
+            background-color: var(--bg-color);
+        }
+        .group-item.selected {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        .group-item.selected span {
+            color: #fff;
+        }
         /* 右键菜单设置模态：加宽并在内容过高时可滚动 */
         #modal-ctxmenu .modal {
             width: min(92vw, 720px);
@@ -747,12 +778,7 @@
     <div class="container">
         <!-- 侧边栏 -->
         <div class="sidebar">
-            <div class="logo">
-                <a href="https://github.com/IIIStudio/PromptStudio" target="_blank" rel="noopener" style="display:flex;align-items:center;color:inherit;text-decoration:none;">
-                    <i class="fab fa-github logo-icon"></i>
-                    <h1>Prompt Studio</h1>
-                </a>
-            </div>
+           
             
             <div class="category-list">
                 <div class="category-title">
@@ -786,35 +812,42 @@
             
             <div class="editor-container">
                 <div class="editor-card">
-                    <div class="editor-header">
-                        <div class="editor-title">
-                            <i class="fas fa-edit"></i> 提示词内容
-                        </div>
-                        <div class="editor-actions">
-                            <button class="btn btn-outline" id="random-pick-btn">
-                                <i class="fas fa-dice"></i> 随机
-                            </button>
-                            <button class="btn btn-outline" onclick="resetPrompt()">
-                                <i class="fas fa-redo"></i> 重置
-                            </button>
-                            <button class="btn btn-outline" onclick="copyPrompt()">
-                                <i class="fas fa-copy"></i> 复制
-                            </button>
-                            <button class="btn btn-outline" id="save-prompt-btn">
-                                <i class="fas fa-bookmark"></i> 存储
-                            </button>
-                            <button class="btn btn-outline" id="view-history-btn">
-                                <i class="fas fa-list"></i> 查看
-                            </button>
+                    <div id="workspaces" style="display:flex; gap:12px; align-items:flex-start;">
+                        <div class="workspace-card active" data-root="true" style="flex:1; min-width:300px; display:flex; flex-direction:column; gap:10px; border:1px solid var(--border-color); border-radius:8px; padding:10px;">
+                            <div class="editor-header">
+                                <div class="editor-title">
+                                    <i class="fas fa-edit"></i> 提示词内容
+                                </div>
+                                <div class="editor-actions">
+                                    <button class="btn btn-outline" id="create-workspace-btn"><i class="fas fa-plus"></i> </button>
+                                    <button class="btn btn-outline" id="delete-workspace-btn"><i class="fas fa-minus"></i> </button>
+                                </div>
+                            </div>
+                            <textarea class="editor-textarea" id="prompt-editor"></textarea>
+                            <div id="token-counter-wrap" style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                <button class="btn btn-outline" onclick="copyPrompt()">
+                                    <i class="fas fa-copy"></i> 复制
+                                </button>
+                                <button class="btn btn-outline" id="clear-prompt-btn" onclick="promptEditor.value=''; normalizePromptInput(); updateTags(); promptEditor.focus();">
+                                    <i class="fas fa-eraser"></i> 清空
+                                </button>
+                                <button class="btn btn-outline" onclick="resetPrompt()">
+                                    <i class="fas fa-redo"></i> 重置
+                                </button>
+                                <button class="btn btn-outline" id="random-pick-btn">
+                                    <i class="fas fa-dice"></i> 随机
+                                </button>
+                                <button class="btn btn-outline" id="save-prompt-btn">
+                                    <i class="fas fa-bookmark"></i> 存储
+                                </button>
+                                <button class="btn btn-outline" id="view-history-btn">
+                                    <i class="fas fa-list"></i> 储存库
+                                </button>
+                                <div style="flex: 1"></div>
+                            </div>
+                            <div class="prompt-tags" id="prompt-tags-container"></div>
                         </div>
                     </div>
-                    <textarea class="editor-textarea" id="prompt-editor"></textarea>
-
-                    
-                    <div class="prompt-tags" id="prompt-tags-container">
-                        <!-- 标签将通过JavaScript动态生成 -->
-                    </div>
-
                     <div class="common-tags-section">
                         <div class="common-tags-title">常用提示词
                             <button class="btn btn-outline icon-plus" id="add-tag-btn" style="margin-left:8px" title="添加标签"></button>
@@ -924,7 +957,7 @@
     <div class="modal-backdrop" id="modal-history">
         <div class="modal">
             <div class="modal-header">
-                <span>提示词历史</span>
+                <span>储存库</span>
                 <button class="btn btn-outline" id="modal-history-close">关闭</button>
             </div>
             <div class="modal-body">
@@ -932,6 +965,33 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="modal-history-clear">清空全部</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 储存确认模态框 -->
+    <div class="modal-backdrop" id="modal-save">
+        <div class="modal">
+            <div class="modal-header">
+                <span>储存提示词</span>
+                <button class="btn btn-outline" id="modal-save-close">取消</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <label>标题：</label>
+                    <input type="text" id="save-title" placeholder="可选" style="flex:1;">
+                </div>
+                <div class="modal-row" style="margin-top:12px;">
+                    <label>选择组：</label>
+                    <div id="save-groups-list" style="display:flex;flex-direction:column;gap:6px;flex:1;max-height:200px;overflow-y:auto;"></div>
+                </div>
+                <div class="modal-row" style="margin-top:8px;">
+                    <button class="btn btn-outline" id="save-create-group">创建新组</button>
+                    <button class="btn btn-outline" id="save-rename-group">重命名选中组</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="modal-save-confirm">保存</button>
             </div>
         </div>
     </div>
@@ -1069,7 +1129,7 @@
         });
         
         // 提示词编辑器
-        const promptEditor = document.getElementById('prompt-editor');
+        let promptEditor = document.getElementById('prompt-editor');
 
         const TAG_WEIGHT_MIN = 0.5;
         const TAG_WEIGHT_MAX = 2;
@@ -1470,7 +1530,128 @@
             renderList();
             show(wrap);
         }
-        const tagsContainer = document.getElementById('prompt-tags-container');
+        let tagsContainer = document.getElementById('prompt-tags-container');
+        const workspacesWrap = document.getElementById('workspaces');
+        function setActiveWorkspace(ws) {
+            Array.from(document.querySelectorAll('.workspace-card')).forEach(el => el.classList.remove('active'));
+            ws.classList.add('active');
+            promptEditor = ws.querySelector('.editor-textarea');
+            tagsContainer = ws.querySelector('.prompt-tags');
+            updateTags();
+        }
+        function createWorkspace() {
+            const ws = document.createElement('div');
+            ws.className = 'workspace-card';
+            ws.style.flex = '1';
+            ws.style.minWidth = '300px';
+            ws.style.display = 'flex';
+            ws.style.flexDirection = 'column';
+            ws.style.gap = '10px';
+            ws.style.border = '1px solid var(--border-color)';
+            ws.style.borderRadius = '8px';
+            ws.style.padding = '10px';
+            const header = document.createElement('div');
+            header.className = 'editor-header';
+            const title = document.createElement('div');
+            title.className = 'editor-title';
+            title.innerHTML = '<i class=\"fas fa-edit\"></i> 提示词内容';
+            const actions = document.createElement('div');
+            actions.className = 'editor-actions';
+            const btnDel = document.createElement('button');
+            btnDel.className = 'btn btn-outline';
+            btnDel.innerHTML = '<i class="fas fa-minus"></i> ';
+            btnDel.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (ws.dataset.root === 'true') { return; }
+                const parent = ws.parentNode;
+                if (parent) {
+                    parent.removeChild(ws);
+                    const remaining = Array.from(document.querySelectorAll('.workspace-card'));
+                    if (remaining.length === 0) {
+                        createWorkspace();
+                    } else {
+                        setActiveWorkspace(remaining[0]);
+                    }
+                }
+            });
+            actions.appendChild(btnDel);
+            header.appendChild(title);
+            header.appendChild(actions);
+            const ta = document.createElement('textarea');
+            ta.className = 'editor-textarea';
+            const tools = document.createElement('div');
+            tools.className = 'token-counter-wrap';
+            tools.style.display = 'flex';
+            tools.style.alignItems = 'center';
+            tools.style.gap = '8px';
+            tools.style.marginTop = '8px';
+            tools.style.flexWrap = 'wrap';
+            const btnCopy = document.createElement('button');
+            btnCopy.className = 'btn btn-outline';
+            btnCopy.innerHTML = '<i class=\"fas fa-copy\"></i> 复制';
+            btnCopy.onclick = () => copyPrompt();
+            const btnClear = document.createElement('button');
+            btnClear.className = 'btn btn-outline';
+            btnClear.innerHTML = '<i class=\"fas fa-eraser\"></i> 清空';
+            btnClear.onclick = () => { promptEditor.value=''; normalizePromptInput(); updateTags(); promptEditor.focus(); };
+            const btnReset = document.createElement('button');
+            btnReset.className = 'btn btn-outline';
+            btnReset.innerHTML = '<i class=\"fas fa-redo\"></i> 重置';
+            btnReset.onclick = () => resetPrompt();
+            const btnRandom = document.createElement('button');
+            btnRandom.className = 'btn btn-outline';
+            btnRandom.innerHTML = '<i class=\"fas fa-dice\"></i> 随机';
+            btnRandom.onclick = () => randomPickAll();
+            const btnSave = document.createElement('button');
+            btnSave.className = 'btn btn-outline';
+            btnSave.innerHTML = '<i class=\"fas fa-bookmark\"></i> 存储';
+            btnSave.onclick = () => savePromptSnapshot();
+            const btnView = document.createElement('button');
+            btnView.className = 'btn btn-outline';
+            btnView.innerHTML = '<i class=\"fas fa-list\"></i> 查看';
+            btnView.onclick = () => openHistoryModal();
+            tools.appendChild(btnCopy);
+            tools.appendChild(btnClear);
+            tools.appendChild(btnReset);
+            tools.appendChild(btnRandom);
+            tools.appendChild(btnSave);
+            tools.appendChild(btnView);
+            const tags = document.createElement('div');
+            tags.className = 'prompt-tags';
+            ws.appendChild(header);
+            ws.appendChild(ta);
+            ws.appendChild(tools);
+            ws.appendChild(tags);
+            workspacesWrap.appendChild(ws);
+            ws.addEventListener('click', () => setActiveWorkspace(ws));
+            ta.addEventListener('input', () => { normalizePromptInput({ restoreCaret: true }); updateTags(); });
+            tags.addEventListener('dragover', onContainerDragOver);
+            tags.addEventListener('drop', onContainerDrop);
+            setActiveWorkspace(ws);
+        }
+        document.getElementById('create-workspace-btn')?.addEventListener('click', () => createWorkspace());
+        function deleteActiveWorkspace() {
+            const active = document.querySelector('.workspace-card.active');
+            const parent = active?.parentNode || document.getElementById('workspaces');
+            if (!parent || !active) return;
+            if (active.dataset.root === 'true') { return; }
+            parent.removeChild(active);
+            const remaining = Array.from(document.querySelectorAll('.workspace-card'));
+            if (remaining.length === 0) {
+                createWorkspace();
+            } else {
+                setActiveWorkspace(remaining[0]);
+            }
+        }
+        document.getElementById('delete-workspace-btn')?.addEventListener('click', () => deleteActiveWorkspace());
+        Array.from(document.querySelectorAll('.workspace-card')).forEach(ws => {
+            ws.addEventListener('click', () => setActiveWorkspace(ws));
+            const tags = ws.querySelector('.prompt-tags');
+            if (tags) {
+                tags.addEventListener('dragover', onContainerDragOver);
+                tags.addEventListener('drop', onContainerDrop);
+            }
+        });
         const commonTagsContainer = document.getElementById('common-tags');
         const weightStateMap = new Map();
         const weightPrefKey = 'ops_weight_controls_enabled';
@@ -1500,7 +1681,14 @@
                     wrap.style.justifyContent = 'space-between';
                     wrap.style.alignItems = 'center';
                     wrap.style.gap = '12px';
+                    if (promptEditor && promptEditor.parentNode) {
+                        promptEditor.parentNode.insertBefore(wrap, promptEditor.nextSibling);
+                    }
+                }
 
+                // 确保权重开关存在（移动到常用标签标题内）
+                const commonTitle = document.querySelector('.common-tags-title');
+                if (commonTitle && !commonTitle.querySelector('.weight-toggle')) {
                     const toggleLabel = document.createElement('label');
                     toggleLabel.className = 'weight-toggle';
                     const initialEnabled = window.__weightControlsEnabled;
@@ -1509,23 +1697,9 @@
                         <span class="slider"></span>
                         <span class="label-text">显示权重控制</span>
                     `;
-
-                    const counter = document.createElement('div');
-                    counter.id = 'token-counter';
-                    counter.className = 'token-counter';
-                    counter.textContent = 'Tokens: 0/75';
-
-                    wrap.appendChild(toggleLabel);
-                    wrap.appendChild(counter);
-
-                    if (promptEditor && promptEditor.parentNode) {
-                        promptEditor.parentNode.insertBefore(wrap, promptEditor.nextSibling);
-                    }
-
-                    const toggle = wrap.querySelector('#weight-visibility-toggle');
+                    commonTitle.appendChild(toggleLabel);
+                    const toggle = toggleLabel.querySelector('#weight-visibility-toggle');
                     if (toggle) {
-                        toggle.checked = window.__weightControlsEnabled;
-                        updateWeightControlVisibility();
                         toggle.addEventListener('change', (e) => {
                             const enabled = !!e.target.checked;
                             window.__weightControlsEnabled = enabled;
@@ -1534,11 +1708,19 @@
                             } catch (_) {}
                             updateWeightControlVisibility();
                         });
+                        updateWeightControlVisibility();
                     }
-                } else {
-                    const counter = document.getElementById('token-counter');
-                    if (counter) counter.textContent = 'Tokens: 0/75';
                 }
+
+                // 确保 Token 计数器存在
+                let counter = document.getElementById('token-counter');
+                if (!counter) {
+                    counter = document.createElement('div');
+                    counter.id = 'token-counter';
+                    counter.className = 'token-counter';
+                    wrap.appendChild(counter);
+                }
+                counter.textContent = 'Tokens: 0/75';
             } catch(_) {}
         })();
 
@@ -1607,22 +1789,79 @@
         function isGroupedCategory(v) {
             return v && typeof v === 'object' && !Array.isArray(v) && v.groups && typeof v.groups === 'object';
         }
+
+        // Helper to get node by path
+        function getNodeByPath(pathStr) {
+            if (!pathStr) return commonData;
+            const parts = pathStr.split('/');
+            let current = commonData;
+            for (const part of parts) {
+                if (!current) return undefined;
+                if (current.subFolders && current.subFolders[part]) {
+                    current = current.subFolders[part];
+                } else if (current[part]) {
+                    current = current[part];
+                } else {
+                    return undefined;
+                }
+            }
+            return current;
+        }
+
+        // Helper to delete node by path
+        function deleteNodeByPath(pathStr) {
+            if (!pathStr) return;
+            const parts = pathStr.split('/');
+            const last = parts.pop();
+            const parentPath = parts.join('/');
+            const parent = getNodeByPath(parentPath);
+            if (!parent) return;
+            
+            if (parent.subFolders && parent.subFolders[last]) {
+                delete parent.subFolders[last];
+            } else if (parent[last]) {
+                delete parent[last];
+            }
+        }
+
+        // Helper to set node by path
+        function setNodeByPath(pathStr, value) {
+            if (!pathStr) return;
+            const parts = pathStr.split('/');
+            const last = parts.pop();
+            const parentPath = parts.join('/');
+            const parent = getNodeByPath(parentPath);
+            if (!parent) return;
+            
+            if (parent.subFolders && parent.subFolders[last] !== undefined) {
+                parent.subFolders[last] = value;
+            } else if (parent[last] !== undefined) {
+                parent[last] = value;
+            } else {
+                if (parent === commonData) {
+                    parent[last] = value;
+                } else {
+                    if (!parent.subFolders) parent.subFolders = {};
+                    parent.subFolders[last] = value;
+                }
+            }
+        }
+
         function getGroups(cat) {
-            const v = commonData?.[cat];
+            const v = commonData[cat];
             if (isGroupedCategory(v)) return v.groups;
             return null;
         }
         function ensureGrouped(cat) {
-            const v = commonData?.[cat];
+            const v = getNodeByPath(cat);
             if (isGroupedCategory(v)) return; // 已是分组
             const arr = Array.isArray(v) ? v : [];
+            const newValue = { groups: {}, groupsOrder: [] };
             if (arr.length > 0) {
                 // 旧有条目迁移到“未分组”
-                commonData[cat] = { groups: { '未分组': arr } };
-            } else {
-                // 空分类：不自动创建“未分组”
-                commonData[cat] = { groups: {}, groupsOrder: [] };
+                newValue.groups['未分组'] = arr;
             }
+            setNodeByPath(cat, newValue);
         }
         function normalizeItem(x) {
             return {
@@ -1660,33 +1899,81 @@
             sidebarList.innerHTML = '';
             const keys = Object.keys(commonData);
             const active = getActiveCategory();
-            keys.forEach((key) => {
+            
+            keys.forEach(key => {
+                const currentPath = key;
+                const isActive = currentPath === active;
+                
                 const card = document.createElement('div');
-                card.className = 'prompt-card' + (key === active ? ' active' : '');
-                card.setAttribute('data-cat', key);
-                card.innerHTML = `<h3><i class="fas fa-tag"></i> ${key}</h3>`;
-                card.addEventListener('click', () => {
+                card.className = 'prompt-card' + (isActive ? ' active' : '');
+                card.setAttribute('data-cat', currentPath);
+                card.style.paddingLeft = '8px';
+                
+                const h3 = document.createElement('h3');
+                h3.style.display = 'flex';
+                h3.style.alignItems = 'center';
+                h3.style.gap = '6px';
+                
+                const spacer = document.createElement('span');
+                spacer.style.width = '12px';
+                h3.appendChild(spacer);
+                
+                const tagIcon = document.createElement('i');
+                tagIcon.className = 'fas fa-tag';
+                tagIcon.style.fontSize = '0.9rem';
+                h3.appendChild(tagIcon);
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'cat-name';
+                nameSpan.textContent = key;
+                nameSpan.style.flex = '1';
+                h3.appendChild(nameSpan);
+                
+                const editBtn = document.createElement('i');
+                editBtn.className = 'fas fa-edit';
+                editBtn.style.cssText = 'cursor: pointer; opacity: 0.6; font-size: 0.8rem;';
+                editBtn.title = '重命名分类';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    renameCategory(currentPath);
+                });
+                h3.appendChild(editBtn);
+                
+                const deleteBtn = document.createElement('i');
+                deleteBtn.className = 'fas fa-trash';
+                deleteBtn.style.cssText = 'cursor: pointer; opacity: 0.6; font-size: 0.8rem; margin-left: 4px;';
+                deleteBtn.title = '删除分类';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteCategory(currentPath);
+                });
+                h3.appendChild(deleteBtn);
+                
+                card.appendChild(h3);
+                
+                card.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('fa-edit') || e.target.classList.contains('fa-trash')) return;
                     document.querySelectorAll('.prompt-card').forEach(c => c.classList.remove('active'));
                     card.classList.add('active');
-                    setActiveCategory(key);
-                    renderCommonTagsByCategory(key);
+                    setActiveCategory(currentPath);
+                    renderCommonTagsByCategory(currentPath);
                 });
-                // 启用侧栏分类拖拽
+                
                 card.draggable = true;
                 card.addEventListener('dragstart', handleCatDragStart);
                 card.addEventListener('dragend', handleCatDragEnd);
-                // 子元素也监听 dragover/drop，确保在卡片上释放也能触发
                 card.addEventListener('dragover', onSidebarDragOver);
                 card.addEventListener('drop', onSidebarDrop);
+                
                 sidebarList.appendChild(card);
             });
+            
             if (keys.length > 0) {
                 const current = active && commonData[active] ? active : keys[0];
                 setActiveCategory(current);
                 renderCommonTagsByCategory(current);
-                // 确保侧栏高亮
                 document.querySelectorAll('.prompt-card').forEach(c => {
-                    if (c.textContent.trim() === current) c.classList.add('active');
+                    if (c.getAttribute('data-cat') === current) c.classList.add('active');
                 });
             } else {
                 const commonTagsContainer = document.getElementById('common-tags');
@@ -1716,6 +2003,64 @@
         }
         function moveCategoryUp(cat) { moveCategory(cat, 'up'); }
         function moveCategoryDown(cat) { moveCategory(cat, 'down'); }
+
+        // 重命名分类
+        function renameCategory(oldName) {
+            if (!oldName || !commonData) return;
+            
+            const newName = prompt('请输入新的分类名称:', oldName);
+            if (newName === null || newName.trim() === '') return;
+            
+            const trimmedName = newName.trim();
+            if (trimmedName === oldName) return;
+            
+            if (commonData[trimmedName]) {
+                showInfo('分类名称已存在', '提示');
+                return;
+            }
+            
+            const value = commonData[oldName];
+            delete commonData[oldName];
+            commonData[trimmedName] = value;
+            
+            saveCommonData();
+            
+            const active = getActiveCategory();
+            if (active === oldName) {
+                setActiveCategory(trimmedName);
+            }
+            
+            renderSidebar();
+            showInfo('分类重命名成功', '提示');
+        }
+
+        // 删除分类
+        function deleteCategory(catName) {
+            if (!catName || !commonData) return;
+            
+            if (!commonData[catName]) return;
+            
+            const ok = confirm(`确认删除分类"${catName}"？`);
+            if (!ok) return;
+            
+            delete commonData[catName];
+            saveCommonData();
+            
+            const active = getActiveCategory();
+            if (active === catName) {
+                const keys = Object.keys(commonData);
+                if (keys.length > 0) {
+                    setActiveCategory(keys[0]);
+                    renderCommonTagsByCategory(keys[0]);
+                } else {
+                    setActiveCategory('');
+                    const commonTagsContainer = document.getElementById('common-tags');
+                    if (commonTagsContainer) commonTagsContainer.innerHTML = '';
+                }
+            }
+            
+            renderSidebar();
+        }
 
         // 侧栏分类拖拽排序逻辑
         let catDraggedKey = null;
@@ -1788,10 +2133,9 @@
             e.preventDefault();
             e.stopPropagation();
 
-            const keys = Object.keys(commonData);
-            const fromIndex = keys.indexOf(catDraggedKey);
+            const allKeys = Object.keys(commonData);
+            const fromIndex = allKeys.indexOf(catDraggedKey);
 
-            // 优先使用占位条位置确定目标索引
             let toIndex = -1;
             if (catPlaceholderEl && sidebarList.contains(catPlaceholderEl)) {
                 const cards = Array.from(sidebarList.querySelectorAll('.prompt-card'));
@@ -1802,20 +2146,19 @@
                 }
                 toIndex = countBefore;
             } else {
-                // 回退：用坐标估算
                 toIndex = getCatInsertIndexByPoint(e.clientY);
             }
 
             if (fromIndex >= 0 && toIndex >= 0 && fromIndex !== toIndex) {
-                // 拖起位置在目标之前时，移除后目标索引左移一位
                 if (fromIndex < toIndex) toIndex -= 1;
-                const newKeys = keys.slice();
-                newKeys.splice(fromIndex, 1);
-                newKeys.splice(Math.max(0, Math.min(toIndex, newKeys.length)), 0, catDraggedKey);
-
-                const reordered = {};
-                newKeys.forEach(k => { reordered[k] = commonData[k]; });
-                commonData = reordered;
+                
+                const [movedKey] = allKeys.splice(fromIndex, 1);
+                allKeys.splice(Math.max(0, Math.min(toIndex, allKeys.length)), 0, movedKey);
+                
+                const movedNode = commonData[movedKey];
+                delete commonData[movedKey];
+                commonData[movedKey] = movedNode;
+                
                 saveCommonData();
                 renderSidebar();
             }
@@ -2640,11 +2983,103 @@
             }
         }
 
+        // 拖拽相关变量与函数
+        let draggedCommonTagInfo = null;
+
+        function handleCommonTagDragStart(e) {
+            const el = e.target.closest('.common-tag');
+            if (!el) return;
+            draggedCommonTagInfo = {
+                cat: el.dataset.cat,
+                subcat: el.dataset.subcat,
+                index: parseInt(el.dataset.index, 10)
+            };
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', JSON.stringify(draggedCommonTagInfo));
+            el.style.opacity = '0.5';
+        }
+
+        function handleCommonTagDragEnd(e) {
+            const el = e.target.closest('.common-tag');
+            if (el) el.style.opacity = '1';
+            draggedCommonTagInfo = null;
+        }
+
+        function handleCommonTagDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleCommonTagDrop(e) {
+            e.stopPropagation();
+            const el = e.target.closest('.common-tag');
+            if (!el || !draggedCommonTagInfo) return false;
+            
+            const targetInfo = {
+                cat: el.dataset.cat,
+                subcat: el.dataset.subcat,
+                index: parseInt(el.dataset.index, 10)
+            };
+
+            if (draggedCommonTagInfo.cat !== targetInfo.cat) {
+                 return false; 
+            }
+            
+            const cat = draggedCommonTagInfo.cat;
+            const sSub = draggedCommonTagInfo.subcat;
+            const tSub = targetInfo.subcat;
+            const sIdx = draggedCommonTagInfo.index;
+            const tIdx = targetInfo.index;
+            
+            const rect = el.getBoundingClientRect();
+            const isAfter = (e.clientX > rect.left + rect.width / 2);
+
+            if (sSub === tSub && sIdx === tIdx && !isAfter) return false; 
+            if (sSub === tSub && sIdx === tIdx && isAfter) return false;
+
+            const node = getNodeByPath(cat);
+            let sArr, tArr;
+
+            const getArr = (n, sub) => {
+                if (Array.isArray(n)) return n;
+                if (isGroupedCategory(n)) {
+                    return (n.groups || {})[sub] || [];
+                }
+                return [];
+            };
+
+            sArr = getArr(node, sSub);
+            tArr = getArr(node, tSub);
+
+            if (!sArr[sIdx]) return;
+
+            const [item] = sArr.splice(sIdx, 1);
+            
+            if (sArr === tArr) {
+                let insertAt = tIdx;
+                if (tIdx > sIdx) insertAt = tIdx - 1; 
+                if (isAfter) insertAt++;
+                sArr.splice(insertAt, 0, item);
+            } else {
+                let insertAt = tIdx;
+                if (isAfter) insertAt++;
+                tArr.splice(insertAt, 0, item);
+            }
+
+            saveCommonData();
+            renderCommonTagsByCategory(cat);
+            return false;
+        }
+
         function renderCommonTagsByCategory(catKey) {
             if (!commonTagsContainer) return;
             commonTagsContainer.innerHTML = '';
 
-            const data = commonData?.[catKey];
+            if (!catKey) return;
+            
+            const data = commonData[catKey];
+            if (!data) return;
 
             // 旧版结构：数组 => 维持原样平铺
             if (Array.isArray(data)) {
@@ -2654,6 +3089,11 @@
                     if (!label || !value) return;
                     const span = document.createElement('span');
                     span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
+                    span.draggable = true;
+                    span.addEventListener('dragstart', handleCommonTagDragStart);
+                    span.addEventListener('dragend', handleCommonTagDragEnd);
+                    span.addEventListener('dragover', handleCommonTagDragOver);
+                    span.addEventListener('drop', handleCommonTagDrop);
                     span.dataset.cat = catKey;
                     span.dataset.index = String(index);
                     span.dataset.subcat = '';
@@ -2745,6 +3185,11 @@
                         if (!label || !value) return;
                         const span = document.createElement('span');
                         span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
+                        span.draggable = true;
+                        span.addEventListener('dragstart', handleCommonTagDragStart);
+                        span.addEventListener('dragend', handleCommonTagDragEnd);
+                        span.addEventListener('dragover', handleCommonTagDragOver);
+                        span.addEventListener('drop', handleCommonTagDrop);
                         span.dataset.cat = catKey;
                         span.dataset.subcat = sub;
                         span.dataset.index = String(index);
@@ -3148,13 +3593,16 @@
         
         // 拖拽功能
         let draggedItem = null;
+        let draggedSourceWorkspace = null;
         let placeholderEl = null;
         
         function handleDragStart(e) {
             draggedItem = this;
+            draggedSourceWorkspace = this.closest('.workspace-card');
             this.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/html', this.innerHTML);
+            e.dataTransfer.setData('source-workspace', draggedSourceWorkspace ? draggedSourceWorkspace.className : '');
         }
         
         function handleDragOver(e) {
@@ -3216,6 +3664,7 @@
             document.querySelectorAll('.prompt-tag').forEach(tag => {
                 tag.classList.remove('dragging');
             });
+            draggedSourceWorkspace = null;
             // 清理占位条
             if (placeholderEl && placeholderEl.parentNode) {
                 placeholderEl.parentNode.removeChild(placeholderEl);
@@ -3266,6 +3715,13 @@
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
 
+            const targetWorkspace = this.closest('.workspace-card');
+            const isCrossWorkspace = draggedSourceWorkspace && targetWorkspace && draggedSourceWorkspace !== targetWorkspace;
+
+            if (isCrossWorkspace) {
+                return false;
+            }
+
             if (!placeholderEl) {
                 placeholderEl = document.createElement('div');
                 placeholderEl.className = 'tag-placeholder';
@@ -3290,27 +3746,49 @@
             e.preventDefault();
             e.stopPropagation();
 
-            const list = Array.isArray(window.__lastRenderList) ? window.__lastRenderList.slice() : [];
-            if (!list.length) { updateTags(); return false; }
+            const targetWorkspace = this.closest('.workspace-card');
+            const isCrossWorkspace = draggedSourceWorkspace && targetWorkspace && draggedSourceWorkspace !== targetWorkspace;
 
-            const fromIndex = parseInt(draggedItem.getAttribute('data-index'), 10);
-            let toIndex = getInsertIndexByPoint(e.clientX, e.clientY);
+            if (isCrossWorkspace) {
+                const sourceEditor = draggedSourceWorkspace.querySelector('.editor-textarea');
+                const targetEditor = targetWorkspace.querySelector('.editor-textarea');
+                
+                if (sourceEditor && targetEditor) {
+                    const segEn = draggedItem.querySelector('.seg-en');
+                    const tagText = segEn ? segEn.textContent.trim() : (draggedItem.getAttribute('data-base') || draggedItem.textContent.trim());
+                    
+                    let sourceTags = sourceEditor.value.split(/[,，]/).map(t => t.trim()).filter(t => t.length > 0);
+                    sourceTags = sourceTags.filter(t => t !== tagText);
+                    sourceEditor.value = sourceTags.join(', ');
+                    
+                    let targetTags = targetEditor.value.split(/[,，]/).map(t => t.trim()).filter(t => t.length > 0);
+                    targetTags.push(tagText);
+                    targetEditor.value = targetTags.join(', ');
+                    
+                    sourceEditor.dispatchEvent(new Event('input'));
+                    targetEditor.dispatchEvent(new Event('input'));
+                }
+            } else {
+                const list = Array.isArray(window.__lastRenderList) ? window.__lastRenderList.slice() : [];
+                if (!list.length) { updateTags(); return false; }
 
-            if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex) && fromIndex !== toIndex) {
-                const [moved] = list.splice(fromIndex, 1);
-                // 拖起位置在目标之前时，移除后目标索引左移一位
-                if (fromIndex < toIndex) toIndex -= 1;
-                const safeTo = Math.max(0, Math.min(toIndex, list.length));
-                list.splice(safeTo, 0, moved);
-                window.__lastRenderList = list;
+                const fromIndex = parseInt(draggedItem.getAttribute('data-index'), 10);
+                let toIndex = getInsertIndexByPoint(e.clientX, e.clientY);
 
-                const disabledSet = window.__disabledTagSet || new Set();
-                const orderedActive = list.filter(t => !disabledSet.has(t));
-                promptEditor.value = orderedActive.join(', ');
-                normalizePromptInput();
+                if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex) && fromIndex !== toIndex) {
+                    const [moved] = list.splice(fromIndex, 1);
+                    if (fromIndex < toIndex) toIndex -= 1;
+                    const safeTo = Math.max(0, Math.min(toIndex, list.length));
+                    list.splice(safeTo, 0, moved);
+                    window.__lastRenderList = list;
+
+                    const disabledSet = window.__disabledTagSet || new Set();
+                    const orderedActive = list.filter(t => !disabledSet.has(t));
+                    promptEditor.value = orderedActive.join(', ');
+                    normalizePromptInput();
+                }
             }
 
-            // 清理占位条
             if (placeholderEl && placeholderEl.parentNode) {
                 placeholderEl.parentNode.removeChild(placeholderEl);
             }
@@ -3412,7 +3890,7 @@
             const picks = [];
             const cats = Object.keys(commonData || {});
             cats.forEach(cat => {
-                const v = commonData[cat];
+                const v = getNodeByPath(cat);
                 if (v && typeof v === 'object' && !Array.isArray(v) && v.groups && typeof v.groups === 'object') {
                     // 分组结构：每个非空小标签取1条
                     const groups = v.groups || {};
@@ -3464,12 +3942,134 @@
             return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
         }
         function savePromptSnapshot() {
-            const text = (promptEditor.value || '').trim();
-            if (!text) { showInfo('内容为空，无法存储', '提示'); return; }
-            const arr = loadHistory();
-            arr.push({ ts: Date.now(), text });
-            saveHistory(arr);
-            showInfo('已存储当前提示词内容', '存储成功');
+            openSaveModal();
+        }
+
+        let selectedGroup = '';
+
+        function openSaveModal() {
+            const wrap = document.getElementById('modal-save');
+            const btnClose = document.getElementById('modal-save-close');
+            const btnConfirm = document.getElementById('modal-save-confirm');
+            const btnCreate = document.getElementById('save-create-group');
+            const btnRename = document.getElementById('save-rename-group');
+            const titleInput = document.getElementById('save-title');
+            const groupsList = document.getElementById('save-groups-list');
+
+            const GROUPS_KEY = 'ops_history_groups';
+            const GROUP_NAMES_KEY = 'ops_group_names';
+            
+            let groups = [];
+            let groupNames = {};
+            try {
+                const raw = localStorage.getItem(GROUPS_KEY);
+                groups = raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                groups = [];
+            }
+            
+            try {
+                const raw = localStorage.getItem(GROUP_NAMES_KEY);
+                groupNames = raw ? JSON.parse(raw) : {};
+            } catch(e) {
+                groupNames = {};
+            }
+            
+            if (groups.length === 0) {
+                groups = ['默认组'];
+                try {
+                    localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+                } catch(e) {}
+            }
+
+            titleInput.value = '';
+            selectedGroup = groups[0];
+
+            function renderGroups() {
+                groupsList.innerHTML = '';
+                groups.forEach(group => {
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'group-item' + (group === selectedGroup ? ' selected' : '');
+                    groupEl.style.cssText = 'padding:8px 12px;border:1px solid var(--border-color);border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:8px;';
+                    groupEl.innerHTML = `<span style="flex:1;">${groupNames[group] || group}</span>`;
+                    
+                    if (group === selectedGroup) {
+                        const checkIcon = document.createElement('i');
+                        checkIcon.className = 'fas fa-check';
+                        checkIcon.style.color = 'var(--primary-color)';
+                        groupEl.appendChild(checkIcon);
+                    }
+                    
+                    groupEl.addEventListener('click', () => {
+                        selectedGroup = group;
+                        renderGroups();
+                    });
+                    
+                    groupsList.appendChild(groupEl);
+                });
+            }
+
+            renderGroups();
+
+            function cleanup() {
+                btnClose.removeEventListener('click', onClose);
+                btnConfirm.removeEventListener('click', onConfirm);
+                btnCreate.removeEventListener('click', onCreate);
+                btnRename.removeEventListener('click', onRename);
+                hide(wrap);
+            }
+
+            function onClose() {
+                cleanup();
+            }
+
+            function onConfirm() {
+                const title = titleInput.value.trim();
+                const text = (promptEditor.value || '').trim();
+                if (!text) { showInfo('内容为空，无法存储', '提示'); return; }
+                
+                const arrRaw = loadHistory();
+                arrRaw.push({ ts: Date.now(), text, title: title || `快照 ${new Date().toLocaleString()}`, group: selectedGroup });
+                saveHistory(arrRaw);
+                cleanup();
+                showInfo('已存储当前提示词内容', '存储成功');
+            }
+
+            function onCreate() {
+                const newGroupName = prompt('请输入新组名:', '');
+                if (newGroupName === null || newGroupName.trim() === '') return;
+                const trimmedGroupName = newGroupName.trim();
+                if (groups.includes(trimmedGroupName)) {
+                    showInfo('该组已存在', '提示');
+                    return;
+                }
+                groups.push(trimmedGroupName);
+                selectedGroup = trimmedGroupName;
+                try {
+                    localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+                } catch(e) {}
+                renderGroups();
+            }
+
+            function onRename() {
+                const newName = prompt('请输入新的组名称:', groupNames[selectedGroup] || selectedGroup);
+                if (newName === null || newName.trim() === '') return;
+                const trimmedName = newName.trim();
+                if (trimmedName === (groupNames[selectedGroup] || selectedGroup)) return;
+                
+                groupNames[selectedGroup] = trimmedName;
+                try {
+                    localStorage.setItem(GROUP_NAMES_KEY, JSON.stringify(groupNames));
+                } catch(e) {}
+                renderGroups();
+            }
+
+            btnClose.addEventListener('click', onClose);
+            btnConfirm.addEventListener('click', onConfirm);
+            btnCreate.addEventListener('click', onCreate);
+            btnRename.addEventListener('click', onRename);
+
+            show(wrap);
         }
         function openHistoryModal() {
             const wrap = document.getElementById('modal-history');
@@ -3482,19 +4082,45 @@
             // 排序并携带原始索引
             const arrSorted = arrRaw.map((v, i) => ({ ...v, _idx: i })).sort((a, b) => b.ts - a.ts);
 
-            // 分组：按日期分组
+            // 获取组列表
+            const GROUPS_KEY = 'ops_history_groups';
+            let groupsList = [];
+            try {
+                const raw = localStorage.getItem(GROUPS_KEY);
+                groupsList = raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                groupsList = [];
+            }
+            
+            if (groupsList.length === 0) {
+                groupsList = ['默认组'];
+                try {
+                    localStorage.setItem(GROUPS_KEY, JSON.stringify(groupsList));
+                } catch(e) {}
+            }
+
+            // 分组：按组分组
             const groups = {};
             arrSorted.forEach(it => {
-                const k = formatDate(it.ts);
+                const k = it.group || '默认组';
                 if (!groups[k]) groups[k] = [];
                 groups[k].push(it);
             });
 
+            // 获取组自定义名称
+            const GROUP_NAMES_KEY = 'ops_group_names';
+            let groupNames = {};
+            try {
+                const raw = localStorage.getItem(GROUP_NAMES_KEY);
+                groupNames = raw ? JSON.parse(raw) : {};
+            } catch(e) {
+                groupNames = {};
+            }
+
             // 渲染
             list.innerHTML = '';
-            const todayStr = formatDate(Date.now());
-            Object.keys(groups).forEach(dateStr => {
-                const items = groups[dateStr];
+            Object.keys(groups).forEach(groupName => {
+                const items = groups[groupName];
                 const sec = document.createElement('div');
                 sec.style.border = '1px solid var(--border-color)';
                 sec.style.borderRadius = '8px';
@@ -3507,15 +4133,81 @@
                 header.style.justifyContent = 'space-between';
                 header.style.alignItems = 'center';
 
+                const titleContainer = document.createElement('div');
+                titleContainer.style.display = 'flex';
+                titleContainer.style.alignItems = 'center';
+                titleContainer.style.gap = '8px';
+
                 const title = document.createElement('span');
-                title.textContent = dateStr;
+                title.textContent = groupNames[groupName] || groupName;
+
+                const renameBtn = document.createElement('i');
+                renameBtn.className = 'fas fa-edit';
+                renameBtn.style.cssText = 'cursor: pointer; opacity: 0.6; font-size: 0.8rem;';
+                renameBtn.title = '重命名组';
+                renameBtn.addEventListener('click', () => {
+                    const newName = prompt('请输入新的组名称:', groupNames[groupName] || groupName);
+                    if (newName === null || newName.trim() === '') return;
+                    const trimmedName = newName.trim();
+                    if (trimmedName === (groupNames[groupName] || groupName)) return;
+                    
+                    groupNames[groupName] = trimmedName;
+                    try {
+                        localStorage.setItem(GROUP_NAMES_KEY, JSON.stringify(groupNames));
+                    } catch(e) {}
+                    title.textContent = trimmedName;
+                });
+
+                const addGroupBtn = document.createElement('i');
+                addGroupBtn.className = 'fas fa-plus';
+                addGroupBtn.style.cssText = 'cursor: pointer; opacity: 0.6; font-size: 0.8rem;';
+                addGroupBtn.title = '添加新组';
+                addGroupBtn.addEventListener('click', () => {
+                    const newGroupName = prompt('请输入新组名:', '');
+                    if (newGroupName === null || newGroupName.trim() === '') return;
+                    const trimmedGroupName = newGroupName.trim();
+                    if (groupsList.includes(trimmedGroupName)) {
+                        showInfo('该组已存在', '提示');
+                        return;
+                    }
+                    groupsList.push(trimmedGroupName);
+                    try {
+                        localStorage.setItem(GROUPS_KEY, JSON.stringify(groupsList));
+                    } catch(e) {}
+                    openHistoryModal();
+                });
+
+                const deleteGroupBtn = document.createElement('i');
+                deleteGroupBtn.className = 'fas fa-trash';
+                deleteGroupBtn.style.cssText = 'cursor: pointer; opacity: 0.6; font-size: 0.8rem;';
+                deleteGroupBtn.title = '删除组';
+                deleteGroupBtn.addEventListener('click', async () => {
+                    const ok = await showConfirm(`确认删除组「${groupNames[groupName] || groupName}」？该组下的所有记录将被删除。`, '删除组');
+                    if (!ok) return;
+                    
+                    const arrNew = loadHistory();
+                    const filtered = arrNew.filter(item => (item.group || '默认组') !== groupName);
+                    saveHistory(filtered);
+                    const newGroupsList = groupsList.filter(g => g !== groupName);
+                    try {
+                        localStorage.setItem(GROUPS_KEY, JSON.stringify(newGroupsList));
+                        delete groupNames[groupName];
+                        localStorage.setItem(GROUP_NAMES_KEY, JSON.stringify(groupNames));
+                    } catch(e) {}
+                    openHistoryModal();
+                });
+
+                titleContainer.appendChild(title);
+                titleContainer.appendChild(renameBtn);
+                titleContainer.appendChild(addGroupBtn);
+                titleContainer.appendChild(deleteGroupBtn);
 
                 const toggle = document.createElement('button');
                 toggle.className = 'btn btn-outline';
                 toggle.textContent = '折叠/展开';
 
                 const body = document.createElement('div');
-                body.style.display = (dateStr === todayStr) ? 'block' : 'none';
+                body.style.display = 'block';
                 body.style.padding = '10px 12px';
 
                 items.forEach(it => {
@@ -3531,16 +4223,45 @@
 
                     const time = new Date(it.ts);
                     const timeStr = `${time.getHours().toString().padStart(2,'0')}:${time.getMinutes().toString().padStart(2,'0')}:${time.getSeconds().toString().padStart(2,'0')}`;
+                    
+                    const leftCol = document.createElement('div');
+                    leftCol.style.display = 'flex';
+                    leftCol.style.flexDirection = 'column';
+                    leftCol.style.gap = '4px';
+
                     const timeEl = document.createElement('div');
                     timeEl.style.fontSize = '0.85rem';
                     timeEl.style.opacity = '.7';
                     timeEl.textContent = timeStr;
 
+                    const titleEl = document.createElement('div');
+                    titleEl.style.fontSize = '0.9rem';
+                    titleEl.style.fontWeight = '500';
+                    titleEl.textContent = it.title || `快照 ${time.toLocaleString()}`;
+
+                    leftCol.appendChild(timeEl);
+                    leftCol.appendChild(titleEl);
+
                     const ops = document.createElement('div');
                     ops.style.display = 'flex';
                     ops.style.gap = '8px';
 
-                    // 新增：导入按钮（清空后导入到编辑区）
+                    const btnRename = document.createElement('button');
+                    btnRename.className = 'btn btn-outline';
+                    btnRename.textContent = '重命名';
+                    btnRename.addEventListener('click', async () => {
+                        const newTitle = prompt('请输入新的标题:', it.title || `快照 ${time.toLocaleString()}`);
+                        if (newTitle === null || newTitle.trim() === '') return;
+                        const trimmedTitle = newTitle.trim();
+                        const arrNew = loadHistory();
+                        const idx = it._idx;
+                        if (typeof idx === 'number' && idx >= 0 && idx < arrNew.length) {
+                            arrNew[idx].title = trimmedTitle;
+                            saveHistory(arrNew);
+                            openHistoryModal();
+                        }
+                    });
+
                     const btnImport = document.createElement('button');
                     btnImport.className = 'btn btn-outline';
                     btnImport.textContent = '导入';
@@ -3579,7 +4300,6 @@
                             if (idx < arrNew.length && (arrNew[idx]?.ts === it.ts) && (arrNew[idx]?.text === it.text)) {
                                 arrNew.splice(idx, 1);
                             } else {
-                                // 回退策略：按 ts+text 查找
                                 const pos = arrNew.findIndex(x => x.ts === it.ts && x.text === it.text);
                                 if (pos >= 0) arrNew.splice(pos, 1);
                             }
@@ -3588,11 +4308,56 @@
                         }
                     });
 
-                    // 顺序：导入、复制、删除
+                    const btnMove = document.createElement('button');
+                    btnMove.className = 'btn btn-outline';
+                    btnMove.textContent = '移动';
+                    btnMove.addEventListener('click', async () => {
+                        const currentGroup = it.group || '默认组';
+                        const availableGroups = groupsList.filter(g => g !== currentGroup);
+                        
+                        if (availableGroups.length === 0) {
+                            showInfo('没有其他组可移动', '提示');
+                            return;
+                        }
+                        
+                        let targetGroup = '';
+                        if (availableGroups.length === 1) {
+                            targetGroup = availableGroups[0];
+                        } else {
+                            const groupOptions = availableGroups.map((g, i) => `${i + 1}. ${groupNames[g] || g}`).join('\n');
+                            const selection = prompt(`请选择目标组（输入序号）:\n${groupOptions}`);
+                            if (selection === null || selection.trim() === '') return;
+                            
+                            const index = parseInt(selection.trim()) - 1;
+                            if (isNaN(index) || index < 0 || index >= availableGroups.length) {
+                                showInfo('无效的选择', '提示');
+                                return;
+                            }
+                            targetGroup = availableGroups[index];
+                        }
+                        
+                        const idx = it._idx;
+                        if (typeof idx === 'number' && idx >= 0) {
+                            const arrNew = loadHistory();
+                            if (idx < arrNew.length) {
+                                const item = arrNew[idx];
+                                if (item) {
+                                    item.group = targetGroup;
+                                    saveHistory(arrNew);
+                                    openHistoryModal();
+                                    showInfo('已移动到目标组', '移动成功');
+                                }
+                            }
+                        }
+                    });
+
+                    // 顺序：重命名、导入、复制、移动、删除
+                    ops.appendChild(btnRename);
                     ops.appendChild(btnImport);
                     ops.appendChild(btnCopy);
+                    ops.appendChild(btnMove);
                     ops.appendChild(btnDel);
-                    topRow.appendChild(timeEl);
+                    topRow.appendChild(leftCol);
                     topRow.appendChild(ops);
 
                     // 正文
@@ -3631,7 +4396,7 @@
                     body.style.display = now ? 'none' : 'block';
                 });
 
-                header.appendChild(title);
+                header.appendChild(titleContainer);
                 header.appendChild(toggle);
                 sec.appendChild(header);
                 sec.appendChild(body);
@@ -3681,18 +4446,18 @@
                 if (!newName) { input.focus(); return; }
                 if (oldName && newName !== oldName) {
                     // 重命名分类
-                    if (commonData[newName]) {
+                    if (getNodeByPath(newName)) {
                         showInfo('已存在同名分类', '提示');
                         return;
                     }
-                    const items = commonData[oldName] || [];
-                    delete commonData[oldName];
-                    commonData[newName] = items;
+                    const items = getNodeByPath(oldName) || [];
+                    deleteNodeByPath(oldName);
+                    setNodeByPath(newName, items);
                     saveCommonData();
                     setActiveCategory(newName);
                     renderSidebar();
                 } else if (!oldName) {
-                    if (!commonData[newName]) commonData[newName] = [];
+                    if (!getNodeByPath(newName)) setNodeByPath(newName, []);
                     saveCommonData();
                     setActiveCategory(newName);
                     renderSidebar();
@@ -3719,7 +4484,7 @@
             input.addEventListener('keydown', onKey);
         }
 
-        function openTagModal(cat, index, subcat) {
+        function openTagModal(cat, index, subcat, initialData = null) {
             const wrap = document.getElementById('modal-tag');
             const title = document.getElementById('modal-tag-title');
             const zh = document.getElementById('modal-tag-zh');
@@ -3743,7 +4508,7 @@
                 if (!subBtnsWrap) return;
                 // 清空旧按钮（保留“新建类别”按钮）
                 Array.from(subBtnsWrap.querySelectorAll('button[data-subcat]')).forEach(el => el.remove());
-                const v0 = commonData?.[cat];
+                const v0 = getNodeByPath(cat);
                 const names = [];
                 if (isGroupedCategory(v0)) {
                     const g = v0.groups || {};
@@ -3781,7 +4546,7 @@
                     const val = (name || '').trim();
                     if (!val) return;
                     ensureGrouped(cat);
-                    const catObj = commonData[cat];
+                    const catObj = getNodeByPath(cat);
                     const g = catObj.groups;
                     if (!g[val]) g[val] = [];
                     if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
@@ -3796,7 +4561,7 @@
             renderSubButtons();
 
             // 预填表单
-            const v = commonData?.[cat];
+            const v = getNodeByPath(cat);
             if (editing) {
                 if (isGroupedCategory(v) && subcat) {
                     const item = ((v.groups?.[subcat]) || [])[index] || {};
@@ -3808,14 +4573,109 @@
                     en.value = item.text || '';
                 }
             } else {
-                zh.value = '';
-                en.value = '';
+                zh.value = initialData?.lang_zh || '';
+                en.value = initialData?.text || '';
             }
             // 预填 token
             try { tokenInput.value = localStorage.getItem('ops_cy_token') || ''; } catch(e) {}
 
             show(wrap);
-            setTimeout(() => (editing ? en : zh).focus(), 0);
+            setTimeout(() => {
+                if (editing) {
+                    en.focus();
+                } else if (initialData?.text) {
+                    en.focus();
+                } else {
+                    zh.focus();
+                }
+            }, 0);
+
+            // Move/Copy UI
+            const existingMoveRow = wrap.querySelector('#modal-tag-move-copy-row');
+            if (existingMoveRow) existingMoveRow.remove();
+
+            if (editing) {
+                const body = wrap.querySelector('.modal-body');
+                const row = document.createElement('div');
+                row.id = 'modal-tag-move-copy-row';
+                row.className = 'modal-row';
+                row.style.marginTop = '10px';
+                row.style.paddingTop = '10px';
+                row.style.borderTop = '1px dashed var(--border-color)';
+                row.innerHTML = `
+                    <label>移动/复制到其他提示词标签</label>
+                    <div style="display:flex; gap:8px;">
+                        <select id="modal-tag-target-cat" class="modal-input" style="flex:1"></select>
+                        <button type="button" class="btn btn-outline" id="modal-tag-btn-move">移动</button>
+                        <button type="button" class="btn btn-outline" id="modal-tag-btn-copy">复制</button>
+                    </div>
+                `;
+                body.appendChild(row);
+
+                const sel = row.querySelector('#modal-tag-target-cat');
+                const paths = getAllCategoryPaths(commonData);
+                paths.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    opt.textContent = p;
+                    if (p === cat) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+
+                const btnMove = row.querySelector('#modal-tag-btn-move');
+                const btnCopy = row.querySelector('#modal-tag-btn-copy');
+
+                const doMoveCopy = (isMove) => {
+                    const targetPath = sel.value;
+                    if (!targetPath) return;
+                    if (isMove && targetPath === cat) return showInfo('不能移动到当前分类', '提示');
+
+                    const lang_zh_val = (zh.value || '').trim();
+                    const text_val = (en.value || '').trim();
+                    if (!lang_zh_val || !text_val) {
+                         showInfo('请先完善标签内容', '提示');
+                         return;
+                    }
+                    
+                    const targetNode = getNodeByPath(targetPath);
+                    if (!targetNode) return showInfo('目标分类不存在', '错误');
+
+                    const newItem = { text: text_val, lang_zh: lang_zh_val, pinned: false };
+
+                    if (isGroupedCategory(targetNode)) {
+                         const g = targetNode.groups || (targetNode.groups = {});
+                         const uf = g['未分组'] || (g['未分组'] = []);
+                         uf.push(newItem);
+                    } else if (Array.isArray(targetNode)) {
+                         targetNode.push(newItem);
+                    } else {
+                         if (!targetNode.groups) targetNode.groups = {};
+                         const uf = targetNode.groups['未分组'] = [];
+                         uf.push(newItem);
+                    }
+
+                    if (isMove) {
+                         const sourceNode = getNodeByPath(cat);
+                         if (isGroupedCategory(sourceNode) && subcat) {
+                             const arr = sourceNode.groups[subcat];
+                             if (arr) arr.splice(index, 1);
+                         } else if (isGroupedCategory(sourceNode)) {
+                             const arr = sourceNode.groups['未分组'];
+                             if (arr) arr.splice(index, 1);
+                         } else if (Array.isArray(sourceNode)) {
+                             sourceNode.splice(index, 1);
+                         }
+                    }
+
+                    saveCommonData();
+                    renderSidebar();
+                    renderCommonTagsByCategory(cat);
+                    cleanup();
+                };
+
+                btnMove.onclick = () => doMoveCopy(true);
+                btnCopy.onclick = () => doMoveCopy(false);
+            }
 
             // 翻译函数
             const onTranslate = async () => {
@@ -3848,7 +4708,7 @@
                 }
             };
 
-            // MyMemory 翻译：无需令牌，直接 GET
+            // MyMemory 翻译
             const onTranslateMyMemory = async () => {
                 const lang_zh = (zh.value || '').trim();
                 if (!lang_zh) { zh.focus(); return; }
@@ -3869,13 +4729,12 @@
                 const lang_zh2 = (zh.value || '').trim();
                 let text2 = (en.value || '').trim();
 
-                // 自动翻译：若存在 Token 且英文为空，仅有中文，则先翻译再保存
+                // 自动翻译
                 if (lang_zh2 && !text2) {
                     let token = '';
                     try { token = (tokenInput.value || '').trim() || (localStorage.getItem('ops_cy_token') || ''); } catch(e) {}
                     if (token) {
                         try {
-                            // 持久化 Token
                             try { localStorage.setItem('ops_cy_token', token); } catch(e) {}
                             const res = await fetch('https://api.interpreter.caiyunai.com/v1/translator', {
                                 method: 'POST',
@@ -3897,9 +4756,7 @@
                                 text2 = target;
                                 en.value = target;
                             }
-                        } catch (err) {
-                            // 翻译失败则回退到手动填写
-                        }
+                        } catch (err) { }
                     }
                 }
 
@@ -3907,7 +4764,7 @@
 
                 const targetSub = (selectedSub || '').trim();
 
-                const vNow = commonData?.[cat];
+                const vNow = getNodeByPath(cat);
 
                 if (editing) {
                     if (isGroupedCategory(vNow) && subcat) {
@@ -3935,37 +4792,44 @@
                             uf[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
                         }
                     } else {
-                        commonData[cat] = Array.isArray(vNow) ? vNow : [];
-                        // 旧数组模式
+                        // Old array mode or simple array
                         if (targetSub) {
-                            // 升级为分组，并把旧数组作为“未分组”
                             ensureGrouped(cat);
-                            const g = commonData[cat].groups;
+                            const newV = getNodeByPath(cat);
+                            const g = newV.groups;
                             const uf = g['未分组'];
                             const old = uf[index] || {};
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
                             g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
                         } else {
-                            const old = commonData[cat][index] || {};
-                            commonData[cat][index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                            const old = vNow[index] || {};
+                            vNow[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
                         }
                     }
                 } else {
                     if (targetSub) {
                         ensureGrouped(cat);
-                        const groups = commonData[cat].groups;
+                        const newV = getNodeByPath(cat);
+                        const groups = newV.groups;
                         if (!groups[targetSub]) groups[targetSub] = [];
                         groups[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: false });
                     } else {
                         if (Array.isArray(vNow)) {
                             vNow.push({ text: text2, lang_zh: lang_zh2, pinned: false });
-                            commonData[cat] = vNow;
                         } else if (isGroupedCategory(vNow)) {
                             const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
                             arr.push({ text: text2, lang_zh: lang_zh2, pinned: false });
                         } else {
-                            commonData[cat] = [{ text: text2, lang_zh: lang_zh2, pinned: false }];
+                             // Initialize as array or group depending on subFolders
+                             if (vNow.subFolders && Object.keys(vNow.subFolders).length > 0) {
+                                 ensureGrouped(cat);
+                                 const g = getNodeByPath(cat).groups;
+                                 const uf = g['未分组'] || (g['未分组'] = []);
+                                 uf.push({ text: text2, lang_zh: lang_zh2, pinned: false });
+                             } else {
+                                 setNodeByPath(cat, [{ text: text2, lang_zh: lang_zh2, pinned: false }]);
+                             }
                         }
                     }
                 }
@@ -4282,7 +5146,7 @@
                     { label: '删除', icon: 'fas fa-trash', action: async () => {
                         const ok = await showConfirm(`确认删除分类「${cat}」及其所有标签？`, '删除分类');
                         if (!ok) return;
-                        delete commonData[cat];
+                        deleteNodeByPath(cat);
                         saveCommonData();
                         const keys = Object.keys(commonData);
                         setActiveCategory(keys[0] || '');
@@ -4295,6 +5159,12 @@
                 const currentTag = segEn ? (segEn.textContent || '').trim() : '';
                 if (!currentTag) return;
                 showContextMenu(e.clientX, e.clientY, [
+                    { label: '添加到标签', icon: 'fas fa-plus-circle', action: () => {
+                        const activeCat = getActiveCategory();
+                        if (!activeCat) { showInfo('请先选择一个分类', '提示'); return; }
+                        const sel = window.getSelection().toString().trim();
+                        openTagModal(activeCat, null, null, { text: sel || currentTag });
+                    }},
                     { label: '权重+', icon: 'fas fa-plus', action: () => adjustTagWeightBySteps(currentTag, +1) },
                     { label: '权重-', icon: 'fas fa-minus', action: () => adjustTagWeightBySteps(currentTag, -1) },
                     { label: '删除', icon: 'fas fa-trash', action: () => removeWeightedTag(currentTag) }
@@ -4310,7 +5180,7 @@
                 if (!cat || idx < 0) return;
 
                 let it = null, isPinned = false;
-                const v = commonData[cat];
+                const v = getNodeByPath(cat);
                 if (Array.isArray(v)) {
                     it = v[idx];
                 } else if (isGroupedCategory(v)) {
@@ -4353,7 +5223,7 @@
                     label: '删除',
                     icon: 'fas fa-trash',
                     action: async () => {
-                        const v2 = commonData[cat];
+                        const v2 = getNodeByPath(cat);
                         let it2 = null;
                         if (Array.isArray(v2)) {
                             it2 = v2[idx];
@@ -4382,14 +5252,14 @@
 
         // 置顶/取消置顶（支持分组）
         function pinTag(cat, subcat, index, shouldPin) {
-            const v = commonData[cat];
+            const v = getNodeByPath(cat);
             if (Array.isArray(v)) {
                 if (!v[index]) return;
                 const [it] = v.splice(index, 1);
                 it.pinned = !!shouldPin;
                 if (shouldPin) v.unshift(it);
                 else v.splice(Math.min(index, v.length), 0, it);
-                commonData[cat] = v;
+                // commonData[cat] = v; // Removed: v is a reference
             } else if (isGroupedCategory(v)) {
                 const arr = v.groups?.[subcat] || [];
                 if (!arr[index]) return;
@@ -4404,13 +5274,13 @@
 
         // 上移/下移 类别分组顺序（以显式顺序数组 groupsOrder 控制渲染顺序）
         function moveSubcat(catKey, sub, direction) {
-            const v = commonData[catKey];
+            const v = getNodeByPath(catKey);
             if (!isGroupedCategory(v)) { return; }
             const g = v.groups || {};
             // 基于现有顺序或键集合构造 order
             const baseOrder = Array.isArray(v.groupsOrder)
                 ? v.groupsOrder.filter(n => Object.prototype.hasOwnProperty.call(g, n))
-                    .concat(Object.keys(g).filter(n => !v.groupsOrder.includes(n)))
+                    。concat(Object.keys(g).filter(n => !v.groupsOrder.includes(n)))
                 : Object.keys(g);
             const idx = baseOrder.indexOf(sub);
             if (idx === -1) return;
@@ -4427,7 +5297,8 @@
                 reordered[k] = Array.isArray(g[k]) ? g[k].slice() : (g[k] || []);
             }
             // 回写：同时写入 groups 与 groupsOrder
-            commonData[catKey] = { groups: reordered, groupsOrder: newOrder };
+            v.groups = reordered;
+            v.groupsOrder = newOrder;
             saveCommonData();
             renderCommonTagsByCategory(catKey);
         }
