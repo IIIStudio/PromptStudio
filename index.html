@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -195,8 +196,8 @@
         }
 
         .btn {
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 5px 10px;
+            border-radius: 5px;
             border: none;
             cursor: pointer;
             display: flex;
@@ -984,6 +985,26 @@
         </div>
     </div>
 
+    <!-- 编辑分类模态框 -->
+    <div class="modal-backdrop" id="modal-edit-category">
+        <div class="modal">
+            <div class="modal-header">
+                <span>编辑分类</span>
+                <button class="btn btn-outline" id="modal-edit-cat-close">关闭</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <label for="modal-edit-cat-name">分类名称</label>
+                    <input class="modal-input" id="modal-edit-cat-name" type="text" placeholder="例如：人脸标签" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-edit-cat-cancel">取消</button>
+                <button class="btn btn-primary" id="modal-edit-cat-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Dropbox 配置模态框 -->
     <div class="modal-backdrop" id="modal-dropbox">
         <div class="modal">
@@ -1678,6 +1699,11 @@
                 // 子元素也监听 dragover/drop，确保在卡片上释放也能触发
                 card.addEventListener('dragover', onSidebarDragOver);
                 card.addEventListener('drop', onSidebarDrop);
+                // 右键菜单支持
+                card.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showCategoryContextMenu(e, key);
+                });
                 sidebarList.appendChild(card);
             });
             if (keys.length > 0) {
@@ -1716,6 +1742,117 @@
         }
         function moveCategoryUp(cat) { moveCategory(cat, 'up'); }
         function moveCategoryDown(cat) { moveCategory(cat, 'down'); }
+
+        // 侧栏分类右键菜单
+        let currentContextCategory = null;
+        const categoryContextMenu = document.createElement('div');
+        categoryContextMenu.className = 'context-menu';
+        categoryContextMenu.innerHTML = `
+            <div class="item" id="ctx-cat-edit"><i class="fas fa-edit"></i> 编辑名称</div>
+            <div class="item" id="ctx-cat-delete" style="color:var(--danger-color);"><i class="fas fa-trash"></i> 删除分类</div>
+            <div class="item" id="ctx-cat-move-up"><i class="fas fa-arrow-up"></i> 上移</div>
+            <div class="item" id="ctx-cat-move-down"><i class="fas fa-arrow-down"></i> 下移</div>
+        `;
+        document.body.appendChild(categoryContextMenu);
+
+        function showCategoryContextMenu(e, catKey) {
+            currentContextCategory = catKey;
+            const menu = categoryContextMenu;
+            menu.style.display = 'block';
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+
+            // 绑定菜单项事件
+            const editItem = document.getElementById('ctx-cat-edit');
+            const deleteItem = document.getElementById('ctx-cat-delete');
+            const upItem = document.getElementById('ctx-cat-move-up');
+            const downItem = document.getElementById('ctx-cat-move-down');
+
+            editItem.onclick = () => {
+                hideCategoryContextMenu();
+                openEditCategoryModal(catKey);
+            };
+
+            deleteItem.onclick = async () => {
+                hideCategoryContextMenu();
+                const ok = await showConfirm(`确定要删除分类"${catKey}"吗？分类下的所有标签也将被删除。`, '删除确认');
+                if (ok) {
+                    delete commonData[catKey];
+                    saveCommonData();
+                    renderSidebar();
+                }
+            };
+
+            upItem.onclick = () => {
+                hideCategoryContextMenu();
+                moveCategoryUp(catKey);
+            };
+
+            downItem.onclick = () => {
+                hideCategoryContextMenu();
+                moveCategoryDown(catKey);
+            };
+        }
+
+        function hideCategoryContextMenu() {
+            categoryContextMenu.style.display = 'none';
+            currentContextCategory = null;
+        }
+
+        // 点击其他地方关闭右键菜单
+        document.addEventListener('click', (e) => {
+            if (!categoryContextMenu.contains(e.target)) {
+                hideCategoryContextMenu();
+            }
+        });
+
+        // 编辑分类模态框
+        function openEditCategoryModal(oldName) {
+            const wrap = document.getElementById('modal-edit-category');
+            const input = document.getElementById('modal-edit-cat-name');
+            const confirmBtn = document.getElementById('modal-edit-cat-confirm');
+            const cancelBtn = document.getElementById('modal-edit-cat-cancel');
+            const closeBtn = document.getElementById('modal-edit-cat-close');
+            input.value = oldName || '';
+            show(wrap);
+            setTimeout(() => input.focus(), 0);
+
+            const onConfirm = () => {
+                const newName = (input.value || '').trim();
+                if (!newName) { input.focus(); return; }
+                if (newName !== oldName) {
+                    if (commonData[newName]) {
+                        showInfo('已存在同名分类', '提示');
+                        return;
+                    }
+                    const items = commonData[oldName] || [];
+                    delete commonData[oldName];
+                    commonData[newName] = items;
+                    saveCommonData();
+                    setActiveCategory(newName);
+                    renderSidebar();
+                }
+                cleanup();
+            };
+            const onCancel = () => cleanup();
+
+            function cleanup() {
+                confirmBtn.removeEventListener('click', onConfirm);
+                cancelBtn.removeEventListener('click', onCancel);
+                closeBtn.removeEventListener('click', onCancel);
+                input.removeEventListener('keydown', onKey);
+                hide(wrap);
+            }
+            function onKey(e) {
+                if (e.key === 'Enter') onConfirm();
+                if (e.key === 'Escape') onCancel();
+            }
+
+            confirmBtn.addEventListener('click', onConfirm);
+            cancelBtn.addEventListener('click', onCancel);
+            closeBtn.addEventListener('click', onCancel);
+            input.addEventListener('keydown', onKey);
+        }
 
         // 侧栏分类拖拽排序逻辑
         let catDraggedKey = null;
@@ -4461,8 +4598,6 @@
             renderSidebar();
             showInfo('已清空所有标签与分类', '完成');
         }
-
-
 
         // 初始化
         updateTags();
