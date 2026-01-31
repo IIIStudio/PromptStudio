@@ -9,13 +9,20 @@ $:
 
 main:
   push:
-    - stages:
-      - name: tcloud-cmd
-        imports: https://cnb.cool/IIIStudio/key/-/blob/main/Lighthouse/env.yml
-        image: tencentcom/tcloud-cmd
-        settings:
-          secret_id: ${SECRET_ID}
-          secret_key: ${SECRET_KEY}
-          region: ${region}
-          instance_ids: ${instance_ids}
-          script: ${script}
+    - services:
+        - docker
+      imports:
+        - https://cnb.cool/IIIStudio/key/-/blob/main/github/env.yml
+      stages:
+        - name: 同步到GitHub
+          image: tencentcom/git-sync 
+          settings:
+            target_url: https://github.com/IIIStudio/PromptStudio.git
+            auth_type: https
+            git_user: ${GIT_USERNAME}
+            git_email: ${GIT_EMAIL} 
+            username: ${GIT_USERNAME} 
+            password: ${GIT_ACCESS_TOKEN}
+            branch: main
+            sync_mode: mirror  # 镜像模式，直接覆盖
+            force: true
