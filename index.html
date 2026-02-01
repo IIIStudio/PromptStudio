@@ -1324,7 +1324,11 @@ Prompt Studio目录下</p>
                 <button class="btn btn-primary" id="modal-db-save">保存</button>
             </div>
             <div class="modal-footer hidden" id="sync-footer-s3">
-                <button class="btn btn-outline" id="modal-s3-clear" style="margin-right:auto;">清除密钥</button>
+                <div style="margin-right:auto;display:flex;gap:8px;">
+                    <button class="btn btn-outline" id="modal-s3-clear">清除密钥</button>
+                    <button class="btn btn-outline" id="modal-s3-export">导出</button>
+                    <button class="btn btn-outline" id="modal-s3-import">导入</button>
+                </div>
                 <button class="btn btn-outline" id="modal-s3-cancel">取消</button>
                 <button class="btn btn-primary" id="modal-s3-save">保存</button>
             </div>
@@ -3846,6 +3850,121 @@ Prompt Studio目录下</p>
                     });
             };
 
+            // 导出 S3 配置
+            const onExportS3Config = async () => {
+                const s3Config = await getS3Config();
+                
+                if (!s3Config.secretId || !s3Config.secretKey) {
+                    showInfo('没有保存的 S3 配置可导出', '提示');
+                    return;
+                }
+
+                // 检查是否有配置密码
+                const password = await showPasswordModal();
+                if (!password) {
+                    showInfo('需要密码才能导出配置', '提示');
+                    return;
+                }
+
+                try {
+                    // 创建包含加密配置的对象
+                    const exportData = {
+                        version: '1.0',
+                        timestamp: new Date().toISOString(),
+                        secretId: s3Config.secretId,
+                        secretKey: s3Config.secretKey,
+                        region: s3Config.region,
+                        bucket: s3Config.bucket
+                    };
+
+                    // 创建并下载 JSON 文件
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'key.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    showInfo('S3 配置已导出到 key.json', '成功');
+                } catch (e) {
+                    console.error('导出失败:', e);
+                    showInfo('导出失败: ' + (e.message || ''), '错误');
+                }
+            };
+
+            // 导入 S3 配置
+            const onImportS3Config = async () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    if (file.name !== 'key.json') {
+                        showInfo('请选择 key.json 文件', '提示');
+                        return;
+                    }
+
+                    try {
+                        const text = await file.text();
+                        const importData = JSON.parse(text);
+
+                        // 验证导入的数据格式
+                        if (!importData.secretId || !importData.secretKey || 
+                            !importData.region || !importData.bucket) {
+                            showInfo('导入的配置文件格式不正确', '错误');
+                            return;
+                        }
+
+                        // 检查是否有配置密码
+                        const password = await showPasswordModal();
+                        if (!password) {
+                            showInfo('需要密码才能导入配置', '提示');
+                            return;
+                        }
+
+                        // 保存导入的配置到 localStorage
+                        localStorage.setItem('ops_s3_secret_id', importData.secretId);
+                        localStorage.setItem('ops_s3_secret_key', importData.secretKey);
+                        localStorage.setItem('ops_s3_region', importData.region);
+                        localStorage.setItem('ops_s3_bucket', importData.bucket);
+
+                        // 更新界面显示
+                        if (s3SecretIdEl) s3SecretIdEl.value = importData.secretId;
+                        if (s3SecretKeyEl) s3SecretKeyEl.value = importData.secretKey;
+                        if (s3RegionEl) s3RegionEl.value = importData.region;
+                        if (s3BucketEl) s3BucketEl.value = importData.bucket;
+
+                        // 隐藏密钥输入框
+                        if (s3SecretIdEl && s3SecretIdEl.closest('.modal-row')) {
+                            s3SecretIdEl.closest('.modal-row').style.display = 'none';
+                        }
+                        if (s3SecretKeyEl && s3SecretKeyEl.closest('.modal-row')) {
+                            s3SecretKeyEl.closest('.modal-row').style.display = 'none';
+                        }
+                        if (s3RegionEl && s3RegionEl.closest('.modal-row')) {
+                            s3RegionEl.closest('.modal-row').style.display = 'none';
+                        }
+                        if (s3BucketEl && s3BucketEl.closest('.modal-row')) {
+                            s3BucketEl.closest('.modal-row').style.display = 'none';
+                        }
+
+                        showInfo('S3 配置已导入成功', '成功');
+                    } catch (e) {
+                        console.error('导入失败:', e);
+                        showInfo('导入失败: ' + (e.message || ''), '错误');
+                    }
+                };
+
+                input.click();
+            };
+
             function cleanup() {
                 // 清除临时保存的原始配置名称
                 localStorage.removeItem('ops_s3_selected_config_original');
@@ -3858,6 +3977,14 @@ Prompt Studio目录下</p>
                 dbLoginBtn.removeEventListener('click', onLogin);
                 providerBtns.forEach(btn => btn.removeEventListener('click', onProviderClick));
                 document.removeEventListener('keydown', onKey);
+                const exportBtn = wrap.querySelector('#modal-s3-export');
+                const importBtn = wrap.querySelector('#modal-s3-import');
+                if (exportBtn) {
+                    exportBtn.removeEventListener('click', onExportS3Config);
+                }
+                if (importBtn) {
+                    importBtn.removeEventListener('click', onImportS3Config);
+                }
                 hide(wrap);
             }
 
@@ -3888,6 +4015,16 @@ Prompt Studio目录下</p>
             }
             if (s3ClearBtn) {
                 s3ClearBtn.addEventListener('click', () => onClearCredentials('s3'));
+            }
+
+            // S3 导出和导入按钮事件
+            const s3ExportBtn = wrap.querySelector('#modal-s3-export');
+            const s3ImportBtn = wrap.querySelector('#modal-s3-import');
+            if (s3ExportBtn) {
+                s3ExportBtn.addEventListener('click', onExportS3Config);
+            }
+            if (s3ImportBtn) {
+                s3ImportBtn.addEventListener('click', onImportS3Config);
             }
 
             // 刷新文件列表按钮
