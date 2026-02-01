@@ -83,17 +83,17 @@ B站演示：https://www.bilibili.com/video/BV1VgykBQEp5/
 
 ## S3 (腾讯云 COS)（可选）
 
-重要：必须配置 CORS 才能使用！
+**重要：必须配置 CORS 才能使用！**
 
-1. 访问 [腾讯云 API 密钥管理](https://console.cloud.tencent.com/cam/capi)
-2. 创建或复制你的 API 密钥的 SecretId 和 SecretKey
-3. 在 COS 控制台创建存储桶，记录 Bucket 名称和所在区域
-4. 配置 CORS（必须）：在 COS 控制台 → 存储桶 → 安全管理 → 跨域访问 CORS，添加规则：
-  • 来源：*
-  • 允许 Methods：GET, PUT, POST, DELETE, HEAD
-  • 允许 Headers：*
-  • 超时时间：600秒
-5. 存储桶访问权限设置为私有读写
+- [创建子账户](https://console.cloud.tencent.com/cam/user/create?systemType=FastCreateV2)
+  - 选择访问方式 → 编程访问 → 创建用户
+  - 复制你的 API 密钥的 SecretId 和 SecretKey
+- 在 COS 控制台创建存储桶，记录 Bucket 名称和所在区域
+- 添加权限 COS 控制台 → 存储桶 → 权限管理 → 添加成员 → 输入子账户 ID → 添加权限：数据读取、数据写入
+- 配置 CORS（必须）：在 COS 控制台 → 存储桶 → 安全管理 → 跨域访问 CORS，添加规则：
+  - 来源 Origin：*
+  - 操作 Methods：GET, PUT, POST, DELETE, HEAD
+  - 其他默认
 
 ## 彩云api（可选）
 
