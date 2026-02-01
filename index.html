@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https://*.tencentcos.com https://*.myqcloud.com https://*.dropboxapi.com https://api.dropboxapi.com https://api.mymemory.translated.net https://api.interpreter.caiyunai.com/;">
     <title>IIIStudio - AI绘画提示词工具</title>
     <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI" />
     <meta name="description" content="一个纯前端的提示词管理与编辑页面。支持分类/分组管理、标签拖拽排序、历史快照存储、翻译、JSON 导入/导出、本地持久化，以及可选的 Dropbox 云同步；同时提供一键导出提示词区域为图片（html2canvas）。" />
@@ -995,6 +995,27 @@
         </div>
     </div>
 
+    <!-- S3 密码输入模态框 -->
+    <div class="modal-backdrop" id="modal-s3-password">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header">
+                <span>输入密码</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <label>请输入解密密码以访问 S3 密钥</label>
+                </div>
+                <div class="modal-row">
+                    <input class="modal-input" id="modal-password-input" type="password" placeholder="请输入密码" autofocus />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-password-cancel">取消</button>
+                <button class="btn btn-primary" id="modal-password-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 右键菜单设置模态框 -->
     <div class="modal-backdrop" id="modal-ctxmenu">
         <div class="modal">
@@ -1089,11 +1110,11 @@
                 <div id="sync-dropbox-config">
                     <div class="modal-row">
                         <label for="modal-db-key">App Key</label>
-                        <input class="modal-input" id="modal-db-key" type="text" placeholder="Dropbox App Key" />
+                        <input class="modal-input" id="modal-db-key" type="password" placeholder="Dropbox App Key" />
                     </div>
                     <div class="modal-row">
                         <label for="modal-db-secret">App Secret</label>
-                        <input class="modal-input" id="modal-db-secret" type="text" placeholder="Dropbox App Secret" />
+                        <input class="modal-input" id="modal-db-secret" type="password" placeholder="Dropbox App Secret" />
                     </div>
                     <div class="modal-row">
                         <label for="modal-db-refresh">Refresh Token / 授权码或回调URL</label>
@@ -1124,6 +1145,10 @@
                         <label for="modal-s3-bucket">Bucket Name</label>
                         <input class="modal-input" id="modal-s3-bucket" type="password" placeholder="存储桶名称，例如 examplebucket-1250000000" />
                     </div>
+                    <div class="modal-row" id="modal-s3-encrypt-row">
+                        <label for="modal-s3-encrypt-password">加密密码</label>
+                        <input class="modal-input" id="modal-s3-encrypt-password" type="password" placeholder="输入密码用于加密密钥(至少8位)" />
+                    </div>
                     <div class="modal-row" style="font-size:12px;opacity:.75;">
                       <p style="color:var(--danger-color);margin-bottom:8px;">⚠️ 重要：必须配置 CORS 才能使用！如何开启 <a href="https://cnb.cool/IIIStudio/Code/HTML/PromptStudio#s3-%E8%85%BE%E8%AE%AF%E4%BA%91-cos%E5%8F%AF%E9%80%89" target="_blank">CORS 配置</a>文件会在
 Prompt Studio目录下</p>
@@ -1131,12 +1156,14 @@ Prompt Studio目录下</p>
                 </div>
             </div>
             <div class="modal-footer" id="sync-footer-dropbox">
+                <button class="btn btn-outline" id="modal-db-clear" style="margin-right:auto;">清除密钥</button>
                 <button class="btn btn-outline" id="modal-db-cancel">取消</button>
                 <button class="btn btn-outline" id="modal-db-authorize">授权</button>
                 <button class="btn btn-success" id="modal-db-login">登录</button>
                 <button class="btn btn-primary" id="modal-db-save">保存</button>
             </div>
             <div class="modal-footer hidden" id="sync-footer-s3">
+                <button class="btn btn-outline" id="modal-s3-clear" style="margin-right:auto;">清除密钥</button>
                 <button class="btn btn-outline" id="modal-s3-cancel">取消</button>
                 <button class="btn btn-primary" id="modal-s3-save">保存</button>
             </div>
@@ -1777,7 +1804,12 @@ Prompt Studio目录下</p>
                 const card = document.createElement('div');
                 card.className = 'prompt-card' + (key === active ? ' active' : '');
                 card.setAttribute('data-cat', key);
-                card.innerHTML = `<h3><i class="fas fa-tag"></i> ${key}</h3>`;
+                const h3 = document.createElement('h3');
+                h3.innerHTML = '<i class="fas fa-tag"></i> ';
+                const textSpan = document.createElement('span');
+                textSpan.textContent = key;
+                h3.appendChild(textSpan);
+                card.appendChild(h3);
                 card.addEventListener('click', () => {
                     document.querySelectorAll('.prompt-card').forEach(c => c.classList.remove('active'));
                     card.classList.add('active');
@@ -2104,17 +2136,170 @@ Prompt Studio目录下</p>
             try { return localStorage.getItem('ops_cloud_enabled') === '1'; } catch(e) { return false; }
         }
 
-        // S3 (腾讯云 COS) 配置
-        function getS3Config() {
-            try {
-                return {
-                    secretId: localStorage.getItem('ops_s3_secret_id') || '',
-                    secretKey: localStorage.getItem('ops_s3_secret_key') || '',
-                    region: localStorage.getItem('ops_s3_region') || '',
-                    bucket: localStorage.getItem('ops_s3_bucket') || ''
-                };
-            } catch(e) { return { secretId: '', secretKey: '', region: '', bucket: '' }; }
+        // ========== S3 密钥加密/解密功能 ==========
+        // 生成加密密钥（基于固定盐值和用户设备特征）
+        async function getEncryptionKey(userPassword) {
+            if (!userPassword) {
+                throw new Error('需要输入密码');
+            }
+            // 使用用户输入的密码派生密钥
+            const salt = new TextEncoder().encode('PromptStudio_S3_Encryption_Salt_2024');
+            const keyMaterial = await window.crypto.subtle.importKey(
+                'raw',
+                new TextEncoder().encode(userPassword),
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+            return window.crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
         }
+
+        // 加密数据
+        async function encryptData(plaintext, userPassword) {
+            try {
+                const key = await getEncryptionKey(userPassword);
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const encoded = new TextEncoder().encode(plaintext);
+                const encrypted = await window.crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    encoded
+                );
+                // 将 IV 和加密数据合并并转换为 Base64
+                const combined = new Uint8Array(iv.length + encrypted.byteLength);
+                combined.set(iv);
+                combined.set(new Uint8Array(encrypted), iv.length);
+                return btoa(String.fromCharCode.apply(null, combined));
+            } catch(e) {
+                console.error('加密失败:', e);
+                throw e;
+            }
+        }
+
+        // 解密数据
+        async function decryptData(ciphertext, userPassword) {
+            try {
+                const key = await getEncryptionKey(userPassword);
+                const combined = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
+                const iv = combined.slice(0, 12);
+                const encrypted = combined.slice(12);
+                const decrypted = await window.crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    encrypted
+                );
+                return new TextDecoder().decode(decrypted);
+            } catch(e) {
+                throw new Error('密码错误或数据已损坏');
+            }
+        }
+
+        // S3 (腾讯云 COS) 配置(获取加密数据)
+        async function getS3Config() {
+            return {
+                secretId: localStorage.getItem('ops_s3_secret_id') || '',
+                secretKey: localStorage.getItem('ops_s3_secret_key') || '',
+                region: localStorage.getItem('ops_s3_region') || '',
+                bucket: localStorage.getItem('ops_s3_bucket') || ''
+            };
+        }
+
+        // 解密 S3 配置
+        async function decryptS3Config(encryptedConfig, password) {
+            try {
+                let secretId = '';
+                let secretKey = '';
+                let region = encryptedConfig.region || '';
+                let bucket = encryptedConfig.bucket || '';
+
+                if (encryptedConfig.secretId) {
+                    secretId = await decryptData(encryptedConfig.secretId, password);
+                }
+                if (encryptedConfig.secretKey) {
+                    secretKey = await decryptData(encryptedConfig.secretKey, password);
+                }
+                if (encryptedConfig.region) {
+                    region = await decryptData(encryptedConfig.region, password);
+                }
+                if (encryptedConfig.bucket) {
+                    bucket = await decryptData(encryptedConfig.bucket, password);
+                }
+
+                return {
+                    secretId: secretId,
+                    secretKey: secretKey,
+                    region: region,
+                    bucket: bucket
+                };
+            } catch(e) {
+                console.error('解密 S3 配置失败:', e);
+                throw new Error('密码错误或数据已损坏');
+            }
+        }
+
+        // 显示密码输入框并返回密码
+        function showPasswordModal() {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-s3-password');
+                const input = document.getElementById('modal-password-input');
+                const confirmBtn = document.getElementById('modal-password-confirm');
+                const cancelBtn = document.getElementById('modal-password-cancel');
+
+                // 清空输入框
+                input.value = '';
+
+                // 显示模态框
+                modal.style.display = 'flex';
+
+                // 自动聚焦
+                setTimeout(() => input.focus(), 100);
+
+                // 确定按钮
+                const onConfirm = () => {
+                    const password = input.value.trim();
+                    modal.style.display = 'none';
+                    cleanup();
+                    resolve(password || null);
+                };
+
+                // 取消按钮
+                const onCancel = () => {
+                    modal.style.display = 'none';
+                    cleanup();
+                    resolve(null);
+                };
+
+                // 回车键确认
+                const onEnter = (e) => {
+                    if (e.key === 'Enter') {
+                        onConfirm();
+                    }
+                };
+
+                // 清理事件监听
+                const cleanup = () => {
+                    confirmBtn.removeEventListener('click', onConfirm);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    input.removeEventListener('keydown', onEnter);
+                };
+
+                confirmBtn.addEventListener('click', onConfirm);
+                cancelBtn.addEventListener('click', onCancel);
+                input.addEventListener('keydown', onEnter);
+            });
+        }
+
         function getS3SelectedFilename() {
             try {
                 const v = localStorage.getItem('ops_s3_filename');
@@ -2255,10 +2440,18 @@ Prompt Studio目录下</p>
 
         // S3 (腾讯云 COS) 上传函数 - 使用官方 SDK
         async function uploadToS3(filename, contentStr) {
-            const { secretId, secretKey, region, bucket } = getS3Config();
-            if (!secretId || !secretKey || !region || !bucket) {
+            const encryptedConfig = await getS3Config();
+            if (!encryptedConfig.secretId || !encryptedConfig.secretKey || !encryptedConfig.region || !encryptedConfig.bucket) {
                 throw new Error('未配置 S3 信息');
             }
+
+            // 提示用户输入密码
+            const password = await showPasswordModal();
+            if (!password) {
+                throw new Error('需要密码');
+            }
+
+            const { secretId, secretKey, region, bucket } = await decryptS3Config(encryptedConfig, password);
 
             // 初始化 COS 客户端 - 使用永久密钥方式
             const cos = new COS({
@@ -2290,10 +2483,18 @@ Prompt Studio目录下</p>
 
         // S3 (腾讯云 COS) 下载函数 - 使用官方 SDK
         async function downloadFromS3(filename) {
-            const { secretId, secretKey, region, bucket } = getS3Config();
-            if (!secretId || !secretKey || !region || !bucket) {
+            const encryptedConfig = await getS3Config();
+            if (!encryptedConfig.secretId || !encryptedConfig.secretKey || !encryptedConfig.region || !encryptedConfig.bucket) {
                 throw new Error('未配置 S3 信息');
             }
+
+            // 提示用户输入密码
+            const password = await showPasswordModal();
+            if (!password) {
+                throw new Error('需要密码');
+            }
+
+            const { secretId, secretKey, region, bucket } = await decryptS3Config(encryptedConfig, password);
 
             // 初始化 COS 客户端 - 使用永久密钥方式
             const cos = new COS({
@@ -2319,7 +2520,7 @@ Prompt Studio目录下</p>
             });
         }
 
-        function downloadJson() {
+        async function downloadJson() {
             // 同时导出"常用提示词"和"提示词历史"
             const exportObj = {
                 common: commonData || {},
@@ -2333,7 +2534,7 @@ Prompt Studio目录下</p>
             if (useCloud) {
                 const filename = getCloudSelectedFilename();
                 if (provider === 's3') {
-                    const s3Config = getS3Config();
+                    const s3Config = await getS3Config();
                     if (!s3Config.secretId || !s3Config.secretKey || !s3Config.region || !s3Config.bucket) {
                         showInfo('未配置 S3 信息，请在同步配置中填写。', '提示');
                         return;
@@ -2460,7 +2661,7 @@ Prompt Studio目录下</p>
         async function importFromCloud() {
             const provider = getSyncProvider();
             if (provider === 's3') {
-                const s3Config = getS3Config();
+                const s3Config = await getS3Config();
                 if (!s3Config.secretId || !s3Config.secretKey || !s3Config.region || !s3Config.bucket) {
                     showInfo('未配置 S3 信息，请在同步配置中填写。', '提示');
                     return;
@@ -2715,13 +2916,13 @@ Prompt Studio目录下</p>
             document.getElementById('add-tag-btn')?.addEventListener('click', addTagToCurrent);
             document.getElementById('export-tags-image-btn')?.addEventListener('click', exportPromptTagsImage);
             document.getElementById('compose-tags-image-btn')?.addEventListener('click', composeTagsImageOntoSelectedImage);
-            document.getElementById('download-json-btn')?.addEventListener('click', downloadJson);
+            document.getElementById('download-json-btn')?.addEventListener('click', async () => await downloadJson());
             document.getElementById('reset-all-btn')?.addEventListener('click', resetAll);
             document.getElementById('random-pick-btn')?.addEventListener('click', randomPickAll);
-            document.getElementById('import-json-btn')?.addEventListener('click', () => {
+            document.getElementById('import-json-btn')?.addEventListener('click', async () => {
                 const useCloud = isCloudEnabled();
                 if (useCloud) {
-                    importFromCloud();
+                    await importFromCloud();
                 } else {
                     document.getElementById('json-file-input')?.click();
                 }
@@ -2762,6 +2963,7 @@ Prompt Studio目录下</p>
             const s3SecretKeyEl = document.getElementById('modal-s3-secret-key');
             const s3RegionEl = document.getElementById('modal-s3-region');
             const s3BucketEl = document.getElementById('modal-s3-bucket');
+            const s3PasswordEl = document.getElementById('modal-s3-password');
             const s3SaveBtn = document.getElementById('modal-s3-save');
             const s3CancelBtn = document.getElementById('modal-s3-cancel');
 
@@ -2805,12 +3007,20 @@ Prompt Studio目录下</p>
             if (secEl && secEl.closest('.modal-row')) secEl.closest('.modal-row').style.display = 'none';
             refreshEl.value = dbCfg.refresh || '';
 
-            // 初始化 S3 数据
-            const s3Cfg = getS3Config();
-            if (s3SecretIdEl) s3SecretIdEl.value = s3Cfg.secretId || '';
-            if (s3SecretKeyEl) s3SecretKeyEl.value = s3Cfg.secretKey || '';
-            if (s3RegionEl) s3RegionEl.value = s3Cfg.region || '';
-            if (s3BucketEl) s3BucketEl.value = s3Cfg.bucket || '';
+            // 初始化 S3 数据（异步解密）
+            (async () => {
+                const s3Cfg = await getS3Config();
+                if (s3SecretIdEl) s3SecretIdEl.value = s3Cfg.secretId || '';
+                if (s3SecretKeyEl) s3SecretKeyEl.value = s3Cfg.secretKey || '';
+                if (s3RegionEl) s3RegionEl.value = s3Cfg.region || '';
+                if (s3BucketEl) s3BucketEl.value = s3Cfg.bucket || '';
+
+                // 如果已保存加密的密钥，隐藏加密密码输入框
+                const encryptRow = document.getElementById('modal-s3-encrypt-row');
+                if (encryptRow && s3Cfg.secretId && s3Cfg.secretKey) {
+                    encryptRow.style.display = 'none';
+                }
+            })();
 
             // 切换到当前 provider
             switchProvider(currentProvider);
@@ -2946,8 +3156,6 @@ Prompt Studio目录下</p>
                     window.open(url, '_blank', 'noopener,noreferrer');
                     return;
                 }
-                // 提示用户在弹窗中完成登录与授权
-                showInfo('已打开 Dropbox 授权窗口，请在弹窗内登录并同意授权。授权完成后 Dropbox 将回跳至 https://localhost/，请在你的后端用回调换取 Refresh Token，然后回到此处点击"登录"。', '授权提示');
             };
 
             const onLogin = async () => {
@@ -3028,9 +3236,8 @@ Prompt Studio目录下</p>
                         localStorage.setItem('ops_dbx_secret', sec);
                         localStorage.setItem('ops_dbx_refresh', refreshToken);
                         localStorage.setItem('ops_dbx_token', accessToken);
+                        showInfo('登录成功：已保存 Refresh Token 并获取 Access Token，可立即进行 Dropbox 上传/下载。', '登录成功');
                     } catch(e) {}
-
-                    showInfo('登录成功：已保存 Refresh Token 并获取 Access Token，可立即进行 Dropbox 上传/下载。', '登录成功');
                 } catch (err) {
                     showInfo('登录失败：' + (err?.message || err), '登录失败');
                 }
@@ -3062,22 +3269,97 @@ Prompt Studio目录下</p>
                 cleanup();
             };
 
-            const onS3Save = () => {
+            const onS3Save = async () => {
                 try {
+                    // 获取加密密码
+                    const passwordInput = document.getElementById('modal-s3-encrypt-password');
+                    const password = passwordInput?.value?.trim() || '';
+
+                    // 验证密码长度
+                    if (!password || password.length < 8) {
+                        showInfo('密码至少需要8位', '错误');
+                        return;
+                    }
+
                     // 保存全局云端开关
                     if (cloudEnabledEl) {
                         localStorage.setItem('ops_cloud_enabled', cloudEnabledEl.checked ? '1' : '0');
                     }
-                    localStorage.setItem('ops_s3_secret_id', (s3SecretIdEl.value || '').trim());
-                    localStorage.setItem('ops_s3_secret_key', (s3SecretKeyEl.value || '').trim());
-                    localStorage.setItem('ops_s3_region', (s3RegionEl.value || '').trim());
-                    localStorage.setItem('ops_s3_bucket', (s3BucketEl.value || '').trim());
+
+                    // 加密并保存密钥
+                    const secretId = s3SecretIdEl?.value?.trim() || '';
+                    const secretKey = s3SecretKeyEl?.value?.trim() || '';
+                    const region = s3RegionEl?.value?.trim() || '';
+                    const bucket = s3BucketEl?.value?.trim() || '';
+
+                    if (secretId) {
+                        const encryptedSecretId = await encryptData(secretId, password);
+                        localStorage.setItem('ops_s3_secret_id', encryptedSecretId);
+                    }
+                    if (secretKey) {
+                        const encryptedSecretKey = await encryptData(secretKey, password);
+                        localStorage.setItem('ops_s3_secret_key', encryptedSecretKey);
+                    }
+                    if (region) {
+                        const encryptedRegion = await encryptData(region, password);
+                        localStorage.setItem('ops_s3_region', encryptedRegion);
+                    }
+                    if (bucket) {
+                        const encryptedBucket = await encryptData(bucket, password);
+                        localStorage.setItem('ops_s3_bucket', encryptedBucket);
+                    }
                     localStorage.setItem('ops_s3_filename', 'OHAO AI Prompt Studio.json');
-                } catch(e) {}
+
+                    // 清空密码输入框并隐藏
+                    if (passwordInput) {
+                        passwordInput.value = '';
+                        const encryptRow = document.getElementById('modal-s3-encrypt-row');
+                        if (encryptRow) {
+                            encryptRow.style.display = 'none';
+                        }
+                    }
+
+                    showInfo('S3 密钥已加密保存', '提示');
+                } catch(e) {
+                    console.error('保存失败:', e);
+                    showInfo('密钥保存失败: ' + (e.message || ''), '错误');
+                }
                 cleanup();
             };
 
             const onCancel = () => cleanup();
+
+            // 清除密钥函数
+            const onClearCredentials = (provider) => {
+                showConfirm('确定要清除所有保存的密钥吗？清除后需要重新输入才能使用云同步功能。', '清除确认')
+                    .then((ok) => {
+                        if (!ok) return;
+
+                        if (provider === 'dropbox') {
+                            localStorage.removeItem('ops_dbx_key');
+                            localStorage.removeItem('ops_dbx_secret');
+                            localStorage.removeItem('ops_dbx_refresh');
+                            localStorage.removeItem('ops_dbx_token');
+                            if (refreshEl) refreshEl.value = '';
+                            showInfo('Dropbox 密钥已清除', '提示');
+                        } else if (provider === 's3') {
+                            localStorage.removeItem('ops_s3_secret_id');
+                            localStorage.removeItem('ops_s3_secret_key');
+                            localStorage.removeItem('ops_s3_region');
+                            localStorage.removeItem('ops_s3_bucket');
+                            if (s3SecretIdEl) s3SecretIdEl.value = '';
+                            if (s3SecretKeyEl) s3SecretKeyEl.value = '';
+                            if (s3RegionEl) s3RegionEl.value = '';
+                            if (s3BucketEl) s3BucketEl.value = '';
+                            // 清除密钥后显示加密密码输入框
+                            const encryptRow = document.getElementById('modal-s3-encrypt-row');
+                            if (encryptRow) {
+                                encryptRow.style.display = 'grid';
+                            }
+                            showInfo('S3 密钥已清除', '提示');
+                        }
+                    });
+            };
 
             function cleanup() {
                 closeBtn.removeEventListener('click', onCancel);
@@ -3104,6 +3386,16 @@ Prompt Studio目录下</p>
             dbAuthBtn.addEventListener('click', onAuthorize);
             dbLoginBtn.addEventListener('click', onLogin);
             providerBtns.forEach(btn => btn.addEventListener('click', onProviderClick));
+
+            // 清除密钥按钮事件
+            const dbClearBtn = wrap.querySelector('#modal-db-clear');
+            const s3ClearBtn = wrap.querySelector('#modal-s3-clear');
+            if (dbClearBtn) {
+                dbClearBtn.addEventListener('click', () => onClearCredentials('dropbox'));
+            }
+            if (s3ClearBtn) {
+                s3ClearBtn.addEventListener('click', () => onClearCredentials('s3'));
+            }
 
             // 刷新文件列表按钮
             const fileRefreshBtn2 = wrap.querySelector('#modal-db-refresh-list');
