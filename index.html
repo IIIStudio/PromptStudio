@@ -5421,33 +5421,25 @@ Prompt Studio目录下</p>
 
         // 通用信息提示（居中模态，仅"确定"）
         function showInfo(message, title = '提示') {
-            const wrap = document.getElementById('modal-confirm');
-            const titleEl = document.getElementById('modal-confirm-title');
-            const msgEl = document.getElementById('modal-confirm-message');
-            const okBtn = document.getElementById('modal-confirm-ok');
-            const cancelBtn = document.getElementById('modal-confirm-cancel');
-            const closeBtn = document.getElementById('modal-confirm-close');
-            titleEl.textContent = title || '提示';
-            msgEl.textContent = message || '';
-            const prevDisplay = cancelBtn.style.display;
-            cancelBtn.style.display = 'none';
-            show(wrap);
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.top = '50%';
+            toast.style.left = '50%';
+            toast.style.transform = 'translate(-50%, -50%)';
+            toast.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+            toast.style.color = 'white';
+            toast.style.padding = '12px 20px';
+            toast.style.borderRadius = '8px';
+            toast.style.zIndex = '10000';
+            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+            toast.style.fontSize = '1rem';
+            toast.textContent = message;
+            document.body.appendChild(toast);
             return new Promise((resolve) => {
-                const onOk = () => cleanup();
-                function onKey(e) {
-                    if (e.key === 'Enter' || e.key === 'Escape') cleanup();
-                }
-                function cleanup() {
-                    okBtn.removeEventListener('click', onOk);
-                    closeBtn.removeEventListener('click', onOk);
-                    document.removeEventListener('keydown', onKey);
-                    cancelBtn.style.display = prevDisplay || '';
-                    hide(wrap);
+                setTimeout(() => {
+                    document.body.removeChild(toast);
                     resolve();
-                }
-                okBtn.addEventListener('click', onOk);
-                closeBtn.addEventListener('click', onOk);
-                document.addEventListener('keydown', onKey);
+                }, 2000);
             });
         }
 
