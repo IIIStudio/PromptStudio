@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title>IIIStudio - AI绘画提示词工具</title>
-    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI" />
+    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI ，OPS翻译" />
     <meta name="description" content="一个纯前端的提示词管理与编辑页面。支持分类/分组管理、标签拖拽排序、历史快照存储、翻译、JSON 导入/导出、本地持久化，以及可选的 Dropbox 云同步；同时提供一键导出提示词区域为图片（html2canvas）。" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
@@ -792,6 +792,9 @@
                             <i class="fas fa-edit"></i> 提示词内容
                         </div>
                         <div class="editor-actions">
+                            <button class="btn btn-outline" id="search-tags-btn">
+                                <i class="fas fa-search"></i> 搜索
+                            </button>
                             <button class="btn btn-outline" id="random-pick-btn">
                                 <i class="fas fa-dice"></i> 随机
                             </button>
@@ -961,26 +964,25 @@
         </div>
     </div>
 
-    <!-- 右键菜单设置模态框 -->
-    <div class="modal-backdrop" id="modal-ctxmenu">
-        <div class="modal">
+    <!-- 搜索提示词模态框 -->
+    <div class="modal-backdrop" id="modal-search-tags">
+        <div class="modal" style="width: min(92vw, 640px);">
             <div class="modal-header">
-                <span>右键菜单设置</span>
-                <button class="btn btn-outline" id="modal-ctx-close">关闭</button>
+                <span>搜索提示词</span>
+                <button class="btn btn-outline" id="modal-search-close">关闭</button>
             </div>
             <div class="modal-body">
-                <div class="modal-row" style="font-size:12px;opacity:.8;">
-                    支持占位符：{{中文}}、{{英文}}（自动进行 URL 编码）
+                <div class="modal-row">
+                    <input class="modal-input" id="search-input" type="text" placeholder="输入中文或英文关键词搜索..." />
                 </div>
                 <div class="modal-row">
-                    <button class="btn btn-outline" id="ctx-add-btn">新增菜单项</button>
-                </div>
-                <div class="modal-row">
-                    <div id="ctx-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                    <div id="search-results" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow:auto;">
+                        <div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="modal-ctx-save">保存</button>
+                <button class="btn btn-primary" id="modal-search-clear">清空搜索</button>
             </div>
         </div>
     </div>
@@ -4598,6 +4600,180 @@
             renderSidebar();
             showInfo('已清空所有标签与分类', '完成');
         }
+
+        // 搜索提示词模态框
+        function openSearchTagsModal() {
+            const wrap = document.getElementById('modal-search-tags');
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            const closeBtn = document.getElementById('modal-search-close');
+            const clearBtn = document.getElementById('modal-search-clear');
+
+            searchInput.value = '';
+            searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+
+            // 搜索所有提示词
+            function searchTags(keyword) {
+                const results = [];
+                const lowerKeyword = keyword.toLowerCase();
+
+                for (const cat in commonData) {
+                    const data = commonData[cat];
+                    const tags = Array.isArray(data) ? data : (data.groups ? Object.values(data.groups).flat() : []);
+
+                    tags.forEach(tag => {
+                        const zh = (tag.lang_zh || '').trim();
+                        const en = (tag.text || '').trim();
+                        const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
+                        const enMatch = en && en.toLowerCase().includes(lowerKeyword);
+
+                        if (zhMatch || enMatch) {
+                            results.push({
+                                zh: zh,
+                                en: en,
+                                category: cat
+                            });
+                        }
+                    });
+                }
+
+                return results;
+            }
+
+            // 渲染搜索结果
+            function renderSearchResults(results) {
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">未找到匹配的提示词</div>';
+                    return;
+                }
+
+                searchResults.innerHTML = '';
+                results.forEach((result, index) => {
+                    const row = document.createElement('div');
+                    row.style.border = '1px solid var(--border-color)';
+                    row.style.borderRadius = '8px';
+                    row.style.padding = '12px';
+                    row.style.cursor = 'pointer';
+                    row.style.transition = 'all 0.2s ease';
+
+                    const title = document.createElement('div');
+                    title.style.fontWeight = '600';
+                    title.style.color = 'var(--primary-color)';
+                    title.style.marginBottom = '4px';
+                    title.textContent = result.zh || result.en || '未命名';
+
+                    const en = document.createElement('div');
+                    en.style.fontSize = '0.9rem';
+                    en.style.opacity = '0.85';
+                    en.style.marginBottom = '4px';
+                    en.textContent = result.en || '';
+
+                    const cat = document.createElement('div');
+                    cat.style.fontSize = '0.8rem';
+                    cat.style.opacity = '0.6';
+                    cat.textContent = `分类: ${result.category}`;
+
+                    row.appendChild(title);
+                    if (result.en) row.appendChild(en);
+                    row.appendChild(cat);
+
+                    row.addEventListener('click', () => {
+                        const textToCopy = result.en || result.zh;
+
+                        // 创建临时提示元素
+                        const toast = document.createElement('div');
+                        toast.style.position = 'fixed';
+                        toast.style.top = '50%';
+                        toast.style.left = '50%';
+                        toast.style.transform = 'translate(-50%, -50%)';
+                        toast.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                        toast.style.color = 'white';
+                        toast.style.padding = '16px 32px';
+                        toast.style.borderRadius = '8px';
+                        toast.style.zIndex = '10000';
+                        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                        toast.style.fontSize = '1rem';
+                        toast.textContent = `已复制: ${textToCopy}`;
+
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            document.body.appendChild(toast);
+                            setTimeout(() => {
+                                document.body.removeChild(toast);
+                            }, 1000);
+                        }).catch(() => {
+                            // 降级方案：使用textarea复制
+                            const textarea = document.createElement('textarea');
+                            textarea.value = textToCopy;
+                            document.body.appendChild(textarea);
+                            textarea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textarea);
+
+                            document.body.appendChild(toast);
+                            setTimeout(() => {
+                                document.body.removeChild(toast);
+                            }, 1000);
+                        });
+                    });
+
+                    row.addEventListener('mouseenter', () => {
+                        row.style.backgroundColor = 'var(--primary-color)';
+                        title.style.color = 'white';
+                        en.style.color = 'rgba(255,255,255,0.9)';
+                        cat.style.color = 'rgba(255,255,255,0.7)';
+                    });
+
+                    row.addEventListener('mouseleave', () => {
+                        row.style.backgroundColor = '';
+                        title.style.color = 'var(--primary-color)';
+                        en.style.color = '';
+                        cat.style.color = '';
+                    });
+
+                    searchResults.appendChild(row);
+                });
+            }
+
+            // 搜索输入监听
+            searchInput.addEventListener('input', (e) => {
+                const keyword = e.target.value.trim();
+                if (!keyword) {
+                    searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+                    return;
+                }
+
+                const results = searchTags(keyword);
+                renderSearchResults(results);
+            });
+
+            // 清空按钮
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+                searchInput.focus();
+            });
+
+            // 关闭按钮
+            closeBtn.addEventListener('click', () => {
+                hide(wrap);
+                searchInput.removeEventListener('input', arguments.callee);
+            });
+
+            // ESC键关闭
+            const onEscape = (e) => {
+                if (e.key === 'Escape') {
+                    document.removeEventListener('keydown', onEscape);
+                    hide(wrap);
+                }
+            };
+            document.addEventListener('keydown', onEscape);
+
+            show(wrap);
+            setTimeout(() => searchInput.focus(), 100);
+        }
+
+        // 绑定搜索按钮事件
+        document.getElementById('search-tags-btn')?.addEventListener('click', openSearchTagsModal);
 
         // 初始化
         updateTags();
