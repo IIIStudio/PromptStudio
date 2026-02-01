@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="./js/cos-js-sdk-v5.min.js"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -786,7 +787,9 @@
                     <button class="btn btn-primary" id="import-json-btn">
                         <i class="fas fa-file-import"></i> 导入JSON
                     </button>
-                    <button class="btn btn-outline" id="dropbox-config-btn">Dropbox</button>
+                    <button class="btn btn-outline" id="sync-config-btn">
+                        <i class="fas fa-sync"></i> 同步
+                    </button>
                     <button class="btn btn-outline" id="reset-all-btn">
                         <i class="fas fa-trash"></i> 重置
                     </button>
@@ -1018,48 +1021,105 @@
         </div>
     </div>
 
-    <!-- Dropbox 配置模态框 -->
-    <div class="modal-backdrop" id="modal-dropbox">
+    <!-- 同步配置模态框 -->
+    <div class="modal-backdrop" id="modal-sync">
         <div class="modal">
             <div class="modal-header">
-                <span>Dropbox 配置</span>
-                <button class="btn btn-outline" id="modal-db-close">关闭</button>
+                <span>同步配置</span>
+                <button class="btn btn-outline" id="modal-sync-close">关闭</button>
             </div>
             <div class="modal-body">
                 <div class="modal-row">
-                    <label for="modal-db-key">App Key</label>
-                    <input class="modal-input" id="modal-db-key" type="text" placeholder="Dropbox App Key" />
-                </div>
-                <div class="modal-row">
-                    <label for="modal-db-secret">App Secret</label>
-                    <input class="modal-input" id="modal-db-secret" type="text" placeholder="Dropbox App Secret" />
-                </div>
-                <div class="modal-row">
-                    <label for="modal-db-refresh">Refresh Token / 授权码或回调URL</label>
-                    <input class="modal-input" id="modal-db-refresh" type="password" placeholder="可粘贴 Refresh Token，或直接粘贴回调后的整条URL（含 ?code=...）或仅 code" />
-                </div>
-                <div class="modal-row">
-                    <label for="modal-db-enabled">使用 Dropbox 进行上传/导入</label>
-                    <div>
-                        <input type="checkbox" id="modal-db-enabled" /> 启用云端（默认关闭）
+                    <label>同步方式</label>
+                    <div id="sync-provider-buttons" style="display:flex;flex-wrap:wrap;gap:8px;">
+                        <button class="btn btn-toggle btn-outline" data-provider="dropbox" id="btn-provider-dropbox">Dropbox</button>
+                        <button class="btn btn-toggle btn-outline" data-provider="s3" id="btn-provider-s3">S3 (腾讯云 COS)</button>
                     </div>
                 </div>
-                <div class="modal-row" style="font-size:12px;opacity:.75;">
-                  <ol>
-                      <li>访问 <a href="https://www.dropbox.com/developers/apps" target="_blank">Dropbox开发者平台</a></li>
-                      <li>创建或选择您的应用</li>
-                      <li>复制App key与App secret写入下方</li>
-                      <li>在 Permissions 勾选权限，files.content.write与files.content.read，点击Submit提交</li>
-                      <li>OAuth 2 Redirect URIs 写入 https://localhost/</li>
-                  </ol>
-                    使用说明：点击"授权"在弹窗中登录并同意授权。授权完成后若拿到 https://localhost/?code=...，可直接将整条地址或 code部分 粘贴到上方输入框并点"登录"，系统会自动先兑换 Refresh Token；若已拿到 Refresh Token，直接粘贴后点"登录"即可获取临时 Access Token。
+
+                <!-- Dropbox 配置区域 -->
+                <div id="sync-dropbox-config">
+                    <div class="modal-row">
+                        <label for="modal-db-key">App Key</label>
+                        <input class="modal-input" id="modal-db-key" type="text" placeholder="Dropbox App Key" />
+                    </div>
+                    <div class="modal-row">
+                        <label for="modal-db-secret">App Secret</label>
+                        <input class="modal-input" id="modal-db-secret" type="text" placeholder="Dropbox App Secret" />
+                    </div>
+                    <div class="modal-row">
+                        <label for="modal-db-refresh">Refresh Token / 授权码或回调URL</label>
+                        <input class="modal-input" id="modal-db-refresh" type="password" placeholder="可粘贴 Refresh Token，或直接粘贴回调后的整条URL（含 ?code=...）或仅 code" />
+                    </div>
+                    <div class="modal-row">
+                        <label for="modal-db-enabled">使用 Dropbox 进行上传/导入</label>
+                        <div>
+                            <input type="checkbox" id="modal-db-enabled" /> 启用云端（默认关闭）
+                        </div>
+                    </div>
+                    <div class="modal-row" style="font-size:12px;opacity:.75;">
+                      <ol>
+                          <li>访问 <a href="https://www.dropbox.com/developers/apps" target="_blank">Dropbox开发者平台</a></li>
+                          <li>创建或选择您的应用</li>
+                          <li>复制App key与App secret写入下方</li>
+                          <li>在 Permissions 勾选权限，files.content.write与files.content.read，点击Submit提交</li>
+                          <li>OAuth 2 Redirect URIs 写入 https://localhost/</li>
+                      </ol>
+                        使用说明：点击"授权"在弹窗中登录并同意授权。授权完成后若拿到 https://localhost/?code=...，可直接将整条地址或 code部分 粘贴到上方输入框并点"登录"，系统会自动先兑换 Refresh Token；若已拿到 Refresh Token，直接粘贴后点"登录"即可获取临时 Access Token。
+                    </div>
+                </div>
+
+                <!-- S3 配置区域 -->
+                <div id="sync-s3-config" style="display:none;">
+                    <div class="modal-row">
+                        <label for="modal-s3-secret-id">Secret ID</label>
+                        <input class="modal-input" id="modal-s3-secret-id" type="text" placeholder="腾讯云 API 密钥 SecretId" />
+                    </div>
+                    <div class="modal-row">
+                        <label for="modal-s3-secret-key">Secret Key</label>
+                        <input class="modal-input" id="modal-s3-secret-key" type="password" placeholder="腾讯云 API 密钥 SecretKey" />
+                    </div>
+                    <div class="modal-row">
+                        <label for="modal-s3-region">Region</label>
+                        <input class="modal-input" id="modal-s3-region" type="text" placeholder="存储桶所在区域，例如 ap-beijing" />
+                    </div>
+                    <div class="modal-row">
+                        <label for="modal-s3-bucket">Bucket Name</label>
+                        <input class="modal-input" id="modal-s3-bucket" type="text" placeholder="存储桶名称，例如 examplebucket-1250000000" />
+                    </div>
+                    <div class="modal-row">
+                        <label for="modal-s3-enabled">使用 S3 进行上传/导入</label>
+                        <div>
+                            <input type="checkbox" id="modal-s3-enabled" /> 启用云端（默认关闭）
+                        </div>
+                    </div>
+                    <div class="modal-row" style="font-size:12px;opacity:.75;">
+                      <p style="color:var(--danger-color);margin-bottom:8px;">⚠️ 重要：必须配置 CORS 才能使用！</p>
+                      <ol>
+                          <li>访问 <a href="https://console.cloud.tencent.com/cam/capi" target="_blank">腾讯云 API 密钥管理</a></li>
+                          <li>创建或复制你的 API 密钥的 SecretId 和 SecretKey</li>
+                          <li>在 COS 控制台创建存储桶，记录 Bucket 名称和所在区域</li>
+                          <li><strong>配置 CORS（必须）</strong>：在 COS 控制台 → 存储桶 → 安全管理 → 跨域访问 CORS，添加规则：
+                            <br>• 来源：*
+                            <br>• 允许 Methods：GET, PUT, POST, DELETE, HEAD
+                            <br>• 允许 Headers：*
+                            <br>• 超时时间：600秒
+                          </li>
+                          <li>存储桶访问权限设置为私有读写</li>
+                      </ol>
+                      <p style="margin-top:8px;">配置 CORS 后等待 1-2 分钟生效。如果仍然报错，请检查浏览器控制台和存储桶日志。</p>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="sync-footer-dropbox">
                 <button class="btn btn-outline" id="modal-db-cancel">取消</button>
                 <button class="btn btn-outline" id="modal-db-authorize">授权</button>
                 <button class="btn btn-success" id="modal-db-login">登录</button>
                 <button class="btn btn-primary" id="modal-db-save">保存</button>
+            </div>
+            <div class="modal-footer hidden" id="sync-footer-s3">
+                <button class="btn btn-outline" id="modal-s3-cancel">取消</button>
+                <button class="btn btn-primary" id="modal-s3-save">保存</button>
             </div>
         </div>
     </div>
@@ -2024,6 +2084,45 @@
         function isDropboxEnabled() {
             try { return localStorage.getItem('ops_dbx_enabled') === '1'; } catch(e) { return false; }
         }
+
+        // S3 (腾讯云 COS) 配置
+        function getS3Config() {
+            try {
+                return {
+                    secretId: localStorage.getItem('ops_s3_secret_id') || '',
+                    secretKey: localStorage.getItem('ops_s3_secret_key') || '',
+                    region: localStorage.getItem('ops_s3_region') || '',
+                    bucket: localStorage.getItem('ops_s3_bucket') || ''
+                };
+            } catch(e) { return { secretId: '', secretKey: '', region: '', bucket: '' }; }
+        }
+        function getS3SelectedFilename() {
+            try {
+                const v = localStorage.getItem('ops_s3_filename');
+                return v && v.trim() ? v.trim() : 'OHAO AI Prompt Studio.json';
+            } catch(e) { return 'OHAO AI Prompt Studio.json'; }
+        }
+        function isS3Enabled() {
+            try { return localStorage.getItem('ops_s3_enabled') === '1'; } catch(e) { return false; }
+        }
+
+        // 同步配置
+        function getSyncProvider() {
+            try { return localStorage.getItem('sync_provider') || 'dropbox'; } catch(e) { return 'dropbox'; }
+        }
+        function setSyncProvider(provider) {
+            try { localStorage.setItem('sync_provider', provider || 'dropbox'); } catch(e) {}
+        }
+        function isCloudEnabled() {
+            const provider = getSyncProvider();
+            if (provider === 's3') return isS3Enabled();
+            return isDropboxEnabled();
+        }
+        function getCloudSelectedFilename() {
+            const provider = getSyncProvider();
+            if (provider === 's3') return getS3SelectedFilename();
+            return getDropboxSelectedFilename();
+        }
         async function uploadToDropbox(filename, contentStr) {
             const { token } = getDropboxConfig();
             if (!token) throw new Error('未配置 Dropbox Access Token');
@@ -2137,6 +2236,72 @@
             return res.text();
         }
 
+        // S3 (腾讯云 COS) 上传函数 - 使用官方 SDK
+        async function uploadToS3(filename, contentStr) {
+            const { secretId, secretKey, region, bucket } = getS3Config();
+            if (!secretId || !secretKey || !region || !bucket) {
+                throw new Error('未配置 S3 信息');
+            }
+
+            // 初始化 COS 客户端 - 使用永久密钥方式
+            const cos = new COS({
+                SecretId: secretId,
+                SecretKey: secretKey
+            });
+
+            // 构造上传路径：Prompt Studio/filename
+            const key = `Prompt Studio/${filename}`;
+
+            return new Promise((resolve, reject) => {
+                cos.putObject({
+                    Bucket: bucket,
+                    Region: region,
+                    Key: key,
+                    Body: contentStr,
+                    ContentType: 'application/json'
+                }, function (err, data) {
+                    if (err) {
+                        reject(new Error(`S3 上传失败：${err.message || err}`));
+                    } else {
+                        resolve(data);
+                    }
+                });
+            });
+        }
+
+
+
+        // S3 (腾讯云 COS) 下载函数 - 使用官方 SDK
+        async function downloadFromS3(filename) {
+            const { secretId, secretKey, region, bucket } = getS3Config();
+            if (!secretId || !secretKey || !region || !bucket) {
+                throw new Error('未配置 S3 信息');
+            }
+
+            // 初始化 COS 客户端 - 使用永久密钥方式
+            const cos = new COS({
+                SecretId: secretId,
+                SecretKey: secretKey
+            });
+
+            // 构造下载路径：Prompt Studio/filename
+            const key = `Prompt Studio/${filename}`;
+
+            return new Promise((resolve, reject) => {
+                cos.getObject({
+                    Bucket: bucket,
+                    Region: region,
+                    Key: key
+                }, function (err, data) {
+                    if (err) {
+                        reject(new Error(`S3 下载失败：${err.message || err}`));
+                    } else {
+                        resolve(data.Body);
+                    }
+                });
+            });
+        }
+
         function downloadJson() {
             // 同时导出"常用提示词"和"提示词历史"
             const exportObj = {
@@ -2145,15 +2310,27 @@
                 menus: (function(){ try { const raw = localStorage.getItem('ops_ctx_menu_items'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })()
             };
             const dataStr = JSON.stringify(exportObj, null, 2);
-            const { token } = getDropboxConfig();
-            const useCloud = isDropboxEnabled();
+            const useCloud = isCloudEnabled();
+            const provider = getSyncProvider();
+
             if (useCloud) {
-                if (!token) { showInfo('未登录 Dropbox，请先在 Dropbox 配置中完成登录。', '提示'); return; }
-                // 上传到 Dropbox
-                const filename = getDropboxSelectedFilename();
-                uploadToDropbox(filename, dataStr)
-                    .then(() => showInfo('已上传到 Dropbox: ' + filename, '上传成功'))
-                    .catch(err => showInfo('Dropbox 上传失败：' + (err?.message || err), '上传失败'));
+                const filename = getCloudSelectedFilename();
+                if (provider === 's3') {
+                    const s3Config = getS3Config();
+                    if (!s3Config.secretId || !s3Config.secretKey || !s3Config.region || !s3Config.bucket) {
+                        showInfo('未配置 S3 信息，请在同步配置中填写。', '提示');
+                        return;
+                    }
+                    uploadToS3(filename, dataStr)
+                        .then(() => showInfo('已上传到 S3: ' + filename, '上传成功'))
+                        .catch(err => showInfo('S3 上传失败：' + (err?.message || err), '上传失败'));
+                } else {
+                    const { token } = getDropboxConfig();
+                    if (!token) { showInfo('未登录 Dropbox，请先在同步配置中完成登录。', '提示'); return; }
+                    uploadToDropbox(filename, dataStr)
+                        .then(() => showInfo('已上传到 Dropbox: ' + filename, '上传成功'))
+                        .catch(err => showInfo('Dropbox 上传失败：' + (err?.message || err), '上传失败'));
+                }
                 return;
             }
             // 本地下载
@@ -2249,6 +2426,36 @@
                 showInfo('已从 Dropbox 导入 ' + filename, '导入成功');
             } catch (e) {
                 showInfo('从 Dropbox 下载失败：' + (e?.message || e), '下载失败');
+            }
+        }
+
+        async function importFromS3() {
+            try {
+                const filename = getS3SelectedFilename();
+                const text = await downloadFromS3(filename);
+                await importJsonText(text);
+                showInfo('已从 S3 导入 ' + filename, '导入成功');
+            } catch (e) {
+                showInfo('从 S3 下载失败：' + (e?.message || e), '下载失败');
+            }
+        }
+
+        async function importFromCloud() {
+            const provider = getSyncProvider();
+            if (provider === 's3') {
+                const s3Config = getS3Config();
+                if (!s3Config.secretId || !s3Config.secretKey || !s3Config.region || !s3Config.bucket) {
+                    showInfo('未配置 S3 信息，请在同步配置中填写。', '提示');
+                    return;
+                }
+                await importFromS3();
+            } else {
+                const { token } = getDropboxConfig();
+                if (!token) {
+                    showInfo('未登录 Dropbox，请先在同步配置中完成登录。', '提示');
+                    return;
+                }
+                await importFromDropbox();
             }
         }
 
@@ -2495,16 +2702,14 @@
             document.getElementById('reset-all-btn')?.addEventListener('click', resetAll);
             document.getElementById('random-pick-btn')?.addEventListener('click', randomPickAll);
             document.getElementById('import-json-btn')?.addEventListener('click', () => {
-                const { token } = getDropboxConfig();
-                const useCloud = isDropboxEnabled();
+                const useCloud = isCloudEnabled();
                 if (useCloud) {
-                    if (!token) { showInfo('未登录 Dropbox，请先在 Dropbox 配置中完成登录。', '提示'); return; }
-                    importFromDropbox();
+                    importFromCloud();
                 } else {
                     document.getElementById('json-file-input')?.click();
                 }
             });
-            document.getElementById('dropbox-config-btn')?.addEventListener('click', openDropboxModal);
+            document.getElementById('sync-config-btn')?.addEventListener('click', openSyncModal);
             document.getElementById('json-file-input')?.addEventListener('change', (e) => {
                 const file = e.target.files && e.target.files[0];
                 if (file) importJsonFile(file);
@@ -2516,58 +2721,138 @@
             document.getElementById('view-history-btn')?.addEventListener('click', openHistoryModal);
         }
 
-        function openDropboxModal() {
-            const wrap = document.getElementById('modal-dropbox');
+        function openSyncModal() {
+            const wrap = document.getElementById('modal-sync');
+            const providerBtns = document.querySelectorAll('#sync-provider-buttons .btn-toggle');
+            const dropboxConfig = document.getElementById('sync-dropbox-config');
+            const s3Config = document.getElementById('sync-s3-config');
+            const dropboxFooter = document.getElementById('sync-footer-dropbox');
+            const s3Footer = document.getElementById('sync-footer-s3');
+            const closeBtn = document.getElementById('modal-sync-close');
+
+            // Dropbox 元素
             const keyEl = document.getElementById('modal-db-key');
             const secEl = document.getElementById('modal-db-secret');
             const refreshEl = document.getElementById('modal-db-refresh');
             const enabledEl = document.getElementById('modal-db-enabled');
-            const saveBtn = document.getElementById('modal-db-save');
-            const cancelBtn = document.getElementById('modal-db-cancel');
-            const closeBtn = document.getElementById('modal-db-close');
-            const authBtn = document.getElementById('modal-db-authorize');
-            const loginBtn = document.getElementById('modal-db-login');
+            const dbSaveBtn = document.getElementById('modal-db-save');
+            const dbCancelBtn = document.getElementById('modal-db-cancel');
+            const dbAuthBtn = document.getElementById('modal-db-authorize');
+            const dbLoginBtn = document.getElementById('modal-db-login');
 
-            // 预填
-            const cfg = getDropboxConfig();
-            // 隐藏 App Key / Secret 输入框行
+            // S3 元素
+            const s3SecretIdEl = document.getElementById('modal-s3-secret-id');
+            const s3SecretKeyEl = document.getElementById('modal-s3-secret-key');
+            const s3RegionEl = document.getElementById('modal-s3-region');
+            const s3BucketEl = document.getElementById('modal-s3-bucket');
+            const s3EnabledEl = document.getElementById('modal-s3-enabled');
+            const s3SaveBtn = document.getElementById('modal-s3-save');
+            const s3CancelBtn = document.getElementById('modal-s3-cancel');
+
+            // 当前选中的服务
+            let currentProvider = getSyncProvider();
+
+            function switchProvider(provider) {
+                currentProvider = provider;
+                setSyncProvider(provider);
+                providerBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.provider === provider);
+                });
+                const fileRowLabel = document.querySelector('#modal-db-file-row-label');
+                const fileRowContent = document.querySelector('#modal-db-file-row-content');
+                if (provider === 'dropbox') {
+                    dropboxConfig.style.display = 'block';
+                    s3Config.style.display = 'none';
+                    dropboxFooter.classList.remove('hidden');
+                    s3Footer.classList.add('hidden');
+                    if (fileRowLabel) fileRowLabel.style.display = 'flex';
+                    if (fileRowContent) fileRowContent.style.display = 'flex';
+                } else {
+                    dropboxConfig.style.display = 'none';
+                    s3Config.style.display = 'block';
+                    dropboxFooter.classList.add('hidden');
+                    s3Footer.classList.remove('hidden');
+                    if (fileRowLabel) fileRowLabel.style.display = 'none';
+                    if (fileRowContent) fileRowContent.style.display = 'none';
+                }
+            }
+
+            // 初始化 Dropbox 数据
+            const dbCfg = getDropboxConfig();
             if (keyEl && keyEl.closest('.modal-row')) keyEl.closest('.modal-row').style.display = 'none';
             if (secEl && secEl.closest('.modal-row')) secEl.closest('.modal-row').style.display = 'none';
-            refreshEl.value = cfg.refresh || '';
+            refreshEl.value = dbCfg.refresh || '';
             if (enabledEl) enabledEl.checked = isDropboxEnabled();
+
+            // 初始化 S3 数据
+            const s3Cfg = getS3Config();
+            if (s3SecretIdEl) s3SecretIdEl.value = s3Cfg.secretId || '';
+            if (s3SecretKeyEl) s3SecretKeyEl.value = s3Cfg.secretKey || '';
+            if (s3RegionEl) s3RegionEl.value = s3Cfg.region || '';
+            if (s3BucketEl) s3BucketEl.value = s3Cfg.bucket || '';
+            if (s3EnabledEl) s3EnabledEl.checked = isS3Enabled();
+
+            // 切换到当前 provider
+            switchProvider(currentProvider);
 
             show(wrap);
 
-            // 动态插入"选择JSON文件"与"刷新列表"
+            // 动态插入 Dropbox 的"选择JSON文件"与"刷新列表"
             const bodyEl = wrap.querySelector('.modal-body');
-            let fileRow = wrap.querySelector('#modal-db-file-row');
+            let fileRowLabel = wrap.querySelector('#modal-db-file-row-label');
+            let fileRowContent = wrap.querySelector('#modal-db-file-row-content');
             let fileSel = wrap.querySelector('#modal-db-file');
             let fileRefreshBtn = wrap.querySelector('#modal-db-refresh-list');
-            if (!fileRow && bodyEl) {
-                fileRow = document.createElement('div');
-                fileRow.className = 'modal-row';
-                fileRow.id = 'modal-db-file-row';
+            if (!fileRowLabel && !fileRowContent && bodyEl) {
+                // 标签行
+                fileRowLabel = document.createElement('div');
+                fileRowLabel.className = 'modal-row';
+                fileRowLabel.id = 'modal-db-file-row-label';
                 const label = document.createElement('label');
-                label.textContent = '选择JSON文件（Dropbox 应用目录 Prompt Studio）';
+                label.textContent = '选择JSON文件（Dropbox 应用目录）';
+                fileRowLabel.appendChild(label);
+                bodyEl.appendChild(fileRowLabel);
+
+                // 内容行
+                fileRowContent = document.createElement('div');
+                fileRowContent.className = 'modal-row';
+                fileRowContent.id = 'modal-db-file-row-content';
                 const rowInner = document.createElement('div');
                 rowInner.style.display = 'flex';
                 rowInner.style.gap = '8px';
+                rowInner.style.width = '100%';
                 fileSel = document.createElement('select');
                 fileSel.className = 'modal-input';
                 fileSel.id = 'modal-db-file';
+                fileSel.style.flex = '1';
                 fileRefreshBtn = document.createElement('button');
                 fileRefreshBtn.className = 'btn btn-outline';
                 fileRefreshBtn.id = 'modal-db-refresh-list';
                 fileRefreshBtn.textContent = '刷新';
                 rowInner.appendChild(fileSel);
                 rowInner.appendChild(fileRefreshBtn);
-                fileRow.appendChild(label);
-                fileRow.appendChild(rowInner);
-                bodyEl.appendChild(fileRow);
+                fileRowContent.appendChild(rowInner);
+                bodyEl.appendChild(fileRowContent);
+            }
+            // 根据当前 provider 设置文件选择行的显示状态
+            if (fileRowLabel) {
+                fileRowLabel.style.display = currentProvider === 'dropbox' ? 'flex' : 'none';
+            }
+            if (fileRowContent) {
+                fileRowContent.style.display = currentProvider === 'dropbox' ? 'flex' : 'none';
             }
             // 预填文件选择
             if (fileSel) {
-                const preSel = getDropboxSelectedFilename();
+                let preSel = getDropboxSelectedFilename();
+                // 清理可能的错误前缀
+                if (preSel.includes('/Prompt Studio/')) {
+                    const parts = preSel.split('/Prompt Studio/');
+                    preSel = parts[parts.length - 1];
+                }
+                // 移除多余的路径分隔符
+                preSel = preSel.replace(/^\/+/, '').replace(/\/+$/, '');
+                // 确保有 / 前缀
+                preSel = '/' + preSel;
                 fileSel.innerHTML = '';
                 const opt = document.createElement('option');
                 opt.value = preSel;
@@ -2577,7 +2862,6 @@
             }
 
             async function listDropboxJsonFiles(token) {
-                // 列出根目录下所有 .json
                 const res = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
                     method: 'POST',
                     headers: {
@@ -2732,35 +3016,72 @@
                 }
             };
 
-            const onSave = () => {
+            const onDbSave = () => {
                 try {
-                    // 不再保存 App Key/Secret，仅保存 Refresh 与开关、文件名
                     localStorage.setItem('ops_dbx_refresh', refreshEl.value.trim());
                     if (enabledEl) {
                         localStorage.setItem('ops_dbx_enabled', enabledEl.checked ? '1' : '0');
                     }
                     const sel = wrap.querySelector('#modal-db-file');
-                    const v = sel && (sel.value || '').trim();
-                    if (v) localStorage.setItem('ops_dbx_filename', v);
+                    let v = sel && (sel.value || '').trim();
+                    // 清理路径，只保留纯文件名
+                    if (v) {
+                        // 移除 Prompt Studio/ 前缀
+                        if (v.includes('/Prompt Studio/')) {
+                            const parts = v.split('/Prompt Studio/');
+                            v = parts[parts.length - 1];
+                        }
+                        // 移除多余的路径分隔符
+                        v = v.replace(/^\/+/, '').replace(/\/+$/, '');
+                        // 确保有 / 前缀
+                        v = '/' + v;
+                        localStorage.setItem('ops_dbx_filename', v);
+                    }
                 } catch(e) {}
                 cleanup();
             };
+
+            const onS3Save = () => {
+                try {
+                    localStorage.setItem('ops_s3_secret_id', (s3SecretIdEl.value || '').trim());
+                    localStorage.setItem('ops_s3_secret_key', (s3SecretKeyEl.value || '').trim());
+                    localStorage.setItem('ops_s3_region', (s3RegionEl.value || '').trim());
+                    localStorage.setItem('ops_s3_bucket', (s3BucketEl.value || '').trim());
+                    if (s3EnabledEl) {
+                        localStorage.setItem('ops_s3_enabled', s3EnabledEl.checked ? '1' : '0');
+                    }
+                    localStorage.setItem('ops_s3_filename', 'OHAO AI Prompt Studio.json');
+                } catch(e) {}
+                cleanup();
+            };
+
             const onCancel = () => cleanup();
 
             function cleanup() {
-                saveBtn.removeEventListener('click', onSave);
-                cancelBtn.removeEventListener('click', onCancel);
                 closeBtn.removeEventListener('click', onCancel);
-                authBtn.removeEventListener('click', onAuthorize);
-                loginBtn.removeEventListener('click', onLogin);
+                dbCancelBtn.removeEventListener('click', onCancel);
+                s3CancelBtn.removeEventListener('click', onCancel);
+                dbSaveBtn.removeEventListener('click', onDbSave);
+                s3SaveBtn.removeEventListener('click', onS3Save);
+                dbAuthBtn.removeEventListener('click', onAuthorize);
+                dbLoginBtn.removeEventListener('click', onLogin);
+                providerBtns.forEach(btn => btn.removeEventListener('click', onProviderClick));
                 hide(wrap);
             }
 
-            saveBtn.addEventListener('click', onSave);
-            cancelBtn.addEventListener('click', onCancel);
+            const onProviderClick = (e) => {
+                const provider = e.target.dataset.provider;
+                if (provider) switchProvider(provider);
+            };
+
             closeBtn.addEventListener('click', onCancel);
-            authBtn.addEventListener('click', onAuthorize);
-            loginBtn.addEventListener('click', onLogin);
+            dbCancelBtn.addEventListener('click', onCancel);
+            s3CancelBtn.addEventListener('click', onCancel);
+            dbSaveBtn.addEventListener('click', onDbSave);
+            s3SaveBtn.addEventListener('click', onS3Save);
+            dbAuthBtn.addEventListener('click', onAuthorize);
+            dbLoginBtn.addEventListener('click', onLogin);
+            providerBtns.forEach(btn => btn.addEventListener('click', onProviderClick));
 
             // 刷新文件列表按钮
             const fileRefreshBtn2 = wrap.querySelector('#modal-db-refresh-list');
