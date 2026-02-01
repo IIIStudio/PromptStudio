@@ -697,7 +697,7 @@
         }
         /* 让通用提示模态位于最上层（覆盖其他模态） */
         #modal-confirm {
-            z-index: 3000;
+            z-index: 5000;
         }
         /* 编辑标签模态框（需要覆盖搜索模态框） */
         #modal-tag {
@@ -874,13 +874,16 @@
                 <button class="btn btn-outline" id="modal-tag-close">关闭</button>
             </div>
             <div class="modal-body">
+                <div class="modal-row" style="font-size:12px;opacity:.75;">
+                    支持批量添加多个标签，使用分号(;)或顿号(、)分隔
+                </div>
                 <div class="modal-row">
                     <label for="modal-tag-zh">中文</label>
-                    <input class="modal-input" id="modal-tag-zh" type="text" placeholder="例如：斗鸡眼" />
+                    <input class="modal-input" id="modal-tag-zh" type="text" placeholder="例如：斗鸡眼;歪嘴;龅牙" />
                 </div>
                 <div class="modal-row">
                     <label for="modal-tag-en">英文</label>
-                    <input class="modal-input" id="modal-tag-en" type="text" placeholder="例如：cross-eyed" />
+                    <input class="modal-input" id="modal-tag-en" type="text" placeholder="例如：cross-eyed;crooked mouth;bucktooth" />
                 </div>
                 <div class="modal-row">
                     <label>类别</label>
@@ -1045,7 +1048,7 @@
                       <li>在 Permissions 勾选权限，files.content.write与files.content.read，点击Submit提交</li>
                       <li>OAuth 2 Redirect URIs 写入 https://localhost/</li>
                   </ol>
-                    使用说明：点击“授权”在弹窗中登录并同意授权。授权完成后若拿到 https://localhost/?code=...，可直接将整条地址或 code部分 粘贴到上方输入框并点“登录”，系统会自动先兑换 Refresh Token；若已拿到 Refresh Token，直接粘贴后点“登录”即可获取临时 Access Token。
+                    使用说明：点击"授权"在弹窗中登录并同意授权。授权完成后若拿到 https://localhost/?code=...，可直接将整条地址或 code部分 粘贴到上方输入框并点"登录"，系统会自动先兑换 Refresh Token；若已拿到 Refresh Token，直接粘贴后点"登录"即可获取临时 Access Token。
                 </div>
             </div>
             <div class="modal-footer">
@@ -1225,7 +1228,7 @@
                     const empty = document.createElement('div');
                     empty.style.opacity = '.7';
                     empty.style.fontSize = '0.9rem';
-                    empty.textContent = '暂无菜单项，点击“新增菜单项”进行添加';
+                    empty.textContent = '暂无菜单项，点击"新增菜单项"进行添加';
                     list.appendChild(empty);
                     return;
                 }
@@ -1372,7 +1375,7 @@
                     const empty = document.createElement('div');
                     empty.style.opacity = '.7';
                     empty.style.fontSize = '0.9rem';
-                    empty.textContent = '暂无菜单项，点击“新增菜单项”进行添加';
+                    empty.textContent = '暂无菜单项，点击"新增菜单项"进行添加';
                     list.appendChild(empty);
                     return;
                 }
@@ -1644,10 +1647,10 @@
             if (isGroupedCategory(v)) return; // 已是分组
             const arr = Array.isArray(v) ? v : [];
             if (arr.length > 0) {
-                // 旧有条目迁移到“未分组”
+                // 旧有条目迁移到"未分组"
                 commonData[cat] = { groups: { '未分组': arr } };
             } else {
-                // 空分类：不自动创建“未分组”
+                // 空分类：不自动创建"未分组"
                 commonData[cat] = { groups: {}, groupsOrder: [] };
             }
         }
@@ -2131,7 +2134,7 @@
         }
 
         function downloadJson() {
-            // 同时导出“常用提示词”和“提示词历史”
+            // 同时导出"常用提示词"和"提示词历史"
             const exportObj = {
                 common: commonData || {},
                 history: (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
@@ -2531,7 +2534,7 @@
 
             show(wrap);
 
-            // 动态插入“选择JSON文件”与“刷新列表”
+            // 动态插入"选择JSON文件"与"刷新列表"
             const bodyEl = wrap.querySelector('.modal-body');
             let fileRow = wrap.querySelector('#modal-db-file-row');
             let fileSel = wrap.querySelector('#modal-db-file');
@@ -2636,7 +2639,7 @@
                     return;
                 }
                 // 提示用户在弹窗中完成登录与授权
-                showInfo('已打开 Dropbox 授权窗口，请在弹窗内登录并同意授权。授权完成后 Dropbox 将回跳至 https://localhost/，请在你的后端用回调换取 Refresh Token，然后回到此处点击“登录”。', '授权提示');
+                showInfo('已打开 Dropbox 授权窗口，请在弹窗内登录并同意授权。授权完成后 Dropbox 将回跳至 https://localhost/，请在你的后端用回调换取 Refresh Token，然后回到此处点击"登录"。', '授权提示');
             };
 
             const onLogin = async () => {
@@ -2943,7 +2946,7 @@
                     });
 
                     btnDelete.addEventListener('click', async () => {
-                        const ok = await showConfirm(`确认删除类别「${sub}」？${sub==='未分组' ? '（将删除其中所有条目）' : '（其中条目将移动到“未分组”）'}`, '删除类别');
+                        const ok = await showConfirm(`确认删除类别「${sub}」？${sub==='未分组' ? '（将删除其中所有条目）' : '（其中条目将移动到"未分组"）'}`, '删除类别');
                         if (!ok) return;
                         ensureGrouped(catKey);
                         const catObj = commonData[catKey];
@@ -2958,18 +2961,18 @@
                         } else {
                             const arrOld = g[sub] || [];
                             if (arrOld.length === 0) {
-                                // 空类别：直接删除，不迁移到“未分组”，不创建“未分组”
+                                // 空类别：直接删除，不迁移到"未分组"，不创建"未分组"
                                 delete g[sub];
                                 if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
                                 const i = catObj.groupsOrder.indexOf(sub);
                                 if (i >= 0) catObj.groupsOrder.splice(i, 1);
                             } else {
-                                // 非空类别：将条目迁移到“未分组”，再删除分组
+                                // 非空类别：将条目迁移到"未分组"，再删除分组
                                 const uf = g['未分组'] || (g['未分组'] = []);
                                 arrOld.forEach(it => uf.push(it));
                                 delete g[sub];
                                 if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
-                                // 确保“未分组”在顺序中存在
+                                // 确保"未分组"在顺序中存在
                                 if (!catObj.groupsOrder.includes('未分组') && g['未分组']) {
                                     catObj.groupsOrder.unshift('未分组');
                                 }
@@ -3343,7 +3346,7 @@
                 list.splice(safeTo, 0, moved);
                 window.__lastRenderList = list;
 
-                // 仅用“激活项”（排除置灰项）写回文本
+                // 仅用"激活项"（排除置灰项）写回文本
                 const disabledSet = window.__disabledTagSet || new Set();
                 const orderedActive = list.filter(t => !disabledSet.has(t));
                 promptEditor.value = orderedActive.join(', ');
@@ -3694,7 +3697,7 @@
                         normalizePromptInput();
                         updateTags();
                         promptEditor.focus();
-                        // 导入后关闭“提示词历史”弹窗
+                        // 导入后关闭"提示词历史"弹窗
                         onClose();
                     });
 
@@ -3884,7 +3887,7 @@
             let selectedSub = subcat || (function(){ try { return localStorage.getItem(LAST_SUBCAT_KEY) || ''; } catch(e){ return ''; } })();
             function renderSubButtons() {
                 if (!subBtnsWrap) return;
-                // 清空旧按钮（保留“新建类别”按钮）
+                // 清空旧按钮（保留"新建类别"按钮）
                 Array.from(subBtnsWrap.querySelectorAll('button[data-subcat]')).forEach(el => el.remove());
                 const v0 = commonData?.[cat];
                 const names = [];
@@ -4046,13 +4049,34 @@
                     }
                 }
 
-                if (!lang_zh2 || !text2) { (lang_zh2 ? en : zh).focus(); return; }
+                // 支持多标签：按分号(;)或顿号(、)分割
+                const zhParts = lang_zh2.split(/[;、]+/).map(s => s.trim()).filter(Boolean);
+                const enParts = text2.split(/[;、]+/).map(s => s.trim()).filter(Boolean);
+
+                // 验证至少有一个标签对
+                if (zhParts.length === 0 || enParts.length === 0) {
+                    zh.focus();
+                    return;
+                }
 
                 const targetSub = (selectedSub || '').trim();
-
                 const vNow = commonData?.[cat];
+                const tagsToAdd = [];
+
+                // 生成标签对（取较大值，缺失部分为空）
+                const maxLength = Math.max(zhParts.length, enParts.length);
+                for (let i = 0; i < maxLength; i++) {
+                    tagsToAdd.push({
+                        lang_zh: zhParts[i] || '',
+                        text: enParts[i] || ''
+                    });
+                }
 
                 if (editing) {
+                    // 编辑模式：只更新单个标签，不支持批量编辑
+                    const zhSingle = zhParts[0] || lang_zh2;
+                    const enSingle = enParts[0] || text2;
+
                     if (isGroupedCategory(vNow) && subcat) {
                         const g = vNow.groups || {};
                         const fromArr = g[subcat] || [];
@@ -4061,10 +4085,10 @@
                             // 移动到其他类别
                             fromArr.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
                         } else {
                             // 就地更新
-                            fromArr[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                            fromArr[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
                         }
                     } else if (isGroupedCategory(vNow) && !subcat) {
                         const g = vNow.groups || {};
@@ -4073,44 +4097,50 @@
                         if (targetSub && targetSub !== '未分组') {
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
                         } else {
-                            uf[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                            uf[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
                         }
                     } else {
                         commonData[cat] = Array.isArray(vNow) ? vNow : [];
                         // 旧数组模式
                         if (targetSub) {
-                            // 升级为分组，并把旧数组作为“未分组”
+                            // 升级为分组，并把旧数组作为"未分组"
                             ensureGrouped(cat);
                             const g = commonData[cat].groups;
                             const uf = g['未分组'];
                             const old = uf[index] || {};
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
                         } else {
                             const old = commonData[cat][index] || {};
-                            commonData[cat][index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                            commonData[cat][index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
                         }
                     }
                 } else {
-                    if (targetSub) {
-                        ensureGrouped(cat);
-                        const groups = commonData[cat].groups;
-                        if (!groups[targetSub]) groups[targetSub] = [];
-                        groups[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: false });
-                    } else {
-                        if (Array.isArray(vNow)) {
-                            vNow.push({ text: text2, lang_zh: lang_zh2, pinned: false });
-                            commonData[cat] = vNow;
-                        } else if (isGroupedCategory(vNow)) {
-                            const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
-                            arr.push({ text: text2, lang_zh: lang_zh2, pinned: false });
-                        } else {
-                            commonData[cat] = [{ text: text2, lang_zh: lang_zh2, pinned: false }];
+                    // 添加模式：支持批量添加多个标签
+                    tagsToAdd.forEach(tag => {
+                        // 只添加中英文都存在的标签
+                        if (tag.lang_zh && tag.text) {
+                            if (targetSub) {
+                                ensureGrouped(cat);
+                                const groups = commonData[cat].groups;
+                                if (!groups[targetSub]) groups[targetSub] = [];
+                                groups[targetSub].push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                            } else {
+                                if (Array.isArray(vNow)) {
+                                    vNow.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                                    commonData[cat] = vNow;
+                                } else if (isGroupedCategory(vNow)) {
+                                    const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
+                                    arr.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                                } else {
+                                    commonData[cat] = [{ text: tag.text, lang_zh: tag.lang_zh, pinned: false }];
+                                }
+                            }
                         }
-                    }
+                    });
                 }
 
                 // 记录最后一次小类别选择
@@ -4148,7 +4178,7 @@
             en.addEventListener('keydown', onKey);
         }
 
-        // 通用信息提示（居中模态，仅“确定”）
+        // 通用信息提示（居中模态，仅"确定"）
         function showInfo(message, title = '提示') {
             const wrap = document.getElementById('modal-confirm');
             const titleEl = document.getElementById('modal-confirm-title');
@@ -4219,6 +4249,7 @@
                 // 创建容器
                 const backdrop = document.createElement('div');
                 backdrop.className = 'modal-backdrop';
+                backdrop.style.zIndex = '5000'; // 确保在编辑标签弹窗之上
                 const modal = document.createElement('div');
                 modal.className = 'modal';
 
@@ -4295,6 +4326,7 @@
                 const icons = ['fas fa-images','fas fa-book','fas fa-tags','fas fa-search','fas fa-image','fas fa-globe'];
                 const backdrop = document.createElement('div');
                 backdrop.className = 'modal-backdrop';
+                backdrop.style.zIndex = '5000'; // 确保在编辑标签弹窗之上
                 const modal = document.createElement('div');
                 modal.className = 'modal';
 
@@ -4468,7 +4500,7 @@
                     { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) }
                 ];
 
-                // 自定义外链项（出现在“删除”上方）
+                // 自定义外链项（出现在"删除"上方）
                 try {
                     const customMenus = (typeof getCtxMenus === 'function') ? getCtxMenus() : [];
                     if (Array.isArray(customMenus) && customMenus.length) {
