@@ -1618,8 +1618,13 @@ Prompt Studio目录下</p>
             }
             function onClose() { hide(wrap); }
 
+            function onKey(e) {
+                if (e.key === 'Escape') onClose();
+            }
+
             saveBtn.onclick = onSave;
             closeBtn.onclick = onClose;
+            document.addEventListener('keydown', onKey);
 
             renderList();
             show(wrap);
@@ -1765,8 +1770,13 @@ Prompt Studio目录下</p>
             }
             function onClose() { hide(wrap); }
 
+            function onKey(e) {
+                if (e.key === 'Escape') onClose();
+            }
+
             saveBtn.onclick = onSave;
             closeBtn.onclick = onClose;
+            document.addEventListener('keydown', onKey);
 
             renderList();
             show(wrap);
@@ -2441,10 +2451,12 @@ Prompt Studio目录下</p>
                     resolve(null);
                 };
 
-                // 回车键确认
+                // 回车键确认，ESC键取消
                 const onEnter = (e) => {
                     if (e.key === 'Enter') {
                         onConfirm();
+                    } else if (e.key === 'Escape') {
+                        onCancel();
                     }
                 };
 
@@ -2705,6 +2717,60 @@ Prompt Studio目录下</p>
 
             const { secretId, secretKey, region, bucket } = await decryptS3Config(encryptedConfig, password);
 
+            // 初始化 COS 客户端 - 使用永久密钥方式
+            const cos = new COS({
+                SecretId: secretId,
+                SecretKey: secretKey
+            });
+
+            // 构造下载路径：Prompt Studio/filename
+            const key = `Prompt Studio/${filename}`;
+
+            return new Promise((resolve, reject) => {
+                cos.getObject({
+                    Bucket: bucket,
+                    Region: region,
+                    Key: key
+                }, function (err, data) {
+                    if (err) {
+                        reject(new Error(`S3 下载失败：${err.message || err}`));
+                    } else {
+                        resolve(data.Body);
+                    }
+                });
+            });
+        }
+
+        // 内部上传函数 - 使用已解密的配置（不弹出密码输入框）
+        async function uploadToS3Internal(filename, contentStr, secretId, secretKey, region, bucket) {
+            // 初始化 COS 客户端 - 使用永久密钥方式
+            const cos = new COS({
+                SecretId: secretId,
+                SecretKey: secretKey
+            });
+
+            // 构造上传路径：Prompt Studio/filename
+            const key = `Prompt Studio/${filename}`;
+
+            return new Promise((resolve, reject) => {
+                cos.putObject({
+                    Bucket: bucket,
+                    Region: region,
+                    Key: key,
+                    Body: contentStr,
+                    ContentType: 'application/json'
+                }, function (err, data) {
+                    if (err) {
+                        reject(new Error(`S3 上传失败：${err.message || err}`));
+                    } else {
+                        resolve(data);
+                    }
+                });
+            });
+        }
+
+        // 内部下载函数 - 使用已解密的配置（不弹出密码输入框）
+        async function downloadFromS3Internal(filename, secretId, secretKey, region, bucket) {
             // 初始化 COS 客户端 - 使用永久密钥方式
             const cos = new COS({
                 SecretId: secretId,
@@ -3181,6 +3247,10 @@ Prompt Studio目录下</p>
             const s3BtnFetch = document.getElementById('modal-s3-btn-fetch');
             const s3ConfigListEl = document.getElementById('modal-s3-config-list');
 
+            // 保存原始选中的配置名称
+            const originalSelectedConfig = getSelectedS3Config();
+            localStorage.setItem('ops_s3_selected_config_original', originalSelectedConfig);
+
             // 渲染S3配置列表
             function renderS3ConfigList() {
                 const configs = getS3Configs();
@@ -3198,6 +3268,7 @@ Prompt Studio目录下</p>
                         btn.innerHTML = config.name;
                     }
                     btn.onclick = () => {
+                        // 只更新选中状态，不执行上传下载
                         setSelectedS3Config(config.name);
                         renderS3ConfigList();
                     };
@@ -3620,9 +3691,53 @@ Prompt Studio目录下</p>
                         localStorage.setItem('ops_cloud_enabled', cloudEnabledEl.checked ? '1' : '0');
                     }
 
-                    // 如果已经加密，直接保存云端开关即可
+                    // 如果已经加密，检查配置是否发生变化
                     if (hasEncryptedData) {
-                        showInfo('S3 配置已保存', '提示');
+                        // 检查配置是否发生变化
+                        const currentSelectedName = getSelectedS3Config();
+                        const originalSelectedName = localStorage.getItem('ops_s3_selected_config_original');
+                        
+                        if (originalSelectedName && currentSelectedName !== originalSelectedName) {
+                            // 配置发生变化，需要上传当前文件并下载新选择的文件
+                            try {
+                                // 只输入一次密码
+                                const password = await showPasswordModal();
+                                if (!password) {
+                                    showInfo('需要密码才能切换配置', '提示');
+                                    return;
+                                }
+
+                                // 解密配置
+                                const encryptedConfig = await getS3Config();
+                                const { secretId, secretKey, region, bucket } = await decryptS3Config(encryptedConfig, password);
+
+                                const configs = getS3Configs();
+                                const currentConfig = configs.find(c => c.name === currentSelectedName);
+                                const originalConfig = configs.find(c => c.name === originalSelectedName);
+                                
+                                if (currentConfig && originalConfig) {
+                                    // 先上传当前文件（使用原配置的文件名）
+                                    const exportObj = {
+                                        common: commonData || {},
+                                        history: (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
+                                        menus: (function(){ try { const raw = localStorage.getItem('ops_ctx_menu_items'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })()
+                                    };
+                                    const dataStr = JSON.stringify(exportObj, null, 2);
+                                    await uploadToS3Internal(originalConfig.filename, dataStr, secretId, secretKey, region, bucket);
+                                    showInfo('已上传到 S3: ' + originalConfig.filename, '上传成功');
+                                    
+                                    // 下载新选择的文件
+                                    const text = await downloadFromS3Internal(currentConfig.filename, secretId, secretKey, region, bucket);
+                                    await importJsonText(text);
+                                    showInfo('已从 S3 导入 ' + currentConfig.filename, '导入成功');
+                                }
+                            } catch (e) {
+                                console.error('切换配置失败:', e);
+                                showInfo('切换配置失败: ' + (e?.message || e), '错误');
+                                return;
+                            }
+                        }
+                        
                         cleanup();
                         return;
                     }
@@ -3732,6 +3847,8 @@ Prompt Studio目录下</p>
             };
 
             function cleanup() {
+                // 清除临时保存的原始配置名称
+                localStorage.removeItem('ops_s3_selected_config_original');
                 closeBtn.removeEventListener('click', onCancel);
                 dbCancelBtn.removeEventListener('click', onCancel);
                 s3CancelBtn.removeEventListener('click', onCancel);
@@ -3740,7 +3857,12 @@ Prompt Studio目录下</p>
                 dbAuthBtn.removeEventListener('click', onAuthorize);
                 dbLoginBtn.removeEventListener('click', onLogin);
                 providerBtns.forEach(btn => btn.removeEventListener('click', onProviderClick));
+                document.removeEventListener('keydown', onKey);
                 hide(wrap);
+            }
+
+            function onKey(e) {
+                if (e.key === 'Escape') onCancel();
             }
 
             const onProviderClick = (e) => {
@@ -3756,6 +3878,7 @@ Prompt Studio目录下</p>
             dbAuthBtn.addEventListener('click', onAuthorize);
             dbLoginBtn.addEventListener('click', onLogin);
             providerBtns.forEach(btn => btn.addEventListener('click', onProviderClick));
+            document.addEventListener('keydown', onKey);
 
             // 清除密钥按钮事件
             const dbClearBtn = wrap.querySelector('#modal-db-clear');
@@ -5420,7 +5543,24 @@ Prompt Studio目录下</p>
         }
 
         // 通用信息提示（居中模态，仅"确定"）
+        let toastQueue = [];
+        let isShowingToast = false;
+
         function showInfo(message, title = '提示') {
+            return new Promise((resolve) => {
+                toastQueue.push({ message, resolve });
+                processToastQueue();
+            });
+        }
+
+        function processToastQueue() {
+            if (isShowingToast || toastQueue.length === 0) {
+                return;
+            }
+
+            isShowingToast = true;
+            const { message, resolve } = toastQueue.shift();
+
             const toast = document.createElement('div');
             toast.style.position = 'fixed';
             toast.style.top = '50%';
@@ -5435,12 +5575,15 @@ Prompt Studio目录下</p>
             toast.style.fontSize = '1rem';
             toast.textContent = message;
             document.body.appendChild(toast);
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                    resolve();
-                }, 2000);
-            });
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+                isShowingToast = false;
+                resolve();
+                processToastQueue();
+            }, 2000);
         }
 
         // 通用确认函数（居中模态）
