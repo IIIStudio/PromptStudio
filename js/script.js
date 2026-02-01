@@ -38,6 +38,97 @@
         // 提示词编辑器
         const promptEditor = document.getElementById('prompt-editor');
 
+        const TAG_WEIGHT_MIN = 0.5;
+        const TAG_WEIGHT_MAX = 2;
+        const TAG_WEIGHT_STEP_TICKS = 1; // 单步对应 0.1
+        const TAG_WEIGHT_MIN_TICKS = Math.round(TAG_WEIGHT_MIN * 10);
+        const TAG_WEIGHT_MAX_TICKS = Math.round(TAG_WEIGHT_MAX * 10);
+
+        function parseWeightedTag(raw) {
+            const text = (raw || '').trim();
+            if (!text) {
+                return { base: '', weight: 1, hasWeight: false };
+            }
+            if (text.startsWith('(') && text.endsWith(')')) {
+                const inner = text.slice(1, -1);
+                const colonIndex = inner.lastIndexOf(':');
+                if (colonIndex > 0) {
+                    const base = inner.slice(0, colonIndex).trim();
+                    const weightStr = inner.slice(colonIndex + 1).trim();
+                    const weightNum = parseFloat(weightStr);
+                    if (base && !Number.isNaN(weightNum)) {
+                        return { base, weight: weightNum, hasWeight: true };
+                    }
+                }
+            }
+            return { base: text, weight: 1, hasWeight: false };
+        }
+
+        function clampWeightTicks(ticks) {
+            if (!Number.isFinite(ticks)) return Math.round(1 * 10);
+            if (ticks < TAG_WEIGHT_MIN_TICKS) return TAG_WEIGHT_MIN_TICKS;
+            if (ticks > TAG_WEIGHT_MAX_TICKS) return TAG_WEIGHT_MAX_TICKS;
+            return ticks;
+        }
+
+        function ticksToWeight(ticks) {
+            return clampWeightTicks(Math.round(ticks)) / 10;
+        }
+
+        function weightToTicks(weight) {
+            const safeWeight = Number.isFinite(weight) ? weight : 1;
+            return clampWeightTicks(Math.round(safeWeight * 10));
+        }
+
+        function formatWeightedTag(baseText, weightValue) {
+            const base = (baseText || '').trim();
+            if (!base) return '';
+            const ticks = weightToTicks(weightValue);
+            if (ticks === Math.round(1 * 10)) {
+                return base;
+            }
+            const normalizedWeight = ticks / 10;
+            const weightStr = (Math.round(normalizedWeight * 100) / 100).toFixed(2).replace(/\. ?0+$/, '');
+            return `(${base}:${weightStr})`;
+        }
+
+        function computeNextWeight(currentWeight, deltaSteps) {
+            const currentTicks = weightToTicks(currentWeight);
+            const nextTicks = clampWeightTicks(currentTicks + (deltaSteps * TAG_WEIGHT_STEP_TICKS));
+            return nextTicks / 10;
+        }
+
+        function adjustTagWeightBySteps(currentTag, deltaSteps) {
+            if (!currentTag) return;
+            const parsed = parseWeightedTag(currentTag);
+            const base = parsed.base;
+            const baseKey = base.toLowerCase();
+            const curW = Number.isFinite(parsed.weight) ? parsed.weight : 1;
+            const nextW = computeNextWeight(curW, deltaSteps);
+            const formatted = formatWeightedTag(base, nextW);
+
+            weightStateMap.set(baseKey, nextW);
+
+            if (Array.isArray(window.__lastRenderList)) {
+                const pos = window.__lastRenderList.indexOf(currentTag);
+                if (pos >= 0) window.__lastRenderList.splice(pos, 1, formatted);
+            }
+            if (window.__disabledTagSet.has(currentTag)) {
+                window.__disabledTagSet.delete(currentTag);
+                window.__disabledTagSet.add(formatted);
+            }
+            let parts = (promptEditor.value || '').split(/[,，]/)
+                .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                .filter(Boolean);
+            const idx = parts.indexOf(currentTag);
+            if (idx >= 0) {
+                parts[idx] = formatted;
+                promptEditor.value = parts.join(', ');
+            }
+            normalizePromptInput();
+            updateTags();
+        }
+
         // 右键菜单配置存取
         const MENU_KEY = 'ops_ctx_menu_items';
         function getCtxMenus() {
@@ -74,7 +165,7 @@
                     const empty = document.createElement('div');
                     empty.style.opacity = '.7';
                     empty.style.fontSize = '0.9rem';
-                    empty.textContent = '暂无菜单项，点击“新增菜单项”进行添加';
+                    empty.textContent = '暂无菜单项，点击"新增菜单项"进行添加';
                     list.appendChild(empty);
                     return;
                 }
@@ -221,7 +312,7 @@
                     const empty = document.createElement('div');
                     empty.style.opacity = '.7';
                     empty.style.fontSize = '0.9rem';
-                    empty.textContent = '暂无菜单项，点击“新增菜单项”进行添加';
+                    empty.textContent = '暂无菜单项，点击"新增菜单项"进行添加';
                     list.appendChild(empty);
                     return;
                 }
@@ -348,27 +439,136 @@
         }
         const tagsContainer = document.getElementById('prompt-tags-container');
         const commonTagsContainer = document.getElementById('common-tags');
-        // 确保 Token 计数器存在（若未在HTML中插入，则动态创建）
+        const weightStateMap = new Map();
+        const weightPrefKey = 'ops_weight_controls_enabled';
+        const savedWeightPref = localStorage.getItem(weightPrefKey);
+        if (savedWeightPref === null) {
+            window.__weightControlsEnabled = false;
+        } else {
+            window.__weightControlsEnabled = savedWeightPref === 'true';
+        }
+        function updateWeightControlVisibility() {
+            const enabled = window.__weightControlsEnabled;
+            if (!tagsContainer) return;
+            tagsContainer.querySelectorAll('.prompt-tag').forEach(tagEl => {
+                tagEl.classList.toggle('weight-disabled', !enabled);
+                const panel = tagEl.querySelector('[data-role="weight-panel"]');
+                if (panel) panel.style.display = enabled ? 'inline-flex' : 'none';
+            });
+        }
+        // 确保 Token 计数器存在，并添加权重开关
         (function ensureTokenCounter() {
             try {
-                let el = document.getElementById('token-counter');
-                if (!el) {
-                    el = document.createElement('div');
-                    el.id = 'token-counter';
-                    el.className = 'token-counter';
-                    el.textContent = 'Tokens: 0/75';
-                    // 插入到文本域之后
+                let wrap = document.getElementById('token-counter-wrap');
+                if (!wrap) {
+                    wrap = document.createElement('div');
+                    wrap.id = 'token-counter-wrap';
+                    wrap.style.display = 'flex';
+                    wrap.style.justifyContent = 'space-between';
+                    wrap.style.alignItems = 'center';
+                    wrap.style.gap = '12px';
+
+                    const toggleLabel = document.createElement('label');
+                    toggleLabel.className = 'weight-toggle';
+                    const initialEnabled = window.__weightControlsEnabled;
+                    toggleLabel.innerHTML = `
+                        <input type="checkbox" id="weight-visibility-toggle"${initialEnabled ? ' checked' : ''}>
+                        <span class="slider"></span>
+                        <span class="label-text">显示权重控制</span>
+                    `;
+
+                    const counter = document.createElement('div');
+                    counter.id = 'token-counter';
+                    counter.className = 'token-counter';
+                    counter.textContent = 'Tokens: 0/75';
+
+                    wrap.appendChild(toggleLabel);
+                    wrap.appendChild(counter);
+
                     if (promptEditor && promptEditor.parentNode) {
-                        promptEditor.parentNode.insertBefore(el, promptEditor.nextSibling);
+                        promptEditor.parentNode.insertBefore(wrap, promptEditor.nextSibling);
                     }
+
+                    const toggle = wrap.querySelector('#weight-visibility-toggle');
+                    if (toggle) {
+                        toggle.checked = window.__weightControlsEnabled;
+                        updateWeightControlVisibility();
+                        toggle.addEventListener('change', (e) => {
+                            const enabled = !!e.target.checked;
+                            window.__weightControlsEnabled = enabled;
+                            try {
+                                localStorage.setItem(weightPrefKey, String(enabled));
+                            } catch (_) {}
+                            updateWeightControlVisibility();
+                        });
+                    }
+                } else {
+                    const counter = document.getElementById('token-counter');
+                    if (counter) counter.textContent = 'Tokens: 0/75';
                 }
             } catch(_) {}
         })();
 
         // 本地存储常用提示词（顶层为分类名，值为数组 {text, lang_zh}）
         let commonData = {};
+        let zhToEnMap = null;
         const sidebarList = document.querySelector('.prompt-list');
         const STORAGE_KEY = 'ops_common_data';
+
+        function normalizeZhKey(text) {
+            if (typeof text !== 'string') return '';
+            return text.trim().replace(/\s+/g, '');
+        }
+
+        function extractZhVariants(raw) {
+            const base = typeof raw === 'string' ? raw.trim() : '';
+            if (!base) return [];
+            const variants = new Set([base]);
+            base.split(/[\|｜/、，,;；]+/).forEach(part => {
+                const trimmed = part.trim();
+                if (trimmed) variants.add(trimmed);
+            });
+            return Array.from(variants);
+        }
+
+        function refreshZhToEnCache() {
+            const map = new Map();
+            const addPair = (variant, enText) => {
+                const key = normalizeZhKey(variant);
+                if (!key || map.has(key)) return;
+                map.set(key, enText);
+            };
+            const collectFromArray = (arr) => {
+                arr.forEach(item => {
+                    const enText = (item?.text || '').trim();
+                    const zhRaw = (item?.lang_zh || '').trim();
+                    if (!enText || !zhRaw) return;
+                    extractZhVariants(zhRaw).forEach(variant => addPair(variant, enText));
+                });
+            };
+            try {
+                Object.keys(commonData || {}).forEach(cat => {
+                    const value = commonData[cat];
+                    if (Array.isArray(value)) {
+                        collectFromArray(value);
+                    } else if (isGroupedCategory(value)) {
+                        const groups = value.groups || {};
+                        Object.keys(groups).forEach(groupKey => {
+                            const arr = groups[groupKey];
+                            if (Array.isArray(arr)) collectFromArray(arr);
+                        });
+                    }
+                });
+            } catch (_) {}
+            zhToEnMap = map;
+        }
+
+        function findEn(zhText) {
+            const key = normalizeZhKey(zhText);
+            if (!key) return '';
+            if (!zhToEnMap) refreshZhToEnCache();
+            return zhToEnMap?.get(key) || '';
+        }
 
         // 分组工具函数
         function isGroupedCategory(v) {
@@ -384,10 +584,10 @@
             if (isGroupedCategory(v)) return; // 已是分组
             const arr = Array.isArray(v) ? v : [];
             if (arr.length > 0) {
-                // 旧有条目迁移到“未分组”
+                // 旧有条目迁移到"未分组"
                 commonData[cat] = { groups: { '未分组': arr } };
             } else {
-                // 空分类：不自动创建“未分组”
+                // 空分类：不自动创建"未分组"
                 commonData[cat] = { groups: {}, groupsOrder: [] };
             }
         }
@@ -408,6 +608,7 @@
 
         function saveCommonData() {
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify(commonData)); } catch(e) { console.error('保存失败', e); }
+            refreshZhToEnCache();
         }
 
         function loadCommonTagsFromStorage() {
@@ -417,6 +618,7 @@
             } catch (e) {
                 commonData = {};
             }
+            refreshZhToEnCache();
             renderSidebar();
         }
 
@@ -435,6 +637,18 @@
                     card.classList.add('active');
                     setActiveCategory(key);
                     renderCommonTagsByCategory(key);
+                });
+                // 启用侧栏分类拖拽
+                card.draggable = true;
+                card.addEventListener('dragstart', handleCatDragStart);
+                card.addEventListener('dragend', handleCatDragEnd);
+                // 子元素也监听 dragover/drop，确保在卡片上释放也能触发
+                card.addEventListener('dragover', onSidebarDragOver);
+                card.addEventListener('drop', onSidebarDrop);
+                // 右键菜单支持
+                card.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showCategoryContextMenu(e, key);
                 });
                 sidebarList.appendChild(card);
             });
@@ -475,6 +689,229 @@
         function moveCategoryUp(cat) { moveCategory(cat, 'up'); }
         function moveCategoryDown(cat) { moveCategory(cat, 'down'); }
 
+        // 侧栏分类右键菜单
+        let currentContextCategory = null;
+        const categoryContextMenu = document.createElement('div');
+        categoryContextMenu.className = 'context-menu';
+        categoryContextMenu.innerHTML = `
+            <div class="item" id="ctx-cat-edit"><i class="fas fa-edit"></i> 编辑名称</div>
+            <div class="item" id="ctx-cat-delete" style="color:var(--danger-color);"><i class="fas fa-trash"></i> 删除分类</div>
+            <div class="item" id="ctx-cat-move-up"><i class="fas fa-arrow-up"></i> 上移</div>
+            <div class="item" id="ctx-cat-move-down"><i class="fas fa-arrow-down"></i> 下移</div>
+        `;
+        document.body.appendChild(categoryContextMenu);
+
+        function showCategoryContextMenu(e, catKey) {
+            currentContextCategory = catKey;
+            const menu = categoryContextMenu;
+            menu.style.display = 'block';
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+
+            // 绑定菜单项事件
+            const editItem = document.getElementById('ctx-cat-edit');
+            const deleteItem = document.getElementById('ctx-cat-delete');
+            const upItem = document.getElementById('ctx-cat-move-up');
+            const downItem = document.getElementById('ctx-cat-move-down');
+
+            editItem.onclick = () => {
+                hideCategoryContextMenu();
+                openEditCategoryModal(catKey);
+            };
+
+            deleteItem.onclick = async () => {
+                hideCategoryContextMenu();
+                const ok = await showConfirm(`确定要删除分类"${catKey}"吗？分类下的所有标签也将被删除。`, '删除确认');
+                if (ok) {
+                    delete commonData[catKey];
+                    saveCommonData();
+                    renderSidebar();
+                }
+            };
+
+            upItem.onclick = () => {
+                hideCategoryContextMenu();
+                moveCategoryUp(catKey);
+            };
+
+            downItem.onclick = () => {
+                hideCategoryContextMenu();
+                moveCategoryDown(catKey);
+            };
+        }
+
+        function hideCategoryContextMenu() {
+            categoryContextMenu.style.display = 'none';
+            currentContextCategory = null;
+        }
+
+        // 点击其他地方关闭右键菜单
+        document.addEventListener('click', (e) => {
+            if (!categoryContextMenu.contains(e.target)) {
+                hideCategoryContextMenu();
+            }
+        });
+
+        // 编辑分类模态框
+        function openEditCategoryModal(oldName) {
+            const wrap = document.getElementById('modal-edit-category');
+            const input = document.getElementById('modal-edit-cat-name');
+            const confirmBtn = document.getElementById('modal-edit-cat-confirm');
+            const cancelBtn = document.getElementById('modal-edit-cat-cancel');
+            const closeBtn = document.getElementById('modal-edit-cat-close');
+            input.value = oldName || '';
+            show(wrap);
+            setTimeout(() => input.focus(), 0);
+
+            const onConfirm = () => {
+                const newName = (input.value || '').trim();
+                if (!newName) { input.focus(); return; }
+                if (newName !== oldName) {
+                    if (commonData[newName]) {
+                        showInfo('已存在同名分类', '提示');
+                        return;
+                    }
+                    const items = commonData[oldName] || [];
+                    delete commonData[oldName];
+                    commonData[newName] = items;
+                    saveCommonData();
+                    setActiveCategory(newName);
+                    renderSidebar();
+                }
+                cleanup();
+            };
+            const onCancel = () => cleanup();
+
+            function cleanup() {
+                confirmBtn.removeEventListener('click', onConfirm);
+                cancelBtn.removeEventListener('click', onCancel);
+                closeBtn.removeEventListener('click', onCancel);
+                input.removeEventListener('keydown', onKey);
+                hide(wrap);
+            }
+            function onKey(e) {
+                if (e.key === 'Enter') onConfirm();
+                if (e.key === 'Escape') onCancel();
+            }
+
+            confirmBtn.addEventListener('click', onConfirm);
+            cancelBtn.addEventListener('click', onCancel);
+            closeBtn.addEventListener('click', onCancel);
+            input.addEventListener('keydown', onKey);
+        }
+
+        // 侧栏分类拖拽排序逻辑
+        let catDraggedKey = null;
+        let catPlaceholderEl = null;
+
+        function handleCatDragStart(e) {
+            const key = this.getAttribute('data-cat') || '';
+            catDraggedKey = key || null;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', key);
+        }
+
+        function handleCatDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.prompt-card').forEach(card => card.classList.remove('dragging'));
+            if (catPlaceholderEl && catPlaceholderEl.parentNode) {
+                catPlaceholderEl.parentNode.removeChild(catPlaceholderEl);
+            }
+            catPlaceholderEl = null;
+            catDraggedKey = null;
+        }
+
+        function getCatInsertIndexByPoint(y) {
+            const items = Array.from(sidebarList.querySelectorAll('.prompt-card'));
+            if (!items.length) return 0;
+            // 找到垂直位置最近的卡片
+            let anchor = items[items.length - 1];
+            let minDist = Infinity;
+            items.forEach(el => {
+                const r = el.getBoundingClientRect();
+                const cy = r.top + r.height / 2;
+                const d = Math.abs(y - cy);
+                if (d < minDist) { minDist = d; anchor = el; }
+            });
+            const r = anchor.getBoundingClientRect();
+            const mid = r.top + r.height / 2;
+            const baseIdx = items.indexOf(anchor);
+            return y < mid ? baseIdx : baseIdx + 1;
+        }
+
+        function onSidebarDragOver(e) {
+            if (!catDraggedKey) return false;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (!catPlaceholderEl) {
+                catPlaceholderEl = document.createElement('div');
+                catPlaceholderEl.style.height = '10px';
+                catPlaceholderEl.style.margin = '6px 12px';
+                catPlaceholderEl.style.borderRadius = '4px';
+                catPlaceholderEl.style.background = 'var(--primary-color)';
+            }
+            const idx = getCatInsertIndexByPoint(e.clientY);
+            const cards = Array.from(sidebarList.querySelectorAll('.prompt-card'));
+            if (idx >= cards.length) {
+                if (catPlaceholderEl.parentNode !== sidebarList || catPlaceholderEl.nextElementSibling !== null) {
+                    sidebarList.appendChild(catPlaceholderEl);
+                }
+            } else {
+                const ref = cards[idx];
+                if (ref.previousSibling !== catPlaceholderEl) {
+                    sidebarList.insertBefore(catPlaceholderEl, ref);
+                }
+            }
+            return false;
+        }
+
+        function onSidebarDrop(e) {
+            if (!catDraggedKey) return false;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const keys = Object.keys(commonData);
+            const fromIndex = keys.indexOf(catDraggedKey);
+
+            // 优先使用占位条位置确定目标索引
+            let toIndex = -1;
+            if (catPlaceholderEl && sidebarList.contains(catPlaceholderEl)) {
+                const cards = Array.from(sidebarList.querySelectorAll('.prompt-card'));
+                let countBefore = 0;
+                for (const node of sidebarList.children) {
+                    if (node === catPlaceholderEl) break;
+                    if (node.classList && node.classList.contains('prompt-card')) countBefore++;
+                }
+                toIndex = countBefore;
+            } else {
+                // 回退：用坐标估算
+                toIndex = getCatInsertIndexByPoint(e.clientY);
+            }
+
+            if (fromIndex >= 0 && toIndex >= 0 && fromIndex !== toIndex) {
+                // 拖起位置在目标之前时，移除后目标索引左移一位
+                if (fromIndex < toIndex) toIndex -= 1;
+                const newKeys = keys.slice();
+                newKeys.splice(fromIndex, 1);
+                newKeys.splice(Math.max(0, Math.min(toIndex, newKeys.length)), 0, catDraggedKey);
+
+                const reordered = {};
+                newKeys.forEach(k => { reordered[k] = commonData[k]; });
+                commonData = reordered;
+                saveCommonData();
+                renderSidebar();
+            }
+
+            if (catPlaceholderEl && catPlaceholderEl.parentNode) {
+                catPlaceholderEl.parentNode.removeChild(catPlaceholderEl);
+            }
+            catPlaceholderEl = null;
+            catDraggedKey = null;
+
+            return false;
+        }
+
         function getActiveCategory() {
             try { return localStorage.getItem('ops_active_cat') || ''; } catch(e) { return ''; }
         }
@@ -498,15 +935,18 @@
         function getDropboxToken() {
             try { return localStorage.getItem('ops_dbx_token') || ''; } catch(e) { return ''; }
         }
+        // 固定 Dropbox 应用参数
+        const DBX_APP_KEY = '5rf7xfl3li2j3tw';
+        const DBX_APP_SECRET = 'kjmbl4fcp68gqz9';
         function getDropboxConfig() {
             try {
                 return {
-                    key: localStorage.getItem('ops_dbx_key') || '',
-                    secret: localStorage.getItem('ops_dbx_secret') || '',
+                    key: DBX_APP_KEY,
+                    secret: DBX_APP_SECRET,
                     token: localStorage.getItem('ops_dbx_token') || '',
                     refresh: localStorage.getItem('ops_dbx_refresh') || ''
                 };
-            } catch(e) { return { key:'', secret:'', token:'', refresh:'' }; }
+            } catch(e) { return { key: DBX_APP_KEY, secret: DBX_APP_SECRET, token:'', refresh:'' }; }
         }
         function getDropboxSelectedFilename() {
             try {
@@ -631,7 +1071,7 @@
         }
 
         function downloadJson() {
-            // 同时导出“常用提示词”和“提示词历史”
+            // 同时导出"常用提示词"和"提示词历史"
             const exportObj = {
                 common: commonData || {},
                 history: (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
@@ -745,6 +1185,36 @@
             }
         }
 
+        // 首次打开提示：导入默认测试数据（仅提示一次）
+        const ONBOARD_KEY = 'ops_onboard_done';
+        async function maybePromptDefaultImport() {
+            try {
+                const done = localStorage.getItem(ONBOARD_KEY) === '1';
+                const hasData = commonData && Object.keys(commonData).length > 0;
+                if (done || hasData) return;
+            } catch (_) {
+                // 若 localStorage 不可用，直接跳过
+                return;
+            }
+            try {
+                const ok = await showConfirm(
+                    `是否导入默认测试数据？`,
+                    '导入默认数据'
+                );
+                // 无论选择与否，都写入一次性标记，下次不再提醒
+                try { localStorage.setItem(ONBOARD_KEY, '1'); } catch(_) {}
+                if (!ok) return;
+
+                // 从同目录读取默认测试数据
+                const res = await fetch('OHAO AI Prompt Studio.json');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const text = await res.text();
+                await importJsonText(text);
+            } catch (err) {
+                showInfo('导入默认数据失败：' + (err?.message || err), '导入失败');
+            }
+        }
+
         // 导出 #prompt-tags-container 为图片并下载
         async function ensureHtml2Canvas() {
             if (window.html2canvas) return window.html2canvas;
@@ -757,40 +1227,38 @@
             });
             return window.html2canvas;
         }
-        async function exportPromptTagsImage() {
+        async function renderPromptTagsToCanvas() {
+            const el = document.getElementById('prompt-tags-container');
+            if (!el) throw new Error('未找到提示词区域');
+            const html2canvas = await ensureHtml2Canvas();
+            const prev = {
+                background: el.style.background,
+                backgroundColor: el.style.backgroundColor,
+                border: el.style.border,
+                boxShadow: el.style.boxShadow
+            };
+            el.style.background = 'transparent';
+            el.style.backgroundColor = 'transparent';
+            el.style.border = 'none';
+            el.style.boxShadow = 'none';
+            const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
             try {
-                const el = document.getElementById('prompt-tags-container');
-                if (!el) { showInfo('未找到提示词区域', '错误'); return; }
-
-                const html2canvas = await ensureHtml2Canvas();
-
-                // 1) 临时移除容器背景与边框，仅保留标签本身
-                const prev = {
-                    background: el.style.background,
-                    backgroundColor: el.style.backgroundColor,
-                    border: el.style.border,
-                    boxShadow: el.style.boxShadow
-                };
-                el.style.background = 'transparent';
-                el.style.backgroundColor = 'transparent';
-                el.style.border = 'none';
-                el.style.boxShadow = 'none';
-
-                // 2) 提升清晰度：按设备像素比放大
-                const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
-
-                const canvas = await html2canvas(el, {
-                    backgroundColor: null,   // 透明背景
+                return await html2canvas(el, {
+                    backgroundColor: null,
                     scale,
                     useCORS: true
                 });
-
-                // 恢复样式
+            } finally {
                 el.style.background = prev.background;
                 el.style.backgroundColor = prev.backgroundColor;
                 el.style.border = prev.border;
                 el.style.boxShadow = prev.boxShadow;
+            }
+        }
 
+        async function exportPromptTagsImage() {
+            try {
+                const canvas = await renderPromptTagsToCanvas();
                 const dataUrl = canvas.toDataURL('image/png');
                 const a = document.createElement('a');
                 a.href = dataUrl;
@@ -803,10 +1271,159 @@
             }
         }
 
+        async function composeTagsImageOntoSelectedImage() {
+            try {
+                const canvas = await renderPromptTagsToCanvas();
+                const tagsBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+                if (!tagsBlob) throw new Error('生成提示词图片失败');
+                const baseFile = await pickBaseImageFile();
+                if (!baseFile) return;
+                const composedBlob = await composeImages(baseFile, tagsBlob);
+                await offerComposedImageDownload(composedBlob);
+            } catch (e) {
+                showInfo('合成失败：' + (e?.message || e), '失败');
+            }
+        }
+
+        async function pickBaseImageFile() {
+            return new Promise((resolve) => {
+                let input = document.getElementById('compose-image-file-input');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'file';
+                    input.id = 'compose-image-file-input';
+                    input.accept = 'image/*';
+                    input.style.display = 'none';
+                    document.body.appendChild(input);
+                }
+                const handler = () => {
+                    input.removeEventListener('change', handler);
+                    const file = input.files && input.files[0];
+                    input.value = '';
+                    resolve(file || null);
+                };
+                input.addEventListener('change', handler);
+                input.click();
+            });
+        }
+
+        async function composeImages(baseFile, overlayBlob) {
+            const [baseImage, overlayImage] = await Promise.all([
+                loadImageFromFile(baseFile),
+                loadImageFromBlob(overlayBlob)
+            ]);
+
+            const composedCanvas = document.createElement('canvas');
+            composedCanvas.width = baseImage.width;
+            composedCanvas.height = baseImage.height;
+            const ctx = composedCanvas.getContext('2d');
+            if (!ctx) throw new Error('无法创建画布');
+            ctx.drawImage(baseImage, 0, 0);
+
+            const overlaySize = calculateOverlaySizeAndPosition(baseImage, overlayImage);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(
+                overlayImage,
+                overlaySize.x,
+                overlaySize.y,
+                overlaySize.width,
+                overlaySize.height
+            );
+
+            return await new Promise((resolve, reject) => {
+                composedCanvas.toBlob((blob) => {
+                    if (!blob) reject(new Error('导出合成图片失败'));
+                    else resolve(blob);
+                }, 'image/png');
+            });
+        }
+
+        function calculateOverlaySizeAndPosition(baseImage, overlayImage) {
+            const MIN_OVERLAY_WIDTH = 512;
+            const isLandscape = baseImage.width > baseImage.height;
+            const maxWidth = baseImage.width;
+            const maxHeight = baseImage.height;
+
+            let targetWidth;
+            if (isLandscape) {
+                const halfWidth = baseImage.width / 2;
+                const preferredWidth = Math.min(MIN_OVERLAY_WIDTH, maxWidth);
+                targetWidth = Math.max(halfWidth, preferredWidth);
+            } else {
+                targetWidth = maxWidth;
+            }
+
+            let scale = targetWidth / overlayImage.width;
+            let targetHeight = overlayImage.height * scale;
+
+            if (targetHeight > maxHeight) {
+                const heightScale = maxHeight / targetHeight;
+                targetHeight = maxHeight;
+                targetWidth = targetWidth * heightScale;
+                scale *= heightScale;
+            }
+
+            return {
+                width: targetWidth,
+                height: targetHeight,
+                x: 0,
+                y: maxHeight - targetHeight
+            };
+        }
+
+        function loadImageFromFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (typeof reader.result !== 'string') {
+                        reject(new Error('读取图片失败'));
+                        return;
+                    }
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('载入图片失败'));
+                    img.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('读取图片失败'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function loadImageFromBlob(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (typeof reader.result !== 'string') {
+                        reject(new Error('读取图片失败'));
+                        return;
+                    }
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('载入图片失败'));
+                    img.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('读取图片失败'));
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        async function offerComposedImageDownload(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Prompt Studio 合成图.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         function setupUIEvents() {
             document.getElementById('add-category-btn')?.addEventListener('click', addCategory);
             document.getElementById('add-tag-btn')?.addEventListener('click', addTagToCurrent);
             document.getElementById('export-tags-image-btn')?.addEventListener('click', exportPromptTagsImage);
+            document.getElementById('compose-tags-image-btn')?.addEventListener('click', composeTagsImageOntoSelectedImage);
             document.getElementById('download-json-btn')?.addEventListener('click', downloadJson);
             document.getElementById('reset-all-btn')?.addEventListener('click', resetAll);
             document.getElementById('random-pick-btn')?.addEventListener('click', randomPickAll);
@@ -846,14 +1463,15 @@
 
             // 预填
             const cfg = getDropboxConfig();
-            keyEl.value = cfg.key || '';
-            secEl.value = cfg.secret || '';
+            // 隐藏 App Key / Secret 输入框行
+            if (keyEl && keyEl.closest('.modal-row')) keyEl.closest('.modal-row').style.display = 'none';
+            if (secEl && secEl.closest('.modal-row')) secEl.closest('.modal-row').style.display = 'none';
             refreshEl.value = cfg.refresh || '';
             if (enabledEl) enabledEl.checked = isDropboxEnabled();
 
             show(wrap);
 
-            // 动态插入“选择JSON文件”与“刷新列表”
+            // 动态插入"选择JSON文件"与"刷新列表"
             const bodyEl = wrap.querySelector('.modal-body');
             let fileRow = wrap.querySelector('#modal-db-file-row');
             let fileSel = wrap.querySelector('#modal-db-file');
@@ -937,8 +1555,7 @@
             }
 
             const onAuthorize = () => {
-                const key = keyEl.value.trim();
-                if (!key) { showInfo('请先填写 App Key', '提示'); keyEl.focus(); return; }
+                const key = getDropboxConfig().key;
                 const redirect = encodeURIComponent('https://localhost/');
                 // 生成 state 以便后端校验（此处仅传递，不在前端校验）
                 const state = Math.random().toString(36).slice(2);
@@ -959,15 +1576,13 @@
                     return;
                 }
                 // 提示用户在弹窗中完成登录与授权
-                showInfo('已打开 Dropbox 授权窗口，请在弹窗内登录并同意授权。授权完成后 Dropbox 将回跳至 https://localhost/，请在你的后端用回调换取 Refresh Token，然后回到此处点击“登录”。', '授权提示');
+                showInfo('已打开 Dropbox 授权窗口，请在弹窗内登录并同意授权。授权完成后 Dropbox 将回跳至 https://localhost/，请在你的后端用回调换取 Refresh Token，然后回到此处点击"登录"。', '授权提示');
             };
 
             const onLogin = async () => {
-                const key = keyEl.value.trim();
-                const sec = secEl.value.trim();
+                const key = getDropboxConfig().key;
+                const sec = getDropboxConfig().secret;
                 let inputVal = refreshEl.value.trim();
-                if (!key) { showInfo('请填写 App Key', '提示'); keyEl.focus(); return; }
-                if (!sec) { showInfo('请填写 App Secret', '提示'); secEl.focus(); return; }
                 if (!inputVal) { showInfo('请粘贴 Refresh Token 或 回调URL/code', '提示'); refreshEl.focus(); return; }
 
                 // 工具：从可能的完整URL或query片段中提取 code
@@ -1052,8 +1667,7 @@
 
             const onSave = () => {
                 try {
-                    localStorage.setItem('ops_dbx_key', keyEl.value.trim());
-                    localStorage.setItem('ops_dbx_secret', secEl.value.trim());
+                    // 不再保存 App Key/Secret，仅保存 Refresh 与开关、文件名
                     localStorage.setItem('ops_dbx_refresh', refreshEl.value.trim());
                     if (enabledEl) {
                         localStorage.setItem('ops_dbx_enabled', enabledEl.checked ? '1' : '0');
@@ -1117,6 +1731,10 @@
 
             // 旧版结构：数组 => 维持原样平铺
             if (Array.isArray(data)) {
+                // 为容器添加数据属性，用于拖拽
+                commonTagsContainer.dataset.cat = catKey;
+                commonTagsContainer.dataset.subcat = '';
+
                 data.forEach((item, index) => {
                     const label = item?.lang_zh || item?.text || '';
                     const value = item?.text || '';
@@ -1126,17 +1744,26 @@
                     span.dataset.cat = catKey;
                     span.dataset.index = String(index);
                     span.dataset.subcat = '';
+                    span.draggable = true;
                     span.textContent = label;
                     span.title = value;
                     span.addEventListener('click', () => {
                         const cur = promptEditor.value.trim();
                         const suffix = value.trim();
                         promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                        normalizePromptInput();
                         updateTags();
                         promptEditor.focus();
                     });
+                    // 添加拖拽事件
+                    span.addEventListener('dragstart', handleCommonTagDragStart);
+                    span.addEventListener('dragover', handleCommonTagDragOver);
+                    span.addEventListener('drop', handleCommonTagDrop);
+                    span.addEventListener('dragend', handleCommonTagDragEnd);
                     commonTagsContainer.appendChild(span);
                 });
+                // 为容器添加 dragover 事件
+                commonTagsContainer.addEventListener('dragover', onCommonContainerDragOver);
                 return;
             }
 
@@ -1205,6 +1832,9 @@
                     body.style.gap = '8px';
                     body.style.padding = '10px';
                     body.style.width = '100%';
+                    body.dataset.containerType = 'common-tag-group';
+                    body.dataset.cat = catKey;
+                    body.dataset.subcat = sub;
 
                     const arr = Array.isArray(groups[sub]) ? groups[sub] : [];
                     arr.forEach((item, index) => {
@@ -1216,17 +1846,27 @@
                         span.dataset.cat = catKey;
                         span.dataset.subcat = sub;
                         span.dataset.index = String(index);
+                        span.draggable = true;
                         span.textContent = label;
                         span.title = value;
                         span.addEventListener('click', () => {
                             const cur = promptEditor.value.trim();
                             const suffix = value.trim();
                             promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                            normalizePromptInput();
                             updateTags();
                             promptEditor.focus();
                         });
+                        // 添加拖拽事件
+                        span.addEventListener('dragstart', handleCommonTagDragStart);
+                        span.addEventListener('dragover', handleCommonTagDragOver);
+                        span.addEventListener('drop', handleCommonTagDrop);
+                        span.addEventListener('dragend', handleCommonTagDragEnd);
                         body.appendChild(span);
                     });
+                    // 为容器添加 dragover 和 drop 事件（支持在空白区域拖拽）
+                    body.addEventListener('dragover', onCommonContainerDragOver);
+                    body.addEventListener('drop', handleCommonTagDrop);
 
                     toggle.addEventListener('click', () => {
                         const next = body.style.display === 'none';
@@ -1267,7 +1907,7 @@
                     });
 
                     btnDelete.addEventListener('click', async () => {
-                        const ok = await showConfirm(`确认删除类别「${sub}」？${sub==='未分组' ? '（将删除其中所有条目）' : '（其中条目将移动到“未分组”）'}`, '删除类别');
+                        const ok = await showConfirm(`确认删除类别「${sub}」？${sub==='未分组' ? '（将删除其中所有条目）' : '（其中条目将移动到"未分组"）'}`, '删除类别');
                         if (!ok) return;
                         ensureGrouped(catKey);
                         const catObj = commonData[catKey];
@@ -1282,18 +1922,18 @@
                         } else {
                             const arrOld = g[sub] || [];
                             if (arrOld.length === 0) {
-                                // 空类别：直接删除，不迁移到“未分组”，不创建“未分组”
+                                // 空类别：直接删除，不迁移到"未分组"，不创建"未分组"
                                 delete g[sub];
                                 if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
                                 const i = catObj.groupsOrder.indexOf(sub);
                                 if (i >= 0) catObj.groupsOrder.splice(i, 1);
                             } else {
-                                // 非空类别：将条目迁移到“未分组”，再删除分组
+                                // 非空类别：将条目迁移到"未分组"，再删除分组
                                 const uf = g['未分组'] || (g['未分组'] = []);
                                 arrOld.forEach(it => uf.push(it));
                                 delete g[sub];
                                 if (!Array.isArray(catObj.groupsOrder)) catObj.groupsOrder = Object.keys(g);
-                                // 确保“未分组”在顺序中存在
+                                // 确保"未分组"在顺序中存在
                                 if (!catObj.groupsOrder.includes('未分组') && g['未分组']) {
                                     catObj.groupsOrder.unshift('未分组');
                                 }
@@ -1316,6 +1956,9 @@
                     header.appendChild(right);
                     section.appendChild(header);
                     section.appendChild(body);
+
+                    // 为 body 容器添加拖拽事件
+                    body.addEventListener('dragover', onCommonContainerDragOver);
 
                     // 移动类别顺序
                     btnUp.addEventListener('click', () => moveSubcat(catKey, sub, 'up'));
@@ -1355,6 +1998,39 @@
             return '';
         }
 
+        function normalizePromptInput(options = {}) {
+            if (!promptEditor) return;
+            const raw = promptEditor.value;
+            if (!raw) return;
+            const segments = raw.split(/[,，]/);
+            const normalized = [];
+            let changed = false;
+            segments.forEach(segment => {
+                const trimmed = segment.trim();
+                if (!trimmed) return;
+                const parsed = parseWeightedTag(trimmed);
+                const en = findEn(parsed.base);
+                if (en) {
+                    const formatted = formatWeightedTag(en, parsed.weight);
+                    normalized.push(formatted);
+                    if (formatted !== trimmed) changed = true;
+                } else {
+                    const formatted = formatWeightedTag(parsed.base, parsed.weight);
+                    normalized.push(formatted);
+                    if (formatted !== trimmed) changed = true;
+                }
+            });
+            if (!changed) return;
+            const nextValue = normalized.join(', ');
+            promptEditor.value = nextValue;
+            if (options.restoreCaret) {
+                try {
+                    const pos = nextValue.length;
+                    promptEditor.setSelectionRange(pos, pos);
+                } catch (_) {}
+            }
+        }
+
         // 令牌数量统计（按逗号/中文逗号分割，忽略空项与尾部多余逗号）
         function updateTokenCounter() {
             try {
@@ -1373,17 +2049,34 @@
 
         // 初始化标签（支持点击置灰/恢复，保持原位置不变）
         function updateTags() {
+            normalizePromptInput();
             const text = promptEditor.value;
-            const active = text.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+            const active = text.split(/[,，]/)
+                .map(s => s.trim())
+                .filter(Boolean);
+
+            const normalizedActive = active.map(tag => {
+                const parsed = parseWeightedTag(tag);
+                const key = parsed.base.toLowerCase();
+                const storedWeight = weightStateMap.get(key);
+                if (Number.isFinite(storedWeight)) {
+                    parsed.weight = storedWeight;
+                }
+                const normalizedTag = formatWeightedTag(parsed.base, parsed.weight);
+                weightStateMap.set(key, parsed.weight);
+                return normalizedTag;
+            });
+
+            const normalizedUniqueSet = new Set(normalizedActive);
 
             // 若首次渲染，用输入框的顺序初始化
             if (!Array.isArray(window.__lastRenderList) || window.__lastRenderList.length === 0) {
-                window.__lastRenderList = active.slice();
+                window.__lastRenderList = normalizedActive.slice();
             } else {
                 // 1) 从顺序表移除已不存在且未被置灰的项
-                window.__lastRenderList = window.__lastRenderList.filter(t => active.includes(t) || window.__disabledTagSet.has(t));
+                window.__lastRenderList = window.__lastRenderList.filter(t => normalizedUniqueSet.has(t) || window.__disabledTagSet.has(t));
                 // 2) 将新出现（用户手动输入）的激活项追加到末尾
-                active.forEach(t => {
+                normalizedActive.forEach(t => {
                     if (!window.__lastRenderList.includes(t)) window.__lastRenderList.push(t);
                 });
             }
@@ -1394,57 +2087,163 @@
             tagsContainer.innerHTML = '';
 
             renderList.forEach((tag, index) => {
-                const tagElement = document.createElement('div');
-                const zh = findZh(tag) || '';
+                let parsedTag = parseWeightedTag(tag);
+                const baseText = parsedTag.base;
+                const baseKey = baseText.toLowerCase();
+                const storedWeight = weightStateMap.get(baseKey);
+                if (Number.isFinite(storedWeight)) {
+                    parsedTag = { ...parsedTag, weight: storedWeight };
+                }
+                let currentWeight = parsedTag.weight;
+                let currentTag = formatWeightedTag(baseText, currentWeight);
+
+                if (currentTag !== tag) {
+                    const listIndex = window.__lastRenderList.indexOf(tag);
+                    if (listIndex >= 0) {
+                        window.__lastRenderList[listIndex] = currentTag;
+                    }
+                    tag = currentTag;
+                }
+
+                weightStateMap.set(baseKey, currentWeight);
+
+                const zh = findZh(baseText) || '';
                 const isInactive = window.__disabledTagSet.has(tag);
+                const tagElement = document.createElement('div');
                 tagElement.className = 'prompt-tag' + (isInactive ? ' inactive' : '');
                 tagElement.draggable = true;
                 tagElement.setAttribute('data-index', index);
-                tagElement.innerHTML = `
-                    <span class="seg-en">${tag}</span>
-                    ${zh ? '<span class="seg-zh">' + zh + '</span>' : ''}
-                    <span class="delete-tag" data-role="del">×</span>
-                `;
+                tagElement.setAttribute('data-base', baseText);
+                tagElement.setAttribute('data-weight', String(currentWeight));
 
-                // 点击标签：切换启用/禁用，并同步输入框（保持原位置）
+                const deleteBtn = document.createElement('span');
+                deleteBtn.className = 'delete-tag';
+                deleteBtn.setAttribute('data-role', 'del');
+                deleteBtn.textContent = '×';
+
+                const enSegment = document.createElement('span');
+                enSegment.className = 'seg-en';
+                enSegment.textContent = currentTag;
+
+                const zhSegment = zh ? (() => {
+                    const span = document.createElement('span');
+                    span.className = 'seg-zh';
+                    span.textContent = zh;
+                    return span;
+                })() : null;
+
+                const weightPanel = document.createElement('div');
+                weightPanel.className = 'weight-adjust';
+                weightPanel.setAttribute('data-role', 'weight-panel');
+                const btnDecrease = document.createElement('button');
+                btnDecrease.className = 'weight-btn';
+                btnDecrease.setAttribute('data-role', 'decrease');
+                btnDecrease.title = '权重-';
+                btnDecrease.textContent = '−';
+                const weightLabelEl = document.createElement('span');
+                weightLabelEl.className = 'weight-value';
+                weightLabelEl.setAttribute('data-role', 'weight-label');
+                weightLabelEl.textContent = (Math.round(currentWeight * 100) / 100).toFixed(2);
+                const btnIncrease = document.createElement('button');
+                btnIncrease.className = 'weight-btn';
+                btnIncrease.setAttribute('data-role', 'increase');
+                btnIncrease.title = '权重+';
+                btnIncrease.textContent = '+';
+
+                weightPanel.appendChild(btnDecrease);
+                weightPanel.appendChild(weightLabelEl);
+                weightPanel.appendChild(btnIncrease);
+
+                tagElement.appendChild(deleteBtn);
+                tagElement.appendChild(enSegment);
+                if (zhSegment) tagElement.appendChild(zhSegment);
+                tagElement.appendChild(weightPanel);
+
+                const updateWeightView = () => {
+                    weightLabelEl.textContent = (Math.round(currentWeight * 100) / 100).toFixed(2);
+                    enSegment.textContent = currentTag;
+                    tagElement.setAttribute('data-weight', String(currentWeight));
+                };
+
+                const applyWeightVisibility = () => {
+                    const enabled = window.__weightControlsEnabled;
+                    tagElement.classList.toggle('weight-disabled', !enabled);
+                    weightPanel.style.display = enabled ? 'inline-flex' : 'none';
+                };
+                applyWeightVisibility();
+
                 tagElement.addEventListener('click', (e) => {
-                    if (e.target && e.target.closest('[data-role="del"]')) return; // 删除按钮不触发
-                    const wasInactive = window.__disabledTagSet.has(tag);
+                    if (e.target && (e.target.closest('[data-role="del"]') || e.target.closest('[data-role="weight-panel"]'))) return;
+                    const wasInactive = window.__disabledTagSet.has(currentTag);
                     if (wasInactive) {
-                        // 恢复：移出禁用集合，并按顺序表重建输入框内容
-                        window.__disabledTagSet.delete(tag);
+                        window.__disabledTagSet.delete(currentTag);
                         const orderedActive = (window.__lastRenderList || []).filter(t => !window.__disabledTagSet.has(t));
                         promptEditor.value = orderedActive.join(', ');
+                        normalizePromptInput();
                     } else {
-                        // 置灰：加入禁用集合，并从输入框移除一次
-                        window.__disabledTagSet.add(tag);
-                        const parts = (promptEditor.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
-                        const pos = parts.indexOf(tag);
-                        if (pos >= 0) { parts.splice(pos, 1); }
+                        window.__disabledTagSet.add(currentTag);
+                        const parts = (promptEditor.value || '').split(/[,，]/)
+                            .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                            .filter(Boolean);
+                        const pos = parts.indexOf(currentTag);
+                        if (pos >= 0) {
+                            parts.splice(pos, 1);
+                        }
                         promptEditor.value = parts.join(', ');
+                        normalizePromptInput();
                     }
-                    // 重新渲染
                     updateTags();
                 });
 
-                // 删除按钮：彻底移除（从输入框与禁用集合与渲染序列）
-                const delBtn = tagElement.querySelector('[data-role="del"]');
-                if (delBtn) {
-                    delBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        // 从输入框中去掉所有该项
-                        let parts = (promptEditor.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
-                        parts = parts.filter(t => t !== tag);
-                        promptEditor.value = parts.join(', ');
-                        // 从禁用集合中移除
-                        if (window.__disabledTagSet.has(tag)) window.__disabledTagSet.delete(tag);
-                        // 从渲染顺序中移除（下次 updateTags 会覆盖写入）
-                        window.__lastRenderList = (window.__lastRenderList || []).filter(t => t !== tag);
-                        updateTags();
-                    });
-                }
+                const applyWeightChange = (deltaSteps) => {
+                    const previousTag = currentTag;
+                    const nextWeight = computeNextWeight(currentWeight, deltaSteps);
+                    if (nextWeight === currentWeight) return;
 
-                // 拖拽事件（沿用原逻辑）
+                    currentWeight = nextWeight;
+                    currentTag = formatWeightedTag(baseText, currentWeight);
+                    weightStateMap.set(baseKey, currentWeight);
+                    updateWeightView();
+
+                    if (Array.isArray(window.__lastRenderList)) {
+                        const idx = window.__lastRenderList.indexOf(previousTag);
+                        if (idx >= 0) {
+                            window.__lastRenderList.splice(idx, 1, currentTag);
+                        }
+                    }
+
+                    if (window.__disabledTagSet.has(previousTag)) {
+                        window.__disabledTagSet.delete(previousTag);
+                        window.__disabledTagSet.add(currentTag);
+                    }
+
+                    let parts = (promptEditor.value || '').split(/[,，]/)
+                        .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                        .filter(Boolean);
+                    const textIdx = parts.indexOf(previousTag);
+                    if (textIdx >= 0) {
+                        parts[textIdx] = currentTag;
+                        promptEditor.value = parts.join(', ');
+                    }
+
+                    normalizePromptInput();
+                    updateTokenCounter();
+                };
+
+                btnDecrease.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    applyWeightChange(-1);
+                });
+                btnIncrease.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    applyWeightChange(1);
+                });
+
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeWeightedTag(currentTag);
+                });
+
                 tagElement.addEventListener('dragstart', handleDragStart);
                 tagElement.addEventListener('dragover', handleDragOver);
                 tagElement.addEventListener('drop', handleDrop);
@@ -1511,10 +2310,11 @@
                 list.splice(safeTo, 0, moved);
                 window.__lastRenderList = list;
 
-                // 仅用“激活项”（排除置灰项）写回文本
+                // 仅用"激活项"（排除置灰项）写回文本
                 const disabledSet = window.__disabledTagSet || new Set();
                 const orderedActive = list.filter(t => !disabledSet.has(t));
                 promptEditor.value = orderedActive.join(', ');
+                normalizePromptInput();
             }
 
             updateTags();
@@ -1617,6 +2417,7 @@
                 const disabledSet = window.__disabledTagSet || new Set();
                 const orderedActive = list.filter(t => !disabledSet.has(t));
                 promptEditor.value = orderedActive.join(', ');
+                normalizePromptInput();
             }
 
             // 清理占位条
@@ -1634,7 +2435,212 @@
             tagsContainer.addEventListener('dragover', onContainerDragOver);
             tagsContainer.addEventListener('drop', onContainerDrop);
         }
-        
+
+        // ========== common-tags 拖拽排序功能 ==========
+        let draggedCommonTag = null;
+        let commonPlaceholderEl = null;
+        let commonDragSourceContainer = null;
+
+        function handleCommonTagDragStart(e) {
+            draggedCommonTag = this;
+            this.classList.add('dragging');
+            commonDragSourceContainer = this.closest('[data-container-type]') || this.parentElement;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleCommonTagDragOver(e) {
+            return onCommonContainerDragOver(e);
+        }
+
+        function handleCommonTagDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!draggedCommonTag) return false;
+
+            const targetContainer = e.target.closest('[data-container-type]') || e.target.closest('.common-tags') || e.target.parentElement;
+
+            if (!targetContainer) return false;
+
+            const cat = draggedCommonTag.dataset.cat;
+            const fromSubcat = draggedCommonTag.dataset.subcat || '';
+            const fromIndex = parseInt(draggedCommonTag.dataset.index, 10);
+
+            const toSubcat = targetContainer.dataset.subcat || '';
+
+            // 直接根据鼠标位置计算目标索引（与 prompt-tags 完全一致）
+            let toIndex = getCommonInsertIndexByPoint(e.clientX, e.clientY, targetContainer);
+
+            if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex)) {
+                if (cat && (fromSubcat !== toSubcat || targetContainer !== commonDragSourceContainer)) {
+                    // 跨容器移动
+                    moveCommonTagTo(cat, fromSubcat, fromIndex, toSubcat, toIndex);
+                } else if (fromIndex !== toIndex) {
+                    // 同容器内排序
+                    reorderCommonTags(targetContainer, fromIndex, toIndex);
+                }
+            }
+
+            cleanupCommonDrag();
+            return false;
+        }
+
+        function handleCommonTagDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.common-tag').forEach(tag => {
+                tag.classList.remove('dragging');
+            });
+            cleanupCommonDrag();
+        }
+
+        function cleanupCommonDrag() {
+            if (commonPlaceholderEl && commonPlaceholderEl.parentNode) {
+                commonPlaceholderEl.parentNode.removeChild(commonPlaceholderEl);
+            }
+            commonPlaceholderEl = null;
+            draggedCommonTag = null;
+            commonDragSourceContainer = null;
+        }
+
+        function getCommonInsertIndexByPoint(x, y, container) {
+            const items = Array.from(container.querySelectorAll('.common-tag'));
+            if (!items.length) return 0;
+            const TOL = 8;
+
+            const sameRow = items.filter(el => {
+                const r = el.getBoundingClientRect();
+                return y >= r.top - TOL && y <= r.bottom + TOL;
+            });
+
+            if (sameRow.length) {
+                for (let i = 0; i < sameRow.length; i++) {
+                    const r = sameRow[i].getBoundingClientRect();
+                    const mid = r.left + r.width / 2;
+                    if (x < mid) return items.indexOf(sameRow[i]);
+                }
+                return items.indexOf(sameRow[sameRow.length - 1]) + 1;
+            }
+
+            let anchor = items[items.length - 1];
+            let minDist = Infinity;
+            items.forEach(el => {
+                const r = el.getBoundingClientRect();
+                const cy = r.top + r.height / 2;
+                const d = Math.abs(y - cy);
+                if (d < minDist) { minDist = d; anchor = el; }
+            });
+            const r = anchor.getBoundingClientRect();
+            const mid = r.left + r.width / 2;
+            const baseIdx = items.indexOf(anchor);
+            return x < mid ? baseIdx : baseIdx + 1;
+        }
+
+        function onCommonContainerDragOver(e) {
+            if (!draggedCommonTag) return false;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            if (!commonPlaceholderEl) {
+                commonPlaceholderEl = document.createElement('div');
+                commonPlaceholderEl.className = 'tag-placeholder';
+            }
+
+            const targetContainer = e.target.closest('[data-container-type]') || e.target.closest('.common-tags');
+            if (!targetContainer) return false;
+
+            const idx = getCommonInsertIndexByPoint(e.clientX, e.clientY, targetContainer);
+            const items = Array.from(targetContainer.querySelectorAll('.common-tag'));
+
+            if (idx >= items.length) {
+                if (commonPlaceholderEl.parentNode !== targetContainer || commonPlaceholderEl.nextElementSibling !== null) {
+                    targetContainer.appendChild(commonPlaceholderEl);
+                }
+            } else {
+                const ref = items[idx];
+                if (ref.previousSibling !== commonPlaceholderEl) {
+                    targetContainer.insertBefore(commonPlaceholderEl, ref);
+                }
+            }
+            return false;
+        }
+
+        function reorderCommonTags(container, fromIndex, toIndex) {
+            const cat = container.dataset.cat;
+            const subcat = container.dataset.subcat || '';
+
+            if (!cat) return;
+
+            const data = commonData?.[cat];
+            if (!data) return;
+
+            if (isGroupedCategory(data) && subcat) {
+                const arr = data.groups?.[subcat];
+                if (Array.isArray(arr)) {
+                    const [moved] = arr.splice(fromIndex, 1);
+                    // 防御：约束范围
+                    if (fromIndex < toIndex) toIndex -= 1;
+                    const safeTo = Math.max(0, Math.min(toIndex, arr.length));
+                    arr.splice(safeTo, 0, moved);
+                    saveCommonData();
+                    renderCommonTagsByCategory(cat);
+                }
+            } else if (Array.isArray(data)) {
+                const [moved] = data.splice(fromIndex, 1);
+                // 防御：约束范围
+                if (fromIndex < toIndex) toIndex -= 1;
+                const safeTo = Math.max(0, Math.min(toIndex, data.length));
+                data.splice(safeTo, 0, moved);
+                saveCommonData();
+                renderCommonTagsByCategory(cat);
+            }
+        }
+
+        function moveCommonTag(cat, fromSubcat, fromIndex, targetContainer) {
+            const toSubcat = targetContainer.dataset.subcat || '';
+
+            if (!cat) return;
+
+            const data = commonData?.[cat];
+            if (!isGroupedCategory(data)) return;
+
+            const fromArr = data.groups?.[fromSubcat];
+            if (!Array.isArray(fromArr)) return;
+
+            const [movedItem] = fromArr.splice(fromIndex, 1);
+
+            if (!data.groups[toSubcat]) {
+                data.groups[toSubcat] = [];
+            }
+            data.groups[toSubcat].push(movedItem);
+
+            saveCommonData();
+            renderCommonTagsByCategory(cat);
+        }
+
+        function moveCommonTagTo(cat, fromSubcat, fromIndex, toSubcat, toIndex) {
+            if (!cat) return;
+
+            const data = commonData?.[cat];
+            if (!isGroupedCategory(data)) return;
+
+            const fromArr = data.groups?.[fromSubcat];
+            if (!Array.isArray(fromArr)) return;
+
+            const [movedItem] = fromArr.splice(fromIndex, 1);
+
+            if (!data.groups[toSubcat]) {
+                data.groups[toSubcat] = [];
+            }
+
+            const toArr = data.groups[toSubcat];
+            const safeTo = Math.max(0, Math.min(toIndex, toArr.length));
+            toArr.splice(safeTo, 0, movedItem);
+
+            saveCommonData();
+            renderCommonTagsByCategory(cat);
+        }
+
         // 移除标签
         function removeTag(index) {
             const tags = promptEditor.value.split(/[,，]/).map(tag => tag.trim()).filter(tag => tag.length > 0);
@@ -1642,10 +2648,26 @@
             promptEditor.value = tags.join(', ');
             updateTags();
         }
+
+        function removeWeightedTag(tag) {
+            const parsed = parseWeightedTag(tag);
+            const baseKey = parsed.base.toLowerCase();
+            let parts = (promptEditor.value || '').split(/[,，]/)
+                .map(s => formatWeightedTag(parseWeightedTag(s).base, parseWeightedTag(s).weight))
+                .filter(Boolean);
+            parts = parts.filter(t => t !== tag);
+            promptEditor.value = parts.join(', ');
+            normalizePromptInput();
+            if (window.__disabledTagSet.has(tag)) window.__disabledTagSet.delete(tag);
+            window.__lastRenderList = (window.__lastRenderList || []).filter(t => t !== tag);
+            weightStateMap.delete(baseKey);
+            updateTags();
+        }
         
         // 重置提示词
         function resetPrompt() {
             promptEditor.value = '';
+            normalizePromptInput();
             updateTags();
             promptEditor.focus();
         }
@@ -1695,6 +2717,7 @@
             const cur = promptEditor.value.trim();
             const add = picks.join(', ');
             promptEditor.value = cur ? (cur + ', ' + add) : add;
+            normalizePromptInput();
             updateTags();
             promptEditor.focus();
         }
@@ -1726,6 +2749,7 @@
             if (!picks.length) { showInfo('暂无可随机的标签', '提示'); return; }
             // 覆盖写入（先清空再写入）
             promptEditor.value = picks.join(', ');
+            normalizePromptInput();
             updateTags();
             promptEditor.focus();
         }
@@ -1839,8 +2863,11 @@
                         const t = it.text || '';
                         promptEditor.value = '';      // 先清空
                         promptEditor.value = t;       // 再写入
+                        normalizePromptInput();
                         updateTags();
                         promptEditor.focus();
+                        // 导入后关闭"提示词历史"弹窗
+                        onClose();
                     });
 
                     const btnCopy = document.createElement('button');
@@ -1927,9 +2954,13 @@
             });
 
             // 事件
+            function onKey(e) {
+                if (e.key === 'Escape') onClose();
+            }
             function cleanup() {
                 btnClose.removeEventListener('click', onClose);
                 btnClear.removeEventListener('click', onClear);
+                document.removeEventListener('keydown', onKey);
                 hide(wrap);
             }
             function onClose() { cleanup(); }
@@ -1942,6 +2973,7 @@
 
             btnClose.addEventListener('click', onClose);
             btnClear.addEventListener('click', onClear);
+            document.addEventListener('keydown', onKey);
             show(wrap);
         }
         
@@ -2024,7 +3056,7 @@
             let selectedSub = subcat || (function(){ try { return localStorage.getItem(LAST_SUBCAT_KEY) || ''; } catch(e){ return ''; } })();
             function renderSubButtons() {
                 if (!subBtnsWrap) return;
-                // 清空旧按钮（保留“新建类别”按钮）
+                // 清空旧按钮（保留"新建类别"按钮）
                 Array.from(subBtnsWrap.querySelectorAll('button[data-subcat]')).forEach(el => el.remove());
                 const v0 = commonData?.[cat];
                 const names = [];
@@ -2186,13 +3218,34 @@
                     }
                 }
 
-                if (!lang_zh2 || !text2) { (lang_zh2 ? en : zh).focus(); return; }
+                // 支持多标签：按分号(;)或顿号(、)分割
+                const zhParts = lang_zh2.split(/[;、]+/).map(s => s.trim()).filter(Boolean);
+                const enParts = text2.split(/[;、]+/).map(s => s.trim()).filter(Boolean);
+
+                // 验证至少有一个标签对
+                if (zhParts.length === 0 || enParts.length === 0) {
+                    zh.focus();
+                    return;
+                }
 
                 const targetSub = (selectedSub || '').trim();
-
                 const vNow = commonData?.[cat];
+                const tagsToAdd = [];
+
+                // 生成标签对（取较大值，缺失部分为空）
+                const maxLength = Math.max(zhParts.length, enParts.length);
+                for (let i = 0; i < maxLength; i++) {
+                    tagsToAdd.push({
+                        lang_zh: zhParts[i] || '',
+                        text: enParts[i] || ''
+                    });
+                }
 
                 if (editing) {
+                    // 编辑模式：只更新单个标签，不支持批量编辑
+                    const zhSingle = zhParts[0] || lang_zh2;
+                    const enSingle = enParts[0] || text2;
+
                     if (isGroupedCategory(vNow) && subcat) {
                         const g = vNow.groups || {};
                         const fromArr = g[subcat] || [];
@@ -2201,10 +3254,10 @@
                             // 移动到其他类别
                             fromArr.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
                         } else {
                             // 就地更新
-                            fromArr[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                            fromArr[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
                         }
                     } else if (isGroupedCategory(vNow) && !subcat) {
                         const g = vNow.groups || {};
@@ -2213,44 +3266,50 @@
                         if (targetSub && targetSub !== '未分组') {
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
                         } else {
-                            uf[index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                            uf[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
                         }
                     } else {
                         commonData[cat] = Array.isArray(vNow) ? vNow : [];
                         // 旧数组模式
                         if (targetSub) {
-                            // 升级为分组，并把旧数组作为“未分组”
+                            // 升级为分组，并把旧数组作为"未分组"
                             ensureGrouped(cat);
                             const g = commonData[cat].groups;
                             const uf = g['未分组'];
                             const old = uf[index] || {};
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
                         } else {
                             const old = commonData[cat][index] || {};
-                            commonData[cat][index] = { text: text2, lang_zh: lang_zh2, pinned: !!old.pinned };
+                            commonData[cat][index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
                         }
                     }
                 } else {
-                    if (targetSub) {
-                        ensureGrouped(cat);
-                        const groups = commonData[cat].groups;
-                        if (!groups[targetSub]) groups[targetSub] = [];
-                        groups[targetSub].push({ text: text2, lang_zh: lang_zh2, pinned: false });
-                    } else {
-                        if (Array.isArray(vNow)) {
-                            vNow.push({ text: text2, lang_zh: lang_zh2, pinned: false });
-                            commonData[cat] = vNow;
-                        } else if (isGroupedCategory(vNow)) {
-                            const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
-                            arr.push({ text: text2, lang_zh: lang_zh2, pinned: false });
-                        } else {
-                            commonData[cat] = [{ text: text2, lang_zh: lang_zh2, pinned: false }];
+                    // 添加模式：支持批量添加多个标签
+                    tagsToAdd.forEach(tag => {
+                        // 只添加中英文都存在的标签
+                        if (tag.lang_zh && tag.text) {
+                            if (targetSub) {
+                                ensureGrouped(cat);
+                                const groups = commonData[cat].groups;
+                                if (!groups[targetSub]) groups[targetSub] = [];
+                                groups[targetSub].push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                            } else {
+                                if (Array.isArray(vNow)) {
+                                    vNow.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                                    commonData[cat] = vNow;
+                                } else if (isGroupedCategory(vNow)) {
+                                    const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
+                                    arr.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                                } else {
+                                    commonData[cat] = [{ text: tag.text, lang_zh: tag.lang_zh, pinned: false }];
+                                }
+                            }
                         }
-                    }
+                    });
                 }
 
                 // 记录最后一次小类别选择
@@ -2288,7 +3347,7 @@
             en.addEventListener('keydown', onKey);
         }
 
-        // 通用信息提示（居中模态，仅“确定”）
+        // 通用信息提示（居中模态，仅"确定"）
         function showInfo(message, title = '提示') {
             const wrap = document.getElementById('modal-confirm');
             const titleEl = document.getElementById('modal-confirm-title');
@@ -2359,6 +3418,7 @@
                 // 创建容器
                 const backdrop = document.createElement('div');
                 backdrop.className = 'modal-backdrop';
+                backdrop.style.zIndex = '5000'; // 确保在编辑标签弹窗之上
                 const modal = document.createElement('div');
                 modal.className = 'modal';
 
@@ -2435,6 +3495,7 @@
                 const icons = ['fas fa-images','fas fa-book','fas fa-tags','fas fa-search','fas fa-image','fas fa-globe'];
                 const backdrop = document.createElement('div');
                 backdrop.className = 'modal-backdrop';
+                backdrop.style.zIndex = '5000'; // 确保在编辑标签弹窗之上
                 const modal = document.createElement('div');
                 modal.className = 'modal';
 
@@ -2552,27 +3613,40 @@
 
         document.addEventListener('contextmenu', (e) => {
             const catCard = e.target.closest('.prompt-card');
+            const promptTagEl = e.target.closest('.prompt-tag');
+            const weightPanelEl = e.target.closest('[data-role="weight-panel"]');
+            if (weightPanelEl) return; // 内联按钮保持默认行为
             const tagEl = e.target.closest('.common-tag');
             if (catCard) {
                 e.preventDefault();
                 const cat = catCard.getAttribute('data-cat') || '';
                 if (!cat) return;
                 showContextMenu(e.clientX, e.clientY, [
-                    { label: '上移', icon: 'fas fa-arrow-up', action: () => moveCategoryUp(cat) },
-                    { label: '下移', icon: 'fas fa-arrow-down', action: () => moveCategoryDown(cat) },
                     { label: '编辑名称', icon: 'fas fa-pen', action: () => openCategoryModal(cat) },
                     { label: '删除', icon: 'fas fa-trash', action: async () => {
                         const ok = await showConfirm(`确认删除分类「${cat}」及其所有标签？`, '删除分类');
                         if (!ok) return;
                         delete commonData[cat];
                         saveCommonData();
-                        // 若删除的是当前分类，重设 active
                         const keys = Object.keys(commonData);
                         setActiveCategory(keys[0] || '');
                         renderSidebar();
                     } }
                 ]);
-            } else if (tagEl) {
+            } else if (promptTagEl) {
+                e.preventDefault();
+                const segEn = promptTagEl.querySelector('.seg-en');
+                const currentTag = segEn ? (segEn.textContent || '').trim() : '';
+                if (!currentTag) return;
+                showContextMenu(e.clientX, e.clientY, [
+                    { label: '权重+', icon: 'fas fa-plus', action: () => adjustTagWeightBySteps(currentTag, +1) },
+                    { label: '权重-', icon: 'fas fa-minus', action: () => adjustTagWeightBySteps(currentTag, -1) },
+                    { label: '删除', icon: 'fas fa-trash', action: () => removeWeightedTag(currentTag) }
+                ]);
+                return;
+            }
+
+            if (tagEl) {
                 e.preventDefault();
                 const cat = tagEl.getAttribute('data-cat') || getActiveCategory();
                 const idx = parseInt(tagEl.getAttribute('data-index') || '-1', 10);
@@ -2595,7 +3669,7 @@
                     { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) }
                 ];
 
-                // 自定义外链项（出现在“删除”上方）
+                // 自定义外链项（出现在"删除"上方）
                 try {
                     const customMenus = (typeof getCtxMenus === 'function') ? getCtxMenus() : [];
                     if (Array.isArray(customMenus) && customMenus.length) {
@@ -2711,6 +3785,7 @@
         
         // 监听编辑器内容变化
         promptEditor.addEventListener('input', () => {
+            normalizePromptInput({ restoreCaret: true });
             updateTags();
         });
 
@@ -2731,13 +3806,268 @@
             showInfo('已清空所有标签与分类', '完成');
         }
 
+        // 搜索提示词模态框
+        function openSearchTagsModal() {
+            const wrap = document.getElementById('modal-search-tags');
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            const closeBtn = document.getElementById('modal-search-close');
+            const clearBtn = document.getElementById('modal-search-clear');
 
+            searchInput.value = '';
+            searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+
+            // 搜索所有提示词
+            function searchTags(keyword) {
+                const results = [];
+                const lowerKeyword = keyword.toLowerCase();
+
+                for (const cat in commonData) {
+                    const data = commonData[cat];
+
+                    // 判断是数组格式还是分组格式
+                    if (Array.isArray(data)) {
+                        // 数组格式（旧版），类别为"未分组"
+                        data.forEach(tag => {
+                            const zh = (tag.lang_zh || '').trim();
+                            const en = (tag.text || '').trim();
+                            const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
+                            const enMatch = en && en.toLowerCase().includes(lowerKeyword);
+
+                            if (zhMatch || enMatch) {
+                                results.push({
+                                    zh: zh,
+                                    en: en,
+                                    category: cat,
+                                    subcategory: '未分组'
+                                });
+                            }
+                        });
+                    } else if (data.groups) {
+                        // 分组格式（新版）
+                        for (const sub in data.groups) {
+                            const tags = data.groups[sub];
+                            tags.forEach(tag => {
+                                const zh = (tag.lang_zh || '').trim();
+                                const en = (tag.text || '').trim();
+                                const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
+                                const enMatch = en && en.toLowerCase().includes(lowerKeyword);
+
+                                if (zhMatch || enMatch) {
+                                    results.push({
+                                        zh: zh,
+                                        en: en,
+                                        category: cat,
+                                        subcategory: sub
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+
+                return results;
+            }
+
+            // 渲染搜索结果
+            function renderSearchResults(results) {
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">未找到匹配的提示词</div>';
+                    return;
+                }
+
+                searchResults.innerHTML = '';
+                results.forEach((result, index) => {
+                    const row = document.createElement('div');
+                    row.style.border = '1px solid var(--border-color)';
+                    row.style.borderRadius = '8px';
+                    row.style.padding = '12px';
+                    row.style.cursor = 'pointer';
+                    row.style.transition = 'all 0.2s ease';
+
+                    const title = document.createElement('div');
+                    title.style.fontWeight = '600';
+                    title.style.color = 'var(--primary-color)';
+                    title.style.marginBottom = '4px';
+                    title.textContent = result.zh || result.en || '未命名';
+
+                    const en = document.createElement('div');
+                    en.style.fontSize = '0.9rem';
+                    en.style.opacity = '0.85';
+                    en.style.marginBottom = '4px';
+                    en.textContent = result.en || '';
+
+                    const cat = document.createElement('div');
+                    cat.style.fontSize = '0.8rem';
+                    cat.style.opacity = '0.6';
+                    cat.textContent = `分类: ${result.category} | 类别: ${result.subcategory}`;
+
+                    row.appendChild(title);
+                    if (result.en) row.appendChild(en);
+                    row.appendChild(cat);
+
+                    row.addEventListener('click', () => {
+                        const textToInsert = result.en || result.zh;
+
+                        // 插入到提示词编辑器
+                        const currentText = promptEditor.value || '';
+                        const separator = currentText.trim() ? ', ' : '';
+                        promptEditor.value = currentText + separator + textToInsert;
+
+                        // 触发输入事件以更新标签显示
+                        promptEditor.dispatchEvent(new Event('input'));
+
+                        // 创建临时提示元素
+                        const toast = document.createElement('div');
+                        toast.style.position = 'fixed';
+                        toast.style.top = '50%';
+                        toast.style.left = '50%';
+                        toast.style.transform = 'translate(-50%, -50%)';
+                        toast.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                        toast.style.color = 'white';
+                        toast.style.padding = '16px 32px';
+                        toast.style.borderRadius = '8px';
+                        toast.style.zIndex = '10000';
+                        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                        toast.style.fontSize = '1rem';
+                        toast.textContent = `已插入: ${textToInsert}`;
+
+                        document.body.appendChild(toast);
+                        setTimeout(() => {
+                            document.body.removeChild(toast);
+                        }, 1000);
+                    });
+
+                    // 右键菜单
+                    row.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+
+                        // 创建右键菜单
+                        const ctxMenu = document.createElement('div');
+                        ctxMenu.className = 'context-menu';
+                        ctxMenu.style.display = 'block';
+                        ctxMenu.style.left = e.pageX + 'px';
+                        ctxMenu.style.top = e.pageY + 'px';
+                        ctxMenu.style.zIndex = '4000';
+
+                        const editBtn = document.createElement('div');
+                        editBtn.className = 'item';
+                        editBtn.innerHTML = '<i class="fas fa-edit"></i> 编辑标签';
+                        editBtn.addEventListener('click', () => {
+                            ctxMenu.remove();
+
+                            // 找到标签在原数据中的索引
+                            const category = result.category;
+                            const subcategory = result.subcategory;
+                            let tagIndex = -1;
+
+                            if (commonData[category]) {
+                                const data = commonData[category];
+                                if (Array.isArray(data)) {
+                                    // 数组格式
+                                    tagIndex = data.findIndex(t =>
+                                        (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                        (t.text || '').trim() === (result.en || '').trim()
+                                    );
+                                    if (tagIndex >= 0) {
+                                        openTagModal(category, tagIndex, '');
+                                    }
+                                } else if (data.groups && data.groups[subcategory]) {
+                                    // 分组格式
+                                    const tags = data.groups[subcategory];
+                                    tagIndex = tags.findIndex(t =>
+                                        (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                        (t.text || '').trim() === (result.en || '').trim()
+                                    );
+                                    if (tagIndex >= 0) {
+                                        openTagModal(category, tagIndex, subcategory);
+                                    }
+                                }
+                            }
+                        });
+
+                        ctxMenu.appendChild(editBtn);
+                        document.body.appendChild(ctxMenu);
+
+                        // 点击其他地方关闭菜单
+                        const closeCtxMenu = () => {
+                            ctxMenu.remove();
+                            document.removeEventListener('click', closeCtxMenu);
+                        };
+                        setTimeout(() => {
+                            document.addEventListener('click', closeCtxMenu);
+                        }, 0);
+                    });
+
+                    row.addEventListener('mouseenter', () => {
+                        row.style.backgroundColor = 'var(--primary-color)';
+                        title.style.color = 'white';
+                        en.style.color = 'rgba(255,255,255,0.9)';
+                        cat.style.color = 'rgba(255,255,255,0.7)';
+                    });
+
+                    row.addEventListener('mouseleave', () => {
+                        row.style.backgroundColor = '';
+                        title.style.color = 'var(--primary-color)';
+                        en.style.color = '';
+                        cat.style.color = '';
+                    });
+
+                    searchResults.appendChild(row);
+                });
+            }
+
+            // 搜索输入监听
+            searchInput.addEventListener('input', (e) => {
+                const keyword = e.target.value.trim();
+                if (!keyword) {
+                    searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+                    return;
+                }
+
+                const results = searchTags(keyword);
+                renderSearchResults(results);
+            });
+
+            // 清空按钮
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+                searchInput.focus();
+            });
+
+            // 关闭按钮
+            closeBtn.addEventListener('click', () => {
+                hide(wrap);
+                searchInput.removeEventListener('input', arguments.callee);
+            });
+
+            // ESC键关闭
+            const onEscape = (e) => {
+                if (e.key === 'Escape') {
+                    document.removeEventListener('keydown', onEscape);
+                    hide(wrap);
+                }
+            };
+            document.addEventListener('keydown', onEscape);
+
+            show(wrap);
+            setTimeout(() => searchInput.focus(), 100);
+        }
+
+        // 绑定搜索按钮事件
+        document.getElementById('search-tags-btn')?.addEventListener('click', openSearchTagsModal);
 
         // 初始化
         updateTags();
         loadCommonTagsFromStorage();
         setupUIEvents();
-        // 绑定设置按钮
+        // 启用侧栏拖拽容器事件
+        if (sidebarList) {
+            sidebarList.addEventListener('dragover', onSidebarDragOver);
+            sidebarList.addEventListener('drop', onSidebarDrop);
+        }
+        // 首次打开提示：若无数据则询问是否导入默认测试数据
+        maybePromptDefaultImport();
         document.getElementById('settings-toggle')?.addEventListener('click', openCtxMenuModal);
-        // 确保初始计数显示
         updateTokenCounter();
