@@ -660,7 +660,7 @@
         }
         .modal-input {
             /* width: 100%; */
-            padding: 10px 12px;
+            padding: 8px 8px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             background: var(--bg-color);
@@ -792,6 +792,10 @@
         #modal-tag {
             z-index: 4000;
         }
+        /* S3 密码输入模态框（需要覆盖同步配置模态框） */
+        #modal-s3-password {
+            z-index: 6000;
+        }
         /* 提示词历史模态宽度扩展 */
         #modal-history .modal {
             width: min(92vw, 720px);
@@ -819,6 +823,35 @@
         .btn-toggle:active {
             transform: translateY(0);
             box-shadow: inset 0 2px 6px rgba(0,0,0,.25);
+        }
+        /* S3 配置按钮样式 */
+        .s3-config-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .s3-config-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(108, 92, 231, 0.05);
+        }
+        .s3-config-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .s3-config-btn .delete-btn {
+            margin-left: 6px;
+            opacity: 0.6;
+            font-size: 0.75rem;
+        }
+        .s3-config-btn .delete-btn:hover {
+            opacity: 1;
+            color: var(--danger-color);
         }
         .token-counter {
             text-align: right;
@@ -1248,6 +1281,15 @@
 
                 <!-- S3 配置区域 -->
                 <div id="sync-s3-config" style="display:none;">
+                    <!-- 文件名称管理区域 -->
+                    <div class="modal-row" style="border-bottom:1px solid var(--border-color);padding-bottom:12px;margin-bottom:12px;">
+                        <label style="font-weight:600;color:var(--primary-color);margin-bottom:8px;">文件名称管理</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn btn-outline" id="modal-s3-btn-default">默认</button>
+                            <button class="btn btn-success" id="modal-s3-btn-fetch">获取</button>
+                        </div>
+                        <div id="modal-s3-config-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+                    </div>
                     <div class="modal-row">
                         <label for="modal-s3-secret-id">Secret ID</label>
                         <input class="modal-input" id="modal-s3-secret-id" type="password" placeholder="腾讯云 API 密钥 SecretId" />
@@ -2419,12 +2461,60 @@ Prompt Studio目录下</p>
             });
         }
 
+        // S3 文件配置管理
+        const S3_CONFIGS_KEY = 'ops_s3_configs';
+        const S3_SELECTED_CONFIG_KEY = 'ops_s3_selected_config';
+
+        function getS3Configs() {
+            try {
+                const raw = localStorage.getItem(S3_CONFIGS_KEY);
+                const configs = raw ? JSON.parse(raw) : [];
+                // 确保默认配置存在
+                const hasDefault = configs.some(c => c.name === '默认');
+                if (!hasDefault) {
+                    configs.unshift({ name: '默认', filename: 'OHAO AI Prompt Studio.json' });
+                    localStorage.setItem(S3_CONFIGS_KEY, JSON.stringify(configs));
+                }
+                return Array.isArray(configs) ? configs : [{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }];
+            } catch(e) {
+                return [{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }];
+            }
+        }
+
+        function saveS3Configs(configs) {
+            try {
+                localStorage.setItem(S3_CONFIGS_KEY, JSON.stringify(configs));
+            } catch(e) {}
+        }
+
+        function getSelectedS3Config() {
+            try {
+                const selected = localStorage.getItem(S3_SELECTED_CONFIG_KEY);
+                if (selected) return selected;
+                return '默认';
+            } catch(e) {
+                return '默认';
+            }
+        }
+
+        function setSelectedS3Config(name) {
+            try {
+                localStorage.setItem(S3_SELECTED_CONFIG_KEY, name);
+            } catch(e) {}
+        }
+
         function getS3SelectedFilename() {
             try {
-                const v = localStorage.getItem('ops_s3_filename');
-                return v && v.trim() ? v.trim() : 'OHAO AI Prompt Studio.json';
+                const selectedName = getSelectedS3Config();
+                const configs = getS3Configs();
+                const config = configs.find(c => c.name === selectedName);
+                if (config && config.filename) {
+                    return config.filename;
+                }
+                return 'OHAO AI Prompt Studio.json';
             } catch(e) { return 'OHAO AI Prompt Studio.json'; }
         }
+
         function isS3Enabled() {
             try { return localStorage.getItem('ops_cloud_enabled') === '1'; } catch(e) { return false; }
         }
@@ -3086,6 +3176,112 @@ Prompt Studio目录下</p>
             const s3SaveBtn = document.getElementById('modal-s3-save');
             const s3CancelBtn = document.getElementById('modal-s3-cancel');
 
+            // S3 文件配置管理元素
+            const s3BtnDefault = document.getElementById('modal-s3-btn-default');
+            const s3BtnFetch = document.getElementById('modal-s3-btn-fetch');
+            const s3ConfigListEl = document.getElementById('modal-s3-config-list');
+
+            // 渲染S3配置列表
+            function renderS3ConfigList() {
+                const configs = getS3Configs();
+                const selectedName = getSelectedS3Config();
+                s3ConfigListEl.innerHTML = '';
+                configs.forEach(config => {
+                    const btn = document.createElement('button');
+                    btn.className = 's3-config-btn' + (config.name === selectedName ? ' active' : '');
+                    // 如果配置名称与文件名（去掉.json后）相同，则不显示文件名；默认配置始终显示文件名
+                    const filenameWithoutExt = config.filename.replace('.json', '');
+                    const showFilename = config.name === '默认' || config.name !== filenameWithoutExt;
+                    if (showFilename) {
+                        btn.innerHTML = `${config.name} <span style="opacity:0.6;font-size:0.75rem;">(${config.filename})</span>`;
+                    } else {
+                        btn.innerHTML = config.name;
+                    }
+                    btn.onclick = () => {
+                        setSelectedS3Config(config.name);
+                        renderS3ConfigList();
+                    };
+                    s3ConfigListEl.appendChild(btn);
+                });
+            }
+
+            // 默认按钮 - 选择默认配置
+            s3BtnDefault.onclick = () => {
+                setSelectedS3Config('默认');
+                renderS3ConfigList();
+                showInfo('已选择默认配置', '提示');
+            };
+
+            // 获取按钮 - 从云端获取配置列表
+            s3BtnFetch.onclick = async () => {
+                try {
+                    const s3Cfg = await getS3Config();
+                    if (!s3Cfg.secretId || !s3Cfg.secretKey || !s3Cfg.region || !s3Cfg.bucket) {
+                        showInfo('请先配置S3密钥信息', '提示');
+                        return;
+                    }
+                    const password = await showPasswordModal();
+                    if (!password) {
+                        showInfo('需要密码才能访问S3', '提示');
+                        return;
+                    }
+                    const { secretId, secretKey, region, bucket } = await decryptS3Config(s3Cfg, password);
+                    const cos = new COS({ SecretId: secretId, SecretKey: secretKey });
+
+                    // 列出Prompt Studio目录下的所有文件
+                    return new Promise((resolve, reject) => {
+                        cos.getBucket({
+                            Bucket: bucket,
+                            Region: region,
+                            Prefix: 'Prompt Studio/',
+                            MaxKeys: 100
+                        }, (err, data) => {
+                            if (err) {
+                                reject(err);
+                                return;
+                            }
+                            // 保留默认配置，其他配置从云端获取
+                            const configs = [{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }];
+                            const existingNames = new Set(['默认']);
+                            const defaultFilename = 'OHAO AI Prompt Studio.json';
+                            let addedCount = 0;
+
+                            if (data.Contents && data.Contents.length > 0) {
+                                data.Contents.forEach(item => {
+                                    if (item.Key && item.Key.endsWith('.json')) {
+                                        const filename = item.Key.replace('Prompt Studio/', '');
+                                        // 跳过与默认配置文件名相同的文件
+                                        if (filename === defaultFilename) {
+                                            return;
+                                        }
+                                        // 从文件名提取名称（去掉.json扩展名）
+                                        const name = filename.replace('.json', '');
+                                        // 添加所有云端配置（覆盖原先的）
+                                        if (!existingNames.has(name)) {
+                                            configs.push({ name, filename });
+                                            existingNames.add(name);
+                                            addedCount++;
+                                        }
+                                    }
+                                });
+                                saveS3Configs(configs);
+                                renderS3ConfigList();
+                                showInfo('已从云端获取 ' + addedCount + ' 个配置', '提示');
+                            } else {
+                                showInfo('云端没有找到配置文件', '提示');
+                            }
+                            resolve();
+                        });
+                    });
+                } catch (e) {
+                    console.error('获取配置失败:', e);
+                    showInfo('获取配置失败: ' + (e?.message || e), '错误');
+                }
+            };
+
+            // 初始化S3配置列表
+            renderS3ConfigList();
+
             // 当前选中的服务
             let currentProvider = getSyncProvider();
 
@@ -3129,15 +3325,38 @@ Prompt Studio目录下</p>
             // 初始化 S3 数据（异步解密）
             (async () => {
                 const s3Cfg = await getS3Config();
-                if (s3SecretIdEl) s3SecretIdEl.value = s3Cfg.secretId || '';
-                if (s3SecretKeyEl) s3SecretKeyEl.value = s3Cfg.secretKey || '';
-                if (s3RegionEl) s3RegionEl.value = s3Cfg.region || '';
-                if (s3BucketEl) s3BucketEl.value = s3Cfg.bucket || '';
+                // 检查是否已经加密（通过检查localStorage中是否有加密数据）
+                const hasEncryptedData = localStorage.getItem('ops_s3_secret_id') || 
+                                       localStorage.getItem('ops_s3_secret_key') ||
+                                       localStorage.getItem('ops_s3_region') ||
+                                       localStorage.getItem('ops_s3_bucket');
 
-                // 如果已保存加密的密钥，隐藏加密密码输入框
-                const encryptRow = document.getElementById('modal-s3-encrypt-row');
-                if (encryptRow && s3Cfg.secretId && s3Cfg.secretKey) {
-                    encryptRow.style.display = 'none';
+                // 如果已经加密，隐藏所有密钥输入框和加密密码输入框
+                if (hasEncryptedData) {
+                    // 隐藏密钥输入框
+                    if (s3SecretIdEl && s3SecretIdEl.closest('.modal-row')) {
+                        s3SecretIdEl.closest('.modal-row').style.display = 'none';
+                    }
+                    if (s3SecretKeyEl && s3SecretKeyEl.closest('.modal-row')) {
+                        s3SecretKeyEl.closest('.modal-row').style.display = 'none';
+                    }
+                    if (s3RegionEl && s3RegionEl.closest('.modal-row')) {
+                        s3RegionEl.closest('.modal-row').style.display = 'none';
+                    }
+                    if (s3BucketEl && s3BucketEl.closest('.modal-row')) {
+                        s3BucketEl.closest('.modal-row').style.display = 'none';
+                    }
+                    // 隐藏加密密码输入框
+                    const encryptRow = document.getElementById('modal-s3-encrypt-row');
+                    if (encryptRow) {
+                        encryptRow.style.display = 'none';
+                    }
+                } else {
+                    // 如果没有加密，显示原始数据
+                    if (s3SecretIdEl) s3SecretIdEl.value = s3Cfg.secretId || '';
+                    if (s3SecretKeyEl) s3SecretKeyEl.value = s3Cfg.secretKey || '';
+                    if (s3RegionEl) s3RegionEl.value = s3Cfg.region || '';
+                    if (s3BucketEl) s3BucketEl.value = s3Cfg.bucket || '';
                 }
             })();
 
@@ -3390,7 +3609,25 @@ Prompt Studio目录下</p>
 
             const onS3Save = async () => {
                 try {
-                    // 获取加密密码
+                    // 检查是否已经加密（通过检查localStorage中是否有加密数据）
+                    const hasEncryptedData = localStorage.getItem('ops_s3_secret_id') || 
+                                           localStorage.getItem('ops_s3_secret_key') ||
+                                           localStorage.getItem('ops_s3_region') ||
+                                           localStorage.getItem('ops_s3_bucket');
+
+                    // 保存全局云端开关
+                    if (cloudEnabledEl) {
+                        localStorage.setItem('ops_cloud_enabled', cloudEnabledEl.checked ? '1' : '0');
+                    }
+
+                    // 如果已经加密，直接保存云端开关即可
+                    if (hasEncryptedData) {
+                        showInfo('S3 配置已保存', '提示');
+                        cleanup();
+                        return;
+                    }
+
+                    // 如果没有加密，需要密码进行加密
                     const passwordInput = document.getElementById('modal-s3-encrypt-password');
                     const password = passwordInput?.value?.trim() || '';
 
@@ -3398,11 +3635,6 @@ Prompt Studio目录下</p>
                     if (!password || password.length < 8) {
                         showInfo('密码至少需要8位', '错误');
                         return;
-                    }
-
-                    // 保存全局云端开关
-                    if (cloudEnabledEl) {
-                        localStorage.setItem('ops_cloud_enabled', cloudEnabledEl.checked ? '1' : '0');
                     }
 
                     // 加密并保存密钥
@@ -3427,7 +3659,7 @@ Prompt Studio目录下</p>
                         const encryptedBucket = await encryptData(bucket, password);
                         localStorage.setItem('ops_s3_bucket', encryptedBucket);
                     }
-                    localStorage.setItem('ops_s3_filename', 'OHAO AI Prompt Studio.json');
+                    // 不再硬编码设置文件名，使用配置管理中的选择
 
                     // 清空密码输入框并隐藏
                     if (passwordInput) {
@@ -3466,16 +3698,35 @@ Prompt Studio目录下</p>
                             localStorage.removeItem('ops_s3_secret_key');
                             localStorage.removeItem('ops_s3_region');
                             localStorage.removeItem('ops_s3_bucket');
+                            // 重置配置列表为只包含默认配置
+                            localStorage.setItem('ops_s3_configs', JSON.stringify([{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }]));
+                            localStorage.removeItem('ops_s3_selected_config');
                             if (s3SecretIdEl) s3SecretIdEl.value = '';
                             if (s3SecretKeyEl) s3SecretKeyEl.value = '';
                             if (s3RegionEl) s3RegionEl.value = '';
                             if (s3BucketEl) s3BucketEl.value = '';
-                            // 清除密钥后显示加密密码输入框
+                            // 清除密钥后显示所有密钥输入框和加密密码输入框
+                            if (s3SecretIdEl && s3SecretIdEl.closest('.modal-row')) {
+                                s3SecretIdEl.closest('.modal-row').style.display = 'grid';
+                            }
+                            if (s3SecretKeyEl && s3SecretKeyEl.closest('.modal-row')) {
+                                s3SecretKeyEl.closest('.modal-row').style.display = 'grid';
+                            }
+                            if (s3RegionEl && s3RegionEl.closest('.modal-row')) {
+                                s3RegionEl.closest('.modal-row').style.display = 'grid';
+                            }
+                            if (s3BucketEl && s3BucketEl.closest('.modal-row')) {
+                                s3BucketEl.closest('.modal-row').style.display = 'grid';
+                            }
                             const encryptRow = document.getElementById('modal-s3-encrypt-row');
                             if (encryptRow) {
                                 encryptRow.style.display = 'grid';
                             }
-                            showInfo('S3 密钥已清除', '提示');
+                            // 重新渲染S3配置列表（恢复默认配置）
+                            if (typeof renderS3ConfigList === 'function') {
+                                renderS3ConfigList();
+                            }
+                            showInfo('S3 密钥和文件名称管理已清除', '提示');
                         }
                     });
             };
