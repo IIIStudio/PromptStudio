@@ -501,6 +501,10 @@
             box-shadow: 0 3px 6px rgba(51, 54, 67, .25);
         }
 
+        .common-tag.dragging {
+            opacity: 0.5;
+        }
+
         /* 主题切换按钮 */
         .theme-toggle {
             position: fixed;
@@ -851,7 +855,7 @@
     <div class="modal-backdrop" id="modal-category">
         <div class="modal">
             <div class="modal-header">
-                <span>新建大标签</span>
+                <span>新建提示词标签</span>
                 <button class="btn btn-outline" id="modal-cat-close">关闭</button>
             </div>
             <div class="modal-body">
@@ -2794,6 +2798,10 @@
 
             // 旧版结构：数组 => 维持原样平铺
             if (Array.isArray(data)) {
+                // 为容器添加数据属性，用于拖拽
+                commonTagsContainer.dataset.cat = catKey;
+                commonTagsContainer.dataset.subcat = '';
+
                 data.forEach((item, index) => {
                     const label = item?.lang_zh || item?.text || '';
                     const value = item?.text || '';
@@ -2803,6 +2811,7 @@
                     span.dataset.cat = catKey;
                     span.dataset.index = String(index);
                     span.dataset.subcat = '';
+                    span.draggable = true;
                     span.textContent = label;
                     span.title = value;
                     span.addEventListener('click', () => {
@@ -2813,8 +2822,15 @@
                         updateTags();
                         promptEditor.focus();
                     });
+                    // 添加拖拽事件
+                    span.addEventListener('dragstart', handleCommonTagDragStart);
+                    span.addEventListener('dragover', handleCommonTagDragOver);
+                    span.addEventListener('drop', handleCommonTagDrop);
+                    span.addEventListener('dragend', handleCommonTagDragEnd);
                     commonTagsContainer.appendChild(span);
                 });
+                // 为容器添加 dragover 事件
+                commonTagsContainer.addEventListener('dragover', onCommonContainerDragOver);
                 return;
             }
 
@@ -2883,6 +2899,9 @@
                     body.style.gap = '8px';
                     body.style.padding = '10px';
                     body.style.width = '100%';
+                    body.dataset.containerType = 'common-tag-group';
+                    body.dataset.cat = catKey;
+                    body.dataset.subcat = sub;
 
                     const arr = Array.isArray(groups[sub]) ? groups[sub] : [];
                     arr.forEach((item, index) => {
@@ -2894,6 +2913,7 @@
                         span.dataset.cat = catKey;
                         span.dataset.subcat = sub;
                         span.dataset.index = String(index);
+                        span.draggable = true;
                         span.textContent = label;
                         span.title = value;
                         span.addEventListener('click', () => {
@@ -2904,8 +2924,16 @@
                             updateTags();
                             promptEditor.focus();
                         });
+                        // 添加拖拽事件
+                        span.addEventListener('dragstart', handleCommonTagDragStart);
+                        span.addEventListener('dragover', handleCommonTagDragOver);
+                        span.addEventListener('drop', handleCommonTagDrop);
+                        span.addEventListener('dragend', handleCommonTagDragEnd);
                         body.appendChild(span);
                     });
+                    // 为容器添加 dragover 和 drop 事件（支持在空白区域拖拽）
+                    body.addEventListener('dragover', onCommonContainerDragOver);
+                    body.addEventListener('drop', handleCommonTagDrop);
 
                     toggle.addEventListener('click', () => {
                         const next = body.style.display === 'none';
@@ -2995,6 +3023,9 @@
                     header.appendChild(right);
                     section.appendChild(header);
                     section.appendChild(body);
+
+                    // 为 body 容器添加拖拽事件
+                    body.addEventListener('dragover', onCommonContainerDragOver);
 
                     // 移动类别顺序
                     btnUp.addEventListener('click', () => moveSubcat(catKey, sub, 'up'));
@@ -3471,7 +3502,212 @@
             tagsContainer.addEventListener('dragover', onContainerDragOver);
             tagsContainer.addEventListener('drop', onContainerDrop);
         }
-        
+
+        // ========== common-tags 拖拽排序功能 ==========
+        let draggedCommonTag = null;
+        let commonPlaceholderEl = null;
+        let commonDragSourceContainer = null;
+
+        function handleCommonTagDragStart(e) {
+            draggedCommonTag = this;
+            this.classList.add('dragging');
+            commonDragSourceContainer = this.closest('[data-container-type]') || this.parentElement;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleCommonTagDragOver(e) {
+            return onCommonContainerDragOver(e);
+        }
+
+        function handleCommonTagDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!draggedCommonTag) return false;
+
+            const targetContainer = e.target.closest('[data-container-type]') || e.target.closest('.common-tags') || e.target.parentElement;
+
+            if (!targetContainer) return false;
+
+            const cat = draggedCommonTag.dataset.cat;
+            const fromSubcat = draggedCommonTag.dataset.subcat || '';
+            const fromIndex = parseInt(draggedCommonTag.dataset.index, 10);
+
+            const toSubcat = targetContainer.dataset.subcat || '';
+
+            // 直接根据鼠标位置计算目标索引（与 prompt-tags 完全一致）
+            let toIndex = getCommonInsertIndexByPoint(e.clientX, e.clientY, targetContainer);
+
+            if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex)) {
+                if (cat && (fromSubcat !== toSubcat || targetContainer !== commonDragSourceContainer)) {
+                    // 跨容器移动
+                    moveCommonTagTo(cat, fromSubcat, fromIndex, toSubcat, toIndex);
+                } else if (fromIndex !== toIndex) {
+                    // 同容器内排序
+                    reorderCommonTags(targetContainer, fromIndex, toIndex);
+                }
+            }
+
+            cleanupCommonDrag();
+            return false;
+        }
+
+        function handleCommonTagDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.common-tag').forEach(tag => {
+                tag.classList.remove('dragging');
+            });
+            cleanupCommonDrag();
+        }
+
+        function cleanupCommonDrag() {
+            if (commonPlaceholderEl && commonPlaceholderEl.parentNode) {
+                commonPlaceholderEl.parentNode.removeChild(commonPlaceholderEl);
+            }
+            commonPlaceholderEl = null;
+            draggedCommonTag = null;
+            commonDragSourceContainer = null;
+        }
+
+        function getCommonInsertIndexByPoint(x, y, container) {
+            const items = Array.from(container.querySelectorAll('.common-tag'));
+            if (!items.length) return 0;
+            const TOL = 8;
+
+            const sameRow = items.filter(el => {
+                const r = el.getBoundingClientRect();
+                return y >= r.top - TOL && y <= r.bottom + TOL;
+            });
+
+            if (sameRow.length) {
+                for (let i = 0; i < sameRow.length; i++) {
+                    const r = sameRow[i].getBoundingClientRect();
+                    const mid = r.left + r.width / 2;
+                    if (x < mid) return items.indexOf(sameRow[i]);
+                }
+                return items.indexOf(sameRow[sameRow.length - 1]) + 1;
+            }
+
+            let anchor = items[items.length - 1];
+            let minDist = Infinity;
+            items.forEach(el => {
+                const r = el.getBoundingClientRect();
+                const cy = r.top + r.height / 2;
+                const d = Math.abs(y - cy);
+                if (d < minDist) { minDist = d; anchor = el; }
+            });
+            const r = anchor.getBoundingClientRect();
+            const mid = r.left + r.width / 2;
+            const baseIdx = items.indexOf(anchor);
+            return x < mid ? baseIdx : baseIdx + 1;
+        }
+
+        function onCommonContainerDragOver(e) {
+            if (!draggedCommonTag) return false;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            if (!commonPlaceholderEl) {
+                commonPlaceholderEl = document.createElement('div');
+                commonPlaceholderEl.className = 'tag-placeholder';
+            }
+
+            const targetContainer = e.target.closest('[data-container-type]') || e.target.closest('.common-tags');
+            if (!targetContainer) return false;
+
+            const idx = getCommonInsertIndexByPoint(e.clientX, e.clientY, targetContainer);
+            const items = Array.from(targetContainer.querySelectorAll('.common-tag'));
+
+            if (idx >= items.length) {
+                if (commonPlaceholderEl.parentNode !== targetContainer || commonPlaceholderEl.nextElementSibling !== null) {
+                    targetContainer.appendChild(commonPlaceholderEl);
+                }
+            } else {
+                const ref = items[idx];
+                if (ref.previousSibling !== commonPlaceholderEl) {
+                    targetContainer.insertBefore(commonPlaceholderEl, ref);
+                }
+            }
+            return false;
+        }
+
+        function reorderCommonTags(container, fromIndex, toIndex) {
+            const cat = container.dataset.cat;
+            const subcat = container.dataset.subcat || '';
+
+            if (!cat) return;
+
+            const data = commonData?.[cat];
+            if (!data) return;
+
+            if (isGroupedCategory(data) && subcat) {
+                const arr = data.groups?.[subcat];
+                if (Array.isArray(arr)) {
+                    const [moved] = arr.splice(fromIndex, 1);
+                    // 防御：约束范围
+                    if (fromIndex < toIndex) toIndex -= 1;
+                    const safeTo = Math.max(0, Math.min(toIndex, arr.length));
+                    arr.splice(safeTo, 0, moved);
+                    saveCommonData();
+                    renderCommonTagsByCategory(cat);
+                }
+            } else if (Array.isArray(data)) {
+                const [moved] = data.splice(fromIndex, 1);
+                // 防御：约束范围
+                if (fromIndex < toIndex) toIndex -= 1;
+                const safeTo = Math.max(0, Math.min(toIndex, data.length));
+                data.splice(safeTo, 0, moved);
+                saveCommonData();
+                renderCommonTagsByCategory(cat);
+            }
+        }
+
+        function moveCommonTag(cat, fromSubcat, fromIndex, targetContainer) {
+            const toSubcat = targetContainer.dataset.subcat || '';
+
+            if (!cat) return;
+
+            const data = commonData?.[cat];
+            if (!isGroupedCategory(data)) return;
+
+            const fromArr = data.groups?.[fromSubcat];
+            if (!Array.isArray(fromArr)) return;
+
+            const [movedItem] = fromArr.splice(fromIndex, 1);
+
+            if (!data.groups[toSubcat]) {
+                data.groups[toSubcat] = [];
+            }
+            data.groups[toSubcat].push(movedItem);
+
+            saveCommonData();
+            renderCommonTagsByCategory(cat);
+        }
+
+        function moveCommonTagTo(cat, fromSubcat, fromIndex, toSubcat, toIndex) {
+            if (!cat) return;
+
+            const data = commonData?.[cat];
+            if (!isGroupedCategory(data)) return;
+
+            const fromArr = data.groups?.[fromSubcat];
+            if (!Array.isArray(fromArr)) return;
+
+            const [movedItem] = fromArr.splice(fromIndex, 1);
+
+            if (!data.groups[toSubcat]) {
+                data.groups[toSubcat] = [];
+            }
+
+            const toArr = data.groups[toSubcat];
+            const safeTo = Math.max(0, Math.min(toIndex, toArr.length));
+            toArr.splice(safeTo, 0, movedItem);
+
+            saveCommonData();
+            renderCommonTagsByCategory(cat);
+        }
+
         // 移除标签
         function removeTag(index) {
             const tags = promptEditor.value.split(/[,，]/).map(tag => tag.trim()).filter(tag => tag.length > 0);
