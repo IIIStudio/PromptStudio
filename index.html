@@ -724,22 +724,65 @@
         .context-menu {
             position: fixed;
             z-index: 2000;
-            min-width: 150px;
+            min-width: 160px;
             background: var(--card-bg);
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,.18);
-            padding: 6px 0;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,.2), 0 2px 8px rgba(0,0,0,.1);
+            padding: 8px 0;
             display: none;
+            backdrop-filter: blur(10px);
         }
         .context-menu .item {
-            padding: 8px 12px;
+            padding: 10px 16px;
             cursor: pointer;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+        .context-menu .item i {
+            width: 16px;
+            text-align: center;
+            opacity: 0.7;
+            transition: opacity 0.15s ease;
         }
         .context-menu .item:hover {
-            background: var(--bg-color);
+            background: linear-gradient(90deg, rgba(108, 92, 231, 0.1), rgba(108, 92, 231, 0.05));
+            color: var(--primary-color);
+            padding-left: 20px;
+        }
+        .context-menu .item:hover i {
+            opacity: 1;
+            color: var(--primary-color);
+        }
+        .context-menu .item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: var(--primary-color);
+            border-radius: 0 2px 2px 0;
+            transition: height 0.15s ease;
+        }
+        .context-menu .item:hover::before {
+            height: 60%;
+        }
+        /* 右键菜单分隔线 */
+        .context-menu .divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 6px 0;
+            opacity: 0.6;
+        }
+        .context-menu .divider:hover {
+            background: var(--border-color);
         }
         /* 让通用提示模态位于最上层（覆盖其他模态） */
         #modal-confirm {
@@ -860,6 +903,16 @@
             scroll-behavior: auto !important;
         }
     }
+
+    /* 小屏幕时按钮只显示图标 */
+    @media (max-width: 768px) {
+        .editor-actions .btn span {
+            display: none;
+        }
+        .editor-actions .btn {
+            padding: 8px 12px;
+        }
+    }
     </style>
 </head>
 <body>
@@ -912,23 +965,23 @@
                             <i class="fas fa-edit"></i> 提示词内容
                         </div>
                         <div class="editor-actions">
-                            <button class="btn btn-outline" id="search-tags-btn">
-                                <i class="fas fa-search"></i> 搜索
+                            <button class="btn btn-outline" id="search-tags-btn" title="搜索">
+                                <i class="fas fa-search"></i> <span>搜索</span>
                             </button>
-                            <button class="btn btn-outline" id="random-pick-btn">
-                                <i class="fas fa-dice"></i> 随机
+                            <button class="btn btn-outline" id="random-pick-btn" title="随机">
+                                <i class="fas fa-dice"></i> <span>随机</span>
                             </button>
-                            <button class="btn btn-outline" onclick="resetPrompt()">
-                                <i class="fas fa-redo"></i> 重置
+                            <button class="btn btn-outline" onclick="resetPrompt()" title="重置">
+                                <i class="fas fa-redo"></i> <span>重置</span>
                             </button>
-                            <button class="btn btn-outline" onclick="copyPrompt()">
-                                <i class="fas fa-copy"></i> 复制
+                            <button class="btn btn-outline" onclick="copyPrompt()" title="复制">
+                                <i class="fas fa-copy"></i> <span>复制</span>
                             </button>
-                            <button class="btn btn-outline" id="save-prompt-btn">
-                                <i class="fas fa-bookmark"></i> 存储
+                            <button class="btn btn-outline" id="save-prompt-btn" title="存储">
+                                <i class="fas fa-bookmark"></i> <span>存储</span>
                             </button>
-                            <button class="btn btn-outline" id="view-history-btn">
-                                <i class="fas fa-list"></i> 查看
+                            <button class="btn btn-outline" id="view-history-btn" title="查看">
+                                <i class="fas fa-list"></i> <span>查看</span>
                             </button>
                         </div>
                     </div>
@@ -5701,7 +5754,7 @@ Prompt Studio目录下</p>
                         toast.style.transform = 'translate(-50%, -50%)';
                         toast.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
                         toast.style.color = 'white';
-                        toast.style.padding = '16px 32px';
+                        toast.style.padding = '5px 16px';
                         toast.style.borderRadius = '8px';
                         toast.style.zIndex = '10000';
                         toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
