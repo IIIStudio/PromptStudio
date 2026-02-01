@@ -7,6 +7,11 @@ B站演示：https://www.bilibili.com/video/BV1VgykBQEp5/
 > 分支有Gemini文生图，但是我没有api所以结果是什么我不知道！
 
 ## 更新日志
+2026-02-01
+- 添加搜索功能
+- 添加分类右键菜单及编辑功能
+- 调整css
+
 2025-10-28
 - 添加prompt-tags区域右键提示词权重+-与删除按键。
 
