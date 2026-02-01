@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title>IIIStudio - AI绘画提示词工具</title>
-    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI ，OPS翻译" />
+    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI" />
     <meta name="description" content="一个纯前端的提示词管理与编辑页面。支持分类/分组管理、标签拖拽排序、历史快照存储、翻译、JSON 导入/导出、本地持久化，以及可选的 Dropbox 云同步；同时提供一键导出提示词区域为图片（html2canvas）。" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
@@ -4619,22 +4619,46 @@
 
                 for (const cat in commonData) {
                     const data = commonData[cat];
-                    const tags = Array.isArray(data) ? data : (data.groups ? Object.values(data.groups).flat() : []);
 
-                    tags.forEach(tag => {
-                        const zh = (tag.lang_zh || '').trim();
-                        const en = (tag.text || '').trim();
-                        const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
-                        const enMatch = en && en.toLowerCase().includes(lowerKeyword);
+                    // 判断是数组格式还是分组格式
+                    if (Array.isArray(data)) {
+                        // 数组格式（旧版），类别为"未分组"
+                        data.forEach(tag => {
+                            const zh = (tag.lang_zh || '').trim();
+                            const en = (tag.text || '').trim();
+                            const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
+                            const enMatch = en && en.toLowerCase().includes(lowerKeyword);
 
-                        if (zhMatch || enMatch) {
-                            results.push({
-                                zh: zh,
-                                en: en,
-                                category: cat
+                            if (zhMatch || enMatch) {
+                                results.push({
+                                    zh: zh,
+                                    en: en,
+                                    category: cat,
+                                    subcategory: '未分组'
+                                });
+                            }
+                        });
+                    } else if (data.groups) {
+                        // 分组格式（新版）
+                        for (const sub in data.groups) {
+                            const tags = data.groups[sub];
+                            tags.forEach(tag => {
+                                const zh = (tag.lang_zh || '').trim();
+                                const en = (tag.text || '').trim();
+                                const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
+                                const enMatch = en && en.toLowerCase().includes(lowerKeyword);
+
+                                if (zhMatch || enMatch) {
+                                    results.push({
+                                        zh: zh,
+                                        en: en,
+                                        category: cat,
+                                        subcategory: sub
+                                    });
+                                }
                             });
                         }
-                    });
+                    }
                 }
 
                 return results;
@@ -4671,7 +4695,7 @@
                     const cat = document.createElement('div');
                     cat.style.fontSize = '0.8rem';
                     cat.style.opacity = '0.6';
-                    cat.textContent = `分类: ${result.category}`;
+                    cat.textContent = `分类: ${result.category} | 类别: ${result.subcategory}`;
 
                     row.appendChild(title);
                     if (result.en) row.appendChild(en);
