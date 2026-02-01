@@ -150,6 +150,20 @@ B站演示：https://www.bilibili.com/video/BV1VgykBQEp5/
 - 上传时对非 ASCII 文件名进行兼容处理：临时文件 + move 接口。
 - 下载时 ASCII 文件走标准 `content` 接口；非 ASCII 文件使用临时链接获取。
 
+## S3 (腾讯云 COS)（可选）
+
+重要：必须配置 CORS 才能使用！
+
+1. 访问 [腾讯云 API 密钥管理](https://console.cloud.tencent.com/cam/capi)
+2. 创建或复制你的 API 密钥的 SecretId 和 SecretKey
+3. 在 COS 控制台创建存储桶，记录 Bucket 名称和所在区域
+4. 配置 CORS（必须）：在 COS 控制台 → 存储桶 → 安全管理 → 跨域访问 CORS，添加规则：
+  • 来源：*
+  • 允许 Methods：GET, PUT, POST, DELETE, HEAD
+  • 允许 Headers：*
+  • 超时时间：600秒
+5. 存储桶访问权限设置为私有读写
+
 ## 彩云api（可选）
 
 - 地址：https://platform.caiyunapp.com/login

@@ -1095,19 +1095,6 @@
                     </div>
                     <div class="modal-row" style="font-size:12px;opacity:.75;">
                       <p style="color:var(--danger-color);margin-bottom:8px;">⚠️ 重要：必须配置 CORS 才能使用！</p>
-                      <ol>
-                          <li>访问 <a href="https://console.cloud.tencent.com/cam/capi" target="_blank">腾讯云 API 密钥管理</a></li>
-                          <li>创建或复制你的 API 密钥的 SecretId 和 SecretKey</li>
-                          <li>在 COS 控制台创建存储桶，记录 Bucket 名称和所在区域</li>
-                          <li><strong>配置 CORS（必须）</strong>：在 COS 控制台 → 存储桶 → 安全管理 → 跨域访问 CORS，添加规则：
-                            <br>• 来源：*
-                            <br>• 允许 Methods：GET, PUT, POST, DELETE, HEAD
-                            <br>• 允许 Headers：*
-                            <br>• 超时时间：600秒
-                          </li>
-                          <li>存储桶访问权限设置为私有读写</li>
-                      </ol>
-                      <p style="margin-top:8px;">配置 CORS 后等待 1-2 分钟生效。如果仍然报错，请检查浏览器控制台和存储桶日志。</p>
                     </div>
                 </div>
             </div>
