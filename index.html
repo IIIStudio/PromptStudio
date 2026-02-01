@@ -699,6 +699,10 @@
         #modal-confirm {
             z-index: 3000;
         }
+        /* 编辑标签模态框（需要覆盖搜索模态框） */
+        #modal-tag {
+            z-index: 4000;
+        }
         /* 提示词历史模态宽度扩展 */
         #modal-history .modal {
             width: min(92vw, 720px);
@@ -4738,6 +4742,67 @@
                                 document.body.removeChild(toast);
                             }, 1000);
                         });
+                    });
+
+                    // 右键菜单
+                    row.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+
+                        // 创建右键菜单
+                        const ctxMenu = document.createElement('div');
+                        ctxMenu.className = 'context-menu';
+                        ctxMenu.style.display = 'block';
+                        ctxMenu.style.left = e.pageX + 'px';
+                        ctxMenu.style.top = e.pageY + 'px';
+                        ctxMenu.style.zIndex = '4000';
+
+                        const editBtn = document.createElement('div');
+                        editBtn.className = 'item';
+                        editBtn.innerHTML = '<i class="fas fa-edit"></i> 编辑标签';
+                        editBtn.addEventListener('click', () => {
+                            ctxMenu.remove();
+
+                            // 找到标签在原数据中的索引
+                            const category = result.category;
+                            const subcategory = result.subcategory;
+                            let tagIndex = -1;
+
+                            if (commonData[category]) {
+                                const data = commonData[category];
+                                if (Array.isArray(data)) {
+                                    // 数组格式
+                                    tagIndex = data.findIndex(t =>
+                                        (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                        (t.text || '').trim() === (result.en || '').trim()
+                                    );
+                                    if (tagIndex >= 0) {
+                                        openTagModal(category, tagIndex, '');
+                                    }
+                                } else if (data.groups && data.groups[subcategory]) {
+                                    // 分组格式
+                                    const tags = data.groups[subcategory];
+                                    tagIndex = tags.findIndex(t =>
+                                        (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                        (t.text || '').trim() === (result.en || '').trim()
+                                    );
+                                    if (tagIndex >= 0) {
+                                        openTagModal(category, tagIndex, subcategory);
+                                    }
+                                }
+                            }
+                        });
+
+                        ctxMenu.appendChild(editBtn);
+                        document.body.appendChild(ctxMenu);
+
+                        // 点击其他地方关闭菜单
+                        const closeCtxMenu = () => {
+                            ctxMenu.remove();
+                            document.removeEventListener('click', closeCtxMenu);
+                        };
+                        setTimeout(() => {
+                            document.addEventListener('click', closeCtxMenu);
+                        }, 0);
                     });
 
                     row.addEventListener('mouseenter', () => {
