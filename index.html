@@ -679,6 +679,47 @@
         }
         .hidden { display: none; }
 
+        /* Toggle Switch 样式 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
         /* 右键菜单 */
         .context-menu {
             position: fixed;
@@ -1026,7 +1067,14 @@
         <div class="modal">
             <div class="modal-header">
                 <span>同步配置</span>
-                <button class="btn btn-outline" id="modal-sync-close">关闭</button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <label style="font-size:14px;">启用云端</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="modal-cloud-enabled" />
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <button class="btn btn-outline" id="modal-sync-close">关闭</button>
+                </div>
             </div>
             <div class="modal-body">
                 <div class="modal-row">
@@ -1049,23 +1097,12 @@
                     </div>
                     <div class="modal-row">
                         <label for="modal-db-refresh">Refresh Token / 授权码或回调URL</label>
-                        <input class="modal-input" id="modal-db-refresh" type="password" placeholder="可粘贴 Refresh Token，或直接粘贴回调后的整条URL（含 ?code=...）或仅 code" />
+                        <input class="modal-input" id="modal-db-refresh" type="password" placeholder="可粘贴 Refresh Token，或直接粘贴回调后的整条URL" />
                     </div>
-                    <div class="modal-row">
-                        <label for="modal-db-enabled">使用 Dropbox 进行上传/导入</label>
-                        <div>
-                            <input type="checkbox" id="modal-db-enabled" /> 启用云端（默认关闭）
-                        </div>
-                    </div>
-                    <div class="modal-row" style="font-size:12px;opacity:.75;">
-                      <ol>
-                          <li>访问 <a href="https://www.dropbox.com/developers/apps" target="_blank">Dropbox开发者平台</a></li>
-                          <li>创建或选择您的应用</li>
-                          <li>复制App key与App secret写入下方</li>
-                          <li>在 Permissions 勾选权限，files.content.write与files.content.read，点击Submit提交</li>
-                          <li>OAuth 2 Redirect URIs 写入 https://localhost/</li>
-                      </ol>
-                        使用说明：点击"授权"在弹窗中登录并同意授权。授权完成后若拿到 https://localhost/?code=...，可直接将整条地址或 code部分 粘贴到上方输入框并点"登录"，系统会自动先兑换 Refresh Token；若已拿到 Refresh Token，直接粘贴后点"登录"即可获取临时 Access Token。
+                    <div class="modal-row" style="font-size:12px;opacity:.75;"><p></p>
+                        <p style="color:var(--danger-color);margin-bottom:8px;">
+                            ⚠️ 使用说明：点击"授权"在弹窗中登录并同意授权。授权完成后若拿到 https://localhost/?code=...，可直接将整条地址或 code部分 粘贴到上方输入框并点"登录"，系统会自动先兑换 Refresh Token；若已拿到 Refresh Token，直接粘贴后点"登录"即可获取临时 Access Token。
+                        </p>
                     </div>
                 </div>
 
@@ -1073,7 +1110,7 @@
                 <div id="sync-s3-config" style="display:none;">
                     <div class="modal-row">
                         <label for="modal-s3-secret-id">Secret ID</label>
-                        <input class="modal-input" id="modal-s3-secret-id" type="text" placeholder="腾讯云 API 密钥 SecretId" />
+                        <input class="modal-input" id="modal-s3-secret-id" type="password" placeholder="腾讯云 API 密钥 SecretId" />
                     </div>
                     <div class="modal-row">
                         <label for="modal-s3-secret-key">Secret Key</label>
@@ -1081,20 +1118,15 @@
                     </div>
                     <div class="modal-row">
                         <label for="modal-s3-region">Region</label>
-                        <input class="modal-input" id="modal-s3-region" type="text" placeholder="存储桶所在区域，例如 ap-beijing" />
+                        <input class="modal-input" id="modal-s3-region" type="password" placeholder="存储桶所在区域，例如 ap-beijing" />
                     </div>
                     <div class="modal-row">
                         <label for="modal-s3-bucket">Bucket Name</label>
-                        <input class="modal-input" id="modal-s3-bucket" type="text" placeholder="存储桶名称，例如 examplebucket-1250000000" />
-                    </div>
-                    <div class="modal-row">
-                        <label for="modal-s3-enabled">使用 S3 进行上传/导入</label>
-                        <div>
-                            <input type="checkbox" id="modal-s3-enabled" /> 启用云端（默认关闭）
-                        </div>
+                        <input class="modal-input" id="modal-s3-bucket" type="password" placeholder="存储桶名称，例如 examplebucket-1250000000" />
                     </div>
                     <div class="modal-row" style="font-size:12px;opacity:.75;">
-                      <p style="color:var(--danger-color);margin-bottom:8px;">⚠️ 重要：必须配置 CORS 才能使用！</p>
+                      <p style="color:var(--danger-color);margin-bottom:8px;">⚠️ 重要：必须配置 CORS 才能使用！如何开启 <a href="https://cnb.cool/IIIStudio/Code/HTML/PromptStudio#s3-%E8%85%BE%E8%AE%AF%E4%BA%91-cos%E5%8F%AF%E9%80%89" target="_blank">CORS 配置</a>文件会在
+Prompt Studio目录下</p>
                     </div>
                 </div>
             </div>
@@ -2069,7 +2101,7 @@
             } catch(e) { return '/OHAO AI Prompt Studio.json'; }
         }
         function isDropboxEnabled() {
-            try { return localStorage.getItem('ops_dbx_enabled') === '1'; } catch(e) { return false; }
+            try { return localStorage.getItem('ops_cloud_enabled') === '1'; } catch(e) { return false; }
         }
 
         // S3 (腾讯云 COS) 配置
@@ -2090,7 +2122,10 @@
             } catch(e) { return 'OHAO AI Prompt Studio.json'; }
         }
         function isS3Enabled() {
-            try { return localStorage.getItem('ops_s3_enabled') === '1'; } catch(e) { return false; }
+            try { return localStorage.getItem('ops_cloud_enabled') === '1'; } catch(e) { return false; }
+        }
+        function isCloudEnabled() {
+            try { return localStorage.getItem('ops_cloud_enabled') === '1'; } catch(e) { return false; }
         }
 
         // 同步配置
@@ -2099,11 +2134,6 @@
         }
         function setSyncProvider(provider) {
             try { localStorage.setItem('sync_provider', provider || 'dropbox'); } catch(e) {}
-        }
-        function isCloudEnabled() {
-            const provider = getSyncProvider();
-            if (provider === 's3') return isS3Enabled();
-            return isDropboxEnabled();
         }
         function getCloudSelectedFilename() {
             const provider = getSyncProvider();
@@ -2716,12 +2746,12 @@
             const dropboxFooter = document.getElementById('sync-footer-dropbox');
             const s3Footer = document.getElementById('sync-footer-s3');
             const closeBtn = document.getElementById('modal-sync-close');
+            const cloudEnabledEl = document.getElementById('modal-cloud-enabled');
 
             // Dropbox 元素
             const keyEl = document.getElementById('modal-db-key');
             const secEl = document.getElementById('modal-db-secret');
             const refreshEl = document.getElementById('modal-db-refresh');
-            const enabledEl = document.getElementById('modal-db-enabled');
             const dbSaveBtn = document.getElementById('modal-db-save');
             const dbCancelBtn = document.getElementById('modal-db-cancel');
             const dbAuthBtn = document.getElementById('modal-db-authorize');
@@ -2732,7 +2762,6 @@
             const s3SecretKeyEl = document.getElementById('modal-s3-secret-key');
             const s3RegionEl = document.getElementById('modal-s3-region');
             const s3BucketEl = document.getElementById('modal-s3-bucket');
-            const s3EnabledEl = document.getElementById('modal-s3-enabled');
             const s3SaveBtn = document.getElementById('modal-s3-save');
             const s3CancelBtn = document.getElementById('modal-s3-cancel');
 
@@ -2764,12 +2793,17 @@
                 }
             }
 
+            // 初始化全局云端开关
+            if (cloudEnabledEl) {
+                const enabled = localStorage.getItem('ops_cloud_enabled') === '1';
+                cloudEnabledEl.checked = enabled;
+            }
+
             // 初始化 Dropbox 数据
             const dbCfg = getDropboxConfig();
             if (keyEl && keyEl.closest('.modal-row')) keyEl.closest('.modal-row').style.display = 'none';
             if (secEl && secEl.closest('.modal-row')) secEl.closest('.modal-row').style.display = 'none';
             refreshEl.value = dbCfg.refresh || '';
-            if (enabledEl) enabledEl.checked = isDropboxEnabled();
 
             // 初始化 S3 数据
             const s3Cfg = getS3Config();
@@ -2777,7 +2811,6 @@
             if (s3SecretKeyEl) s3SecretKeyEl.value = s3Cfg.secretKey || '';
             if (s3RegionEl) s3RegionEl.value = s3Cfg.region || '';
             if (s3BucketEl) s3BucketEl.value = s3Cfg.bucket || '';
-            if (s3EnabledEl) s3EnabledEl.checked = isS3Enabled();
 
             // 切换到当前 provider
             switchProvider(currentProvider);
@@ -3005,10 +3038,11 @@
 
             const onDbSave = () => {
                 try {
-                    localStorage.setItem('ops_dbx_refresh', refreshEl.value.trim());
-                    if (enabledEl) {
-                        localStorage.setItem('ops_dbx_enabled', enabledEl.checked ? '1' : '0');
+                    // 保存全局云端开关
+                    if (cloudEnabledEl) {
+                        localStorage.setItem('ops_cloud_enabled', cloudEnabledEl.checked ? '1' : '0');
                     }
+                    localStorage.setItem('ops_dbx_refresh', refreshEl.value.trim());
                     const sel = wrap.querySelector('#modal-db-file');
                     let v = sel && (sel.value || '').trim();
                     // 清理路径，只保留纯文件名
@@ -3030,13 +3064,14 @@
 
             const onS3Save = () => {
                 try {
+                    // 保存全局云端开关
+                    if (cloudEnabledEl) {
+                        localStorage.setItem('ops_cloud_enabled', cloudEnabledEl.checked ? '1' : '0');
+                    }
                     localStorage.setItem('ops_s3_secret_id', (s3SecretIdEl.value || '').trim());
                     localStorage.setItem('ops_s3_secret_key', (s3SecretKeyEl.value || '').trim());
                     localStorage.setItem('ops_s3_region', (s3RegionEl.value || '').trim());
                     localStorage.setItem('ops_s3_bucket', (s3BucketEl.value || '').trim());
-                    if (s3EnabledEl) {
-                        localStorage.setItem('ops_s3_enabled', s3EnabledEl.checked ? '1' : '0');
-                    }
                     localStorage.setItem('ops_s3_filename', 'OHAO AI Prompt Studio.json');
                 } catch(e) {}
                 cleanup();
