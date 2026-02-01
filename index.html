@@ -4974,7 +4974,15 @@
                     row.appendChild(cat);
 
                     row.addEventListener('click', () => {
-                        const textToCopy = result.en || result.zh;
+                        const textToInsert = result.en || result.zh;
+
+                        // 插入到提示词编辑器
+                        const currentText = promptEditor.value || '';
+                        const separator = currentText.trim() ? ', ' : '';
+                        promptEditor.value = currentText + separator + textToInsert;
+
+                        // 触发输入事件以更新标签显示
+                        promptEditor.dispatchEvent(new Event('input'));
 
                         // 创建临时提示元素
                         const toast = document.createElement('div');
@@ -4989,27 +4997,12 @@
                         toast.style.zIndex = '10000';
                         toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
                         toast.style.fontSize = '1rem';
-                        toast.textContent = `已复制: ${textToCopy}`;
+                        toast.textContent = `已插入: ${textToInsert}`;
 
-                        navigator.clipboard.writeText(textToCopy).then(() => {
-                            document.body.appendChild(toast);
-                            setTimeout(() => {
-                                document.body.removeChild(toast);
-                            }, 1000);
-                        }).catch(() => {
-                            // 降级方案：使用textarea复制
-                            const textarea = document.createElement('textarea');
-                            textarea.value = textToCopy;
-                            document.body.appendChild(textarea);
-                            textarea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(textarea);
-
-                            document.body.appendChild(toast);
-                            setTimeout(() => {
-                                document.body.removeChild(toast);
-                            }, 1000);
-                        });
+                        document.body.appendChild(toast);
+                        setTimeout(() => {
+                            document.body.removeChild(toast);
+                        }, 1000);
                     });
 
                     // 右键菜单
