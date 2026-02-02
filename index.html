@@ -1817,20 +1817,30 @@ Prompt Studio目录下</p>
                     wrap.style.gap = '12px';
 
                     const toggleLabel = document.createElement('label');
-                    toggleLabel.className = 'weight-toggle';
+                    toggleLabel.className = 'toggle-switch';
                     const initialEnabled = window.__weightControlsEnabled;
                     toggleLabel.innerHTML = `
                         <input type="checkbox" id="weight-visibility-toggle"${initialEnabled ? ' checked' : ''}>
-                        <span class="slider"></span>
-                        <span class="label-text">显示权重控制</span>
+                        <span class="toggle-slider"></span>
                     `;
+
+                    const labelText = document.createElement('span');
+                    labelText.textContent = '显示权重控制';
+                    labelText.style.fontSize = '14px';
+
+                    const toggleWrap = document.createElement('div');
+                    toggleWrap.style.display = 'flex';
+                    toggleWrap.style.alignItems = 'center';
+                    toggleWrap.style.gap = '8px';
+                    toggleWrap.appendChild(labelText);
+                    toggleWrap.appendChild(toggleLabel);
 
                     const counter = document.createElement('div');
                     counter.id = 'token-counter';
                     counter.className = 'token-counter';
                     counter.textContent = 'Tokens: 0/75';
 
-                    wrap.appendChild(toggleLabel);
+                    wrap.appendChild(toggleWrap);
                     wrap.appendChild(counter);
 
                     if (promptEditor && promptEditor.parentNode) {
