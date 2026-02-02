@@ -1203,6 +1203,13 @@
             </div>
             <div class="modal-body">
                 <div class="modal-row">
+                    <label>数据源</label>
+                    <div id="search-source-buttons" style="display:flex;flex-wrap:wrap;gap:8px;">
+                        <button class="btn btn-toggle btn-outline active" data-source="default" id="btn-source-default">默认</button>
+                        <button class="btn btn-toggle btn-outline" data-source="ielts" id="btn-source-ielts">IELTS</button>
+                    </div>
+                </div>
+                <div class="modal-row">
                     <input class="modal-input" id="search-input" type="text" placeholder="输入中文或英文关键词搜索..." />
                 </div>
                 <div class="modal-row" style="flex:1;overflow:hidden;">
@@ -6167,41 +6174,82 @@ Prompt Studio目录下</p>
             const searchResults = document.getElementById('search-results');
             const closeBtn = document.getElementById('modal-search-close');
             const clearBtn = document.getElementById('modal-search-clear');
+            const sourceButtons = document.querySelectorAll('#search-source-buttons .btn-toggle');
+
+            let currentSource = 'default'; // 'default' 或 'ielts'
+            let ieltsData = [];
+
+            // 加载IELTS数据
+            async function loadIELTSData() {
+                try {
+                    const response = await fetch('./IELTS/IELTS.json');
+                    if (response.ok) {
+                        ieltsData = await response.json();
+                    }
+                } catch (e) {
+                    console.error('加载IELTS数据失败:', e);
+                }
+            }
+
+            // 初始化加载数据
+            loadIELTSData();
 
             searchInput.value = '';
             searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+
+            // 数据源切换
+            sourceButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const source = btn.dataset.source;
+                    if (source === currentSource) {
+                        // 如果点击已选中的，则取消选择，恢复默认
+                        currentSource = 'default';
+                        sourceButtons.forEach(b => b.classList.remove('active'));
+                        document.getElementById('btn-source-default').classList.add('active');
+                    } else {
+                        // 切换到新数据源
+                        currentSource = source;
+                        sourceButtons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    }
+
+                    // 清空搜索结果
+                    searchInput.value = '';
+                    searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
+                });
+            });
 
             // 搜索所有提示词
             function searchTags(keyword) {
                 const results = [];
                 const lowerKeyword = keyword.toLowerCase();
 
-                for (const cat in commonData) {
-                    const data = commonData[cat];
+                if (currentSource === 'ielts') {
+                    // 搜索IELTS数据
+                    ieltsData.forEach(item => {
+                        const zh = (item.zh || '').trim();
+                        const en = (item.en || '').trim();
+                        const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
+                        const enMatch = en && en.toLowerCase().includes(lowerKeyword);
 
-                    // 判断是数组格式还是分组格式
-                    if (Array.isArray(data)) {
-                        // 数组格式（旧版），类别为"未分组"
-                        data.forEach(tag => {
-                            const zh = (tag.lang_zh || '').trim();
-                            const en = (tag.text || '').trim();
-                            const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
-                            const enMatch = en && en.toLowerCase().includes(lowerKeyword);
+                        if (zhMatch || enMatch) {
+                            results.push({
+                                zh: zh,
+                                en: en,
+                                category: 'IELTS',
+                                subcategory: ''
+                            });
+                        }
+                    });
+                } else {
+                    // 搜索默认数据
+                    for (const cat in commonData) {
+                        const data = commonData[cat];
 
-                            if (zhMatch || enMatch) {
-                                results.push({
-                                    zh: zh,
-                                    en: en,
-                                    category: cat,
-                                    subcategory: '未分组'
-                                });
-                            }
-                        });
-                    } else if (data.groups) {
-                        // 分组格式（新版）
-                        for (const sub in data.groups) {
-                            const tags = data.groups[sub];
-                            tags.forEach(tag => {
+                        // 判断是数组格式还是分组格式
+                        if (Array.isArray(data)) {
+                            // 数组格式（旧版），类别为"未分组"
+                            data.forEach(tag => {
                                 const zh = (tag.lang_zh || '').trim();
                                 const en = (tag.text || '').trim();
                                 const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
@@ -6212,10 +6260,30 @@ Prompt Studio目录下</p>
                                         zh: zh,
                                         en: en,
                                         category: cat,
-                                        subcategory: sub
+                                        subcategory: '未分组'
                                     });
                                 }
                             });
+                        } else if (data.groups) {
+                            // 分组格式（新版）
+                            for (const sub in data.groups) {
+                                const tags = data.groups[sub];
+                                tags.forEach(tag => {
+                                    const zh = (tag.lang_zh || '').trim();
+                                    const en = (tag.text || '').trim();
+                                    const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
+                                    const enMatch = en && en.toLowerCase().includes(lowerKeyword);
+
+                                    if (zhMatch || enMatch) {
+                                        results.push({
+                                            zh: zh,
+                                            en: en,
+                                            category: cat,
+                                            subcategory: sub
+                                        });
+                                    }
+                                });
+                            }
                         }
                     }
                 }
@@ -6259,14 +6327,16 @@ Prompt Studio目录下</p>
                     firstLine.appendChild(title);
                     if (result.en) firstLine.appendChild(en);
 
-                    // 第二行：分类信息
-                    const cat = document.createElement('div');
-                    cat.style.fontSize = '0.8rem';
-                    cat.style.opacity = '0.6';
-                    cat.textContent = `分类: ${result.category} | 类别: ${result.subcategory}`;
-
                     row.appendChild(firstLine);
-                    row.appendChild(cat);
+
+                    // IELTS模式不显示分类信息
+                    if (currentSource !== 'ielts') {
+                        const cat = document.createElement('div');
+                        cat.style.fontSize = '0.8rem';
+                        cat.style.opacity = '0.6';
+                        cat.textContent = `分类: ${result.category} | 类别: ${result.subcategory}`;
+                        row.appendChild(cat);
+                    }
 
                     row.addEventListener('click', () => {
                         const textToInsert = result.en || result.zh;
@@ -6300,79 +6370,79 @@ Prompt Studio目录下</p>
                         }, 1000);
                     });
 
-                    // 右键菜单
-                    row.addEventListener('contextmenu', (e) => {
-                        e.preventDefault();
+                    // 右键菜单（仅默认模式支持编辑）
+                    if (currentSource !== 'ielts') {
+                        row.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
 
-                        // 创建右键菜单
-                        const ctxMenu = document.createElement('div');
-                        ctxMenu.className = 'context-menu';
-                        ctxMenu.style.display = 'block';
-                        ctxMenu.style.left = e.pageX + 'px';
-                        ctxMenu.style.top = e.pageY + 'px';
-                        ctxMenu.style.zIndex = '4000';
+                            // 创建右键菜单
+                            const ctxMenu = document.createElement('div');
+                            ctxMenu.className = 'context-menu';
+                            ctxMenu.style.display = 'block';
+                            ctxMenu.style.left = e.pageX + 'px';
+                            ctxMenu.style.top = e.pageY + 'px';
+                            ctxMenu.style.zIndex = '4000';
 
-                        const editBtn = document.createElement('div');
-                        editBtn.className = 'item';
-                        editBtn.innerHTML = '<i class="fas fa-edit"></i> 编辑标签';
-                        editBtn.addEventListener('click', () => {
-                            ctxMenu.remove();
+                            const editBtn = document.createElement('div');
+                            editBtn.className = 'item';
+                            editBtn.innerHTML = '<i class="fas fa-edit"></i> 编辑标签';
+                            editBtn.addEventListener('click', () => {
+                                ctxMenu.remove();
 
-                            // 找到标签在原数据中的索引
-                            const category = result.category;
-                            const subcategory = result.subcategory;
-                            let tagIndex = -1;
+                                // 找到标签在原数据中的索引
+                                const category = result.category;
+                                const subcategory = result.subcategory;
+                                let tagIndex = -1;
 
-                            if (commonData[category]) {
-                                const data = commonData[category];
-                                if (Array.isArray(data)) {
-                                    // 数组格式
-                                    tagIndex = data.findIndex(t =>
-                                        (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                        (t.text || '').trim() === (result.en || '').trim()
-                                    );
-                                    if (tagIndex >= 0) {
-                                        openTagModal(category, tagIndex, '');
-                                    }
-                                } else if (data.groups && data.groups[subcategory]) {
-                                    // 分组格式
-                                    const tags = data.groups[subcategory];
-                                    tagIndex = tags.findIndex(t =>
-                                        (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                        (t.text || '').trim() === (result.en || '').trim()
-                                    );
-                                    if (tagIndex >= 0) {
-                                        openTagModal(category, tagIndex, subcategory);
+                                if (commonData[category]) {
+                                    const data = commonData[category];
+                                    if (Array.isArray(data)) {
+                                        // 数组格式
+                                        tagIndex = data.findIndex(t =>
+                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                            (t.text || '').trim() === (result.en || '').trim()
+                                        );
+                                        if (tagIndex >= 0) {
+                                            openTagModal(category, tagIndex, '');
+                                        }
+                                    } else if (data.groups && data.groups[subcategory]) {
+                                        // 分组格式
+                                        const tags = data.groups[subcategory];
+                                        tagIndex = tags.findIndex(t =>
+                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                            (t.text || '').trim() === (result.en || '').trim()
+                                        );
+                                        if (tagIndex >= 0) {
+                                            openTagModal(category, tagIndex, subcategory);
+                                        }
                                     }
                                 }
-                            }
+                            });
+
+                            ctxMenu.appendChild(editBtn);
+                            document.body.appendChild(ctxMenu);
+
+                            // 点击其他地方关闭菜单
+                            const closeCtxMenu = () => {
+                                ctxMenu.remove();
+                                document.removeEventListener('click', closeCtxMenu);
+                            };
+                            setTimeout(() => {
+                                document.addEventListener('click', closeCtxMenu);
+                            }, 0);
                         });
-
-                        ctxMenu.appendChild(editBtn);
-                        document.body.appendChild(ctxMenu);
-
-                        // 点击其他地方关闭菜单
-                        const closeCtxMenu = () => {
-                            ctxMenu.remove();
-                            document.removeEventListener('click', closeCtxMenu);
-                        };
-                        setTimeout(() => {
-                            document.addEventListener('click', closeCtxMenu);
-                        }, 0);
-                    });
+                    }
 
                     row.addEventListener('mouseenter', () => {
                         row.style.backgroundColor = 'var(--primary-color)';
                         title.style.color = 'white';
                         en.style.color = 'rgba(255,255,255,0.9)';
-                        cat.style.color = 'rgba(255,255,255,0.7)';
                     });
 
                     row.addEventListener('mouseleave', () => {
                         row.style.backgroundColor = '';
                         title.style.color = 'var(--primary-color)';
                         en.style.color = '';
-                        cat.style.color = '';
                     });
 
                     searchResults.appendChild(row);
