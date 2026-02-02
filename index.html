@@ -6191,7 +6191,8 @@ Prompt Studio目录下</p>
             const clearBtn = document.getElementById('modal-search-clear');
             const sourceButtons = document.querySelectorAll('#search-source-buttons .btn-toggle');
 
-            let currentSource = 'default'; // 'default' 或 'ielts'
+            // 使用Set存储选中的数据源，支持多选
+            let selectedSources = new Set(['default']);
 
             // 加载IELTS数据
             async function loadIELTSData() {
@@ -6211,19 +6212,24 @@ Prompt Studio目录下</p>
             searchInput.value = '';
             searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">输入关键词后，下方将显示匹配的提示词</div>';
 
-            // 数据源切换
+            // 数据源切换（支持多选）
             sourceButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const source = btn.dataset.source;
-                    if (source === currentSource) {
-                        // 如果点击已选中的，则取消选择，恢复默认
-                        currentSource = 'default';
-                        sourceButtons.forEach(b => b.classList.remove('active'));
-                        document.getElementById('btn-source-default').classList.add('active');
+
+                    if (selectedSources.has(source)) {
+                        // 如果已选中，则取消选择
+                        selectedSources.delete(source);
+                        btn.classList.remove('active');
+
+                        // 如果所有都取消，则恢复默认
+                        if (selectedSources.size === 0) {
+                            selectedSources.add('default');
+                            document.getElementById('btn-source-default').classList.add('active');
+                        }
                     } else {
-                        // 切换到新数据源
-                        currentSource = source;
-                        sourceButtons.forEach(b => b.classList.remove('active'));
+                        // 添加选择
+                        selectedSources.add(source);
                         btn.classList.add('active');
                     }
 
@@ -6238,8 +6244,8 @@ Prompt Studio目录下</p>
                 const results = [];
                 const lowerKeyword = keyword.toLowerCase();
 
-                if (currentSource === 'ielts') {
-                    // 搜索IELTS数据
+                // 搜索IELTS数据（如果选中）
+                if (selectedSources.has('ielts')) {
                     ieltsData.forEach(item => {
                         const zh = (item.zh || '').trim();
                         const en = (item.en || '').trim();
@@ -6255,8 +6261,10 @@ Prompt Studio目录下</p>
                             });
                         }
                     });
-                } else {
-                    // 搜索默认数据
+                }
+
+                // 搜索默认数据（如果选中）
+                if (selectedSources.has('default')) {
                     for (const cat in commonData) {
                         const data = commonData[cat];
 
@@ -6343,8 +6351,8 @@ Prompt Studio目录下</p>
 
                     row.appendChild(firstLine);
 
-                    // IELTS模式不显示分类信息
-                    if (currentSource !== 'ielts') {
+                    // IELTS数据不显示分类信息
+                    if (result.category !== 'IELTS') {
                         const cat = document.createElement('div');
                         cat.style.fontSize = '0.8rem';
                         cat.style.opacity = '0.6';
@@ -6384,8 +6392,8 @@ Prompt Studio目录下</p>
                         }, 1000);
                     });
 
-                    // 右键菜单（仅默认模式支持编辑）
-                    if (currentSource !== 'ielts') {
+                    // 右键菜单（仅默认数据支持编辑）
+                    if (result.category !== 'IELTS') {
                         row.addEventListener('contextmenu', (e) => {
                             e.preventDefault();
 
