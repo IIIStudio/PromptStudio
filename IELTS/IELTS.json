@@ -1,0 +1,4742 @@
+[
+    {
+        "en": "beginner",
+        "zh": "初学者"
+    },
+    {
+        "en": "account",
+        "zh": "账户"
+    },
+    {
+        "en": "leather shoes",
+        "zh": "皮鞋"
+    },
+    {
+        "en": "garage",
+        "zh": "车库"
+    },
+    {
+        "en": "wheel",
+        "zh": "轮子"
+    },
+    {
+        "en": "moderate",
+        "zh": "温和的-适度的"
+    },
+    {
+        "en": "waterfall",
+        "zh": "瀑布"
+    },
+    {
+        "en": "express",
+        "zh": "快递"
+    },
+    {
+        "en": "code",
+        "zh": "代码编码"
+    },
+    {
+        "en": "avenue",
+        "zh": "（南北向）街道"
+    },
+    {
+        "en": "drama",
+        "zh": "戏剧"
+    },
+    {
+        "en": "gas",
+        "zh": "气体"
+    },
+    {
+        "en": "fluent",
+        "zh": "流畅的"
+    },
+    {
+        "en": "shower",
+        "zh": "淋浴"
+    },
+    {
+        "en": "minibus",
+        "zh": "面包车"
+    },
+    {
+        "en": "plant",
+        "zh": "工厂"
+    },
+    {
+        "en": "transit",
+        "zh": "运送"
+    },
+    {
+        "en": "cookery",
+        "zh": "烹饪"
+    },
+    {
+        "en": "cinema",
+        "zh": "电影-电影院"
+    },
+    {
+        "en": "tank",
+        "zh": "坦克-水槽-水池"
+    },
+    {
+        "en": "enjoyable",
+        "zh": "快乐的-有乐趣"
+    },
+    {
+        "en": "warehouse",
+        "zh": "仓库"
+    },
+    {
+        "en": "yoga",
+        "zh": "瑜伽"
+    },
+    {
+        "en": "mat",
+        "zh": "垫子"
+    },
+    {
+        "en": "Asian",
+        "zh": "亚洲人"
+    },
+    {
+        "en": "knife",
+        "zh": "刀子"
+    },
+    {
+        "en": "container",
+        "zh": "集装箱-容器"
+    },
+    {
+        "en": "mirror",
+        "zh": "镜子"
+    },
+    {
+        "en": "first aid",
+        "zh": "急救"
+    },
+    {
+        "en": "campaign",
+        "zh": "活动"
+    },
+    {
+        "en": "conference",
+        "zh": "会议-协商"
+    },
+    {
+        "en": "limited",
+        "zh": "有限的"
+    },
+    {
+        "en": "exterior",
+        "zh": "外部的"
+    },
+    {
+        "en": "basis",
+        "zh": "基础"
+    },
+    {
+        "en": "internet",
+        "zh": "因特网"
+    },
+    {
+        "en": "resume",
+        "zh": "履历-简历"
+    },
+    {
+        "en": "type",
+        "zh": "类型"
+    },
+    {
+        "en": "layout",
+        "zh": "布局"
+    },
+    {
+        "en": "correction",
+        "zh": "改正-修正"
+    },
+    {
+        "en": "experience",
+        "zh": "经验"
+    },
+    {
+        "en": "avoid",
+        "zh": "避免"
+    },
+    {
+        "en": "bakery",
+        "zh": "面包店"
+    },
+    {
+        "en": "reference",
+        "zh": "参考"
+    },
+    {
+        "en": "agency",
+        "zh": "代理"
+    },
+    {
+        "en": "manufacture",
+        "zh": "制造"
+    },
+    {
+        "en": "tutor",
+        "zh": "导师"
+    },
+    {
+        "en": "kid",
+        "zh": "小孩子"
+    },
+    {
+        "en": "example",
+        "zh": "例子"
+    },
+    {
+        "en": "private",
+        "zh": "私人的"
+    },
+    {
+        "en": "screen",
+        "zh": "屏幕"
+    },
+    {
+        "en": "manager",
+        "zh": "经理"
+    },
+    {
+        "en": "choice",
+        "zh": "选择"
+    },
+    {
+        "en": "available",
+        "zh": "可利用的"
+    },
+    {
+        "en": "instruction",
+        "zh": "说明"
+    },
+    {
+        "en": "freezer",
+        "zh": "冰箱"
+    },
+    {
+        "en": "financial",
+        "zh": "金融的"
+    },
+    {
+        "en": "camping",
+        "zh": "露营度假"
+    },
+    {
+        "en": "block",
+        "zh": "街区"
+    },
+    {
+        "en": "climbing",
+        "zh": "爬山"
+    },
+    {
+        "en": "free",
+        "zh": "免费的"
+    },
+    {
+        "en": "view",
+        "zh": "视野"
+    },
+    {
+        "en": "include",
+        "zh": "包括"
+    },
+    {
+        "en": "cancel",
+        "zh": "取消"
+    },
+    {
+        "en": "performer",
+        "zh": "演奏者"
+    },
+    {
+        "en": "suitable",
+        "zh": "适当的"
+    },
+    {
+        "en": "opera",
+        "zh": "歌剧院"
+    },
+    {
+        "en": "theatre",
+        "zh": "戏院"
+    },
+    {
+        "en": "library",
+        "zh": "图书馆"
+    },
+    {
+        "en": "townhall",
+        "zh": "市政厅"
+    },
+    {
+        "en": "studio",
+        "zh": "工作室"
+    },
+    {
+        "en": "interview",
+        "zh": "采访"
+    },
+    {
+        "en": "select",
+        "zh": "选择"
+    },
+    {
+        "en": "edit",
+        "zh": "编辑"
+    },
+    {
+        "en": "parking",
+        "zh": "停车"
+    },
+    {
+        "en": "gym",
+        "zh": "健身房"
+    },
+    {
+        "en": "laundry",
+        "zh": "洗衣店"
+    },
+    {
+        "en": "harbour",
+        "zh": "海港"
+    },
+    {
+        "en": "balcony",
+        "zh": "阳台"
+    },
+    {
+        "en": "intermediate",
+        "zh": "中级的"
+    },
+    {
+        "en": "electricity",
+        "zh": "电力"
+    },
+    {
+        "en": "Africa",
+        "zh": "非洲"
+    },
+    {
+        "en": "vegetarian",
+        "zh": "素食主义者"
+    },
+    {
+        "en": "India",
+        "zh": "印度"
+    },
+    {
+        "en": "navigation",
+        "zh": "导航"
+    },
+    {
+        "en": "translate",
+        "zh": "翻译"
+    },
+    {
+        "en": "helicopter",
+        "zh": "直升机"
+    },
+    {
+        "en": "event",
+        "zh": "事件"
+    },
+    {
+        "en": "organic",
+        "zh": "有机的"
+    },
+    {
+        "en": "vacant",
+        "zh": "空缺的"
+    },
+    {
+        "en": "exhibition",
+        "zh": "展览会"
+    },
+    {
+        "en": "waitress",
+        "zh": "女服务员"
+    },
+    {
+        "en": "detail",
+        "zh": "细节"
+    },
+    {
+        "en": "leaflet",
+        "zh": "传单"
+    },
+    {
+        "en": "coastline",
+        "zh": "海岸线"
+    },
+    {
+        "en": "keyboard",
+        "zh": "键盘"
+    },
+    {
+        "en": "ruin",
+        "zh": "废墟"
+    },
+    {
+        "en": "database",
+        "zh": "数据库"
+    },
+    {
+        "en": "accommodation",
+        "zh": "住宿"
+    },
+    {
+        "en": "slide",
+        "zh": "滑梯"
+    },
+    {
+        "en": "stair lift",
+        "zh": "电梯"
+    },
+    {
+        "en": "hostel",
+        "zh": "招待所"
+    },
+    {
+        "en": "average",
+        "zh": "普通的"
+    },
+    {
+        "en": "travel",
+        "zh": "旅行"
+    },
+    {
+        "en": "challenge",
+        "zh": "挑战"
+    },
+    {
+        "en": "teenager",
+        "zh": "青少年"
+    },
+    {
+        "en": "junior",
+        "zh": "青少年"
+    },
+    {
+        "en": "rent",
+        "zh": "租金"
+    },
+    {
+        "en": "fax",
+        "zh": "传真"
+    },
+    {
+        "en": "landlady",
+        "zh": "女房东"
+    },
+    {
+        "en": "switch",
+        "zh": "开关"
+    },
+    {
+        "en": "hire",
+        "zh": "租用"
+    },
+    {
+        "en": "heater",
+        "zh": "加热器"
+    },
+    {
+        "en": "maid",
+        "zh": "女仆"
+    },
+    {
+        "en": "fridge",
+        "zh": "电冰箱"
+    },
+    {
+        "en": "lock",
+        "zh": "锁"
+    },
+    {
+        "en": "midnight",
+        "zh": "午夜"
+    },
+    {
+        "en": "department",
+        "zh": "部门"
+    },
+    {
+        "en": "further",
+        "zh": "更远的"
+    },
+    {
+        "en": "personal",
+        "zh": "个人的"
+    },
+    {
+        "en": "recruitment",
+        "zh": "招聘"
+    },
+    {
+        "en": "fight",
+        "zh": "打仗"
+    },
+    {
+        "en": "occasional",
+        "zh": "偶尔的"
+    },
+    {
+        "en": "skill",
+        "zh": "技能"
+    },
+    {
+        "en": "requirement",
+        "zh": "要求"
+    },
+    {
+        "en": "vision",
+        "zh": "视力"
+    },
+    {
+        "en": "math",
+        "zh": "数学"
+    },
+    {
+        "en": "prepare",
+        "zh": "准备"
+    },
+    {
+        "en": "customer",
+        "zh": "顾客"
+    },
+    {
+        "en": "cultural",
+        "zh": "文化的"
+    },
+    {
+        "en": "refreshment",
+        "zh": "点心"
+    },
+    {
+        "en": "awareness",
+        "zh": "意识"
+    },
+    {
+        "en": "cash",
+        "zh": "现金"
+    },
+    {
+        "en": "advice",
+        "zh": "建议"
+    },
+    {
+        "en": "museum",
+        "zh": "博物馆"
+    },
+    {
+        "en": "credit card",
+        "zh": "信用卡"
+    },
+    {
+        "en": "snowboarding",
+        "zh": "单板滑雪"
+    },
+    {
+        "en": "sailing",
+        "zh": "航海"
+    },
+    {
+        "en": "in advance",
+        "zh": "提前"
+    },
+    {
+        "en": "mountain",
+        "zh": "山"
+    },
+    {
+        "en": "destination",
+        "zh": "目的地"
+    },
+    {
+        "en": "suggestion",
+        "zh": "建议"
+    },
+    {
+        "en": "alternative",
+        "zh": "选择性的"
+    },
+    {
+        "en": "job agency",
+        "zh": "招聘中介"
+    },
+    {
+        "en": "booklet",
+        "zh": "小册子"
+    },
+    {
+        "en": "European",
+        "zh": "欧洲人"
+    },
+    {
+        "en": "contact",
+        "zh": "联系"
+    },
+    {
+        "en": "flat",
+        "zh": "公寓"
+    },
+    {
+        "en": "venue",
+        "zh": "集会/聚会场所"
+    },
+    {
+        "en": "interviewer",
+        "zh": "面试者"
+    },
+    {
+        "en": "remain",
+        "zh": "保持"
+    },
+    {
+        "en": "detailed",
+        "zh": "详细的"
+    },
+    {
+        "en": "disadvantage",
+        "zh": "缺点"
+    },
+    {
+        "en": "lift",
+        "zh": "举起"
+    },
+    {
+        "en": "medical",
+        "zh": "医学的"
+    },
+    {
+        "en": "arrange",
+        "zh": "安排"
+    },
+    {
+        "en": "artist",
+        "zh": "艺术家"
+    },
+    {
+        "en": "passport",
+        "zh": "护照"
+    },
+    {
+        "en": "university",
+        "zh": "大学"
+    },
+    {
+        "en": "occupation",
+        "zh": "职业"
+    },
+    {
+        "en": "audience",
+        "zh": "观众"
+    },
+    {
+        "en": "landscape",
+        "zh": "风景"
+    },
+    {
+        "en": "clay",
+        "zh": "黏土"
+    },
+    {
+        "en": "advantage",
+        "zh": "优点"
+    },
+    {
+        "en": "deck",
+        "zh": "甲板"
+    },
+    {
+        "en": "tourist",
+        "zh": "旅行者"
+    },
+    {
+        "en": "entrance",
+        "zh": "入口"
+    },
+    {
+        "en": "concern",
+        "zh": "担心的事"
+    },
+    {
+        "en": "feature",
+        "zh": "特色"
+    },
+    {
+        "en": "service",
+        "zh": "服务"
+    },
+    {
+        "en": "opportunity",
+        "zh": "机会"
+    },
+    {
+        "en": "band",
+        "zh": "队"
+    },
+    {
+        "en": "camp",
+        "zh": "露营"
+    },
+    {
+        "en": "festival",
+        "zh": "节日"
+    },
+    {
+        "en": "protection",
+        "zh": "保护"
+    },
+    {
+        "en": "model",
+        "zh": "模型"
+    },
+    {
+        "en": "salt",
+        "zh": "盐"
+    },
+    {
+        "en": "purple",
+        "zh": "紫色"
+    },
+    {
+        "en": "calorie",
+        "zh": "卡路里"
+    },
+    {
+        "en": "race",
+        "zh": "比赛"
+    },
+    {
+        "en": "concert",
+        "zh": "音乐会"
+    },
+    {
+        "en": "provide",
+        "zh": "提供"
+    },
+    {
+        "en": "broadcast",
+        "zh": "广播"
+    },
+    {
+        "en": "tent",
+        "zh": "帐篷"
+    },
+    {
+        "en": "piano",
+        "zh": "钢琴"
+    },
+    {
+        "en": "share",
+        "zh": "分享"
+    },
+    {
+        "en": "discount",
+        "zh": "折扣"
+    },
+    {
+        "en": "tablet",
+        "zh": "药片"
+    },
+    {
+        "en": "original",
+        "zh": "原始的"
+    },
+    {
+        "en": "control",
+        "zh": "控制"
+    },
+    {
+        "en": "handle",
+        "zh": "操作"
+    },
+    {
+        "en": "participant",
+        "zh": "参与者"
+    },
+    {
+        "en": "repair",
+        "zh": "修理"
+    },
+    {
+        "en": "advertisement",
+        "zh": "广告"
+    },
+    {
+        "en": "silver",
+        "zh": "银色"
+    },
+    {
+        "en": "additional",
+        "zh": "附加的"
+    },
+    {
+        "en": "dining room",
+        "zh": "餐厅"
+    },
+    {
+        "en": "candle",
+        "zh": "蜡烛"
+    },
+    {
+        "en": "single",
+        "zh": "单个的"
+    },
+    {
+        "en": "performance",
+        "zh": "表演"
+    },
+    {
+        "en": "supermarket",
+        "zh": "超市"
+    },
+    {
+        "en": "vacuum",
+        "zh": "真空"
+    },
+    {
+        "en": "registration",
+        "zh": "登记"
+    },
+    {
+        "en": "sale",
+        "zh": "出售"
+    },
+    {
+        "en": "cousin",
+        "zh": "堂兄弟姐妹"
+    },
+    {
+        "en": "reusable",
+        "zh": "可以再使用的"
+    },
+    {
+        "en": "certificate",
+        "zh": "证书"
+    },
+    {
+        "en": "swimming pool",
+        "zh": "游泳池"
+    },
+    {
+        "en": "initial",
+        "zh": "最初的"
+    },
+    {
+        "en": "deliver",
+        "zh": "传递"
+    },
+    {
+        "en": "primary school",
+        "zh": "小学"
+    },
+    {
+        "en": "purchase",
+        "zh": "购买"
+    },
+    {
+        "en": "consult",
+        "zh": "请教-咨询"
+    },
+    {
+        "en": "alarm",
+        "zh": "闹钟-警报"
+    },
+    {
+        "en": "driving license",
+        "zh": "行车执照"
+    },
+    {
+        "en": "sandwich",
+        "zh": "三明治"
+    },
+    {
+        "en": "postcode",
+        "zh": "邮编"
+    },
+    {
+        "en": "loss",
+        "zh": "减少"
+    },
+    {
+        "en": "technician",
+        "zh": "技术人员"
+    },
+    {
+        "en": "tour",
+        "zh": "旅行"
+    },
+    {
+        "en": "valid",
+        "zh": "有效的"
+    },
+    {
+        "en": "wheelchair",
+        "zh": "轮椅"
+    },
+    {
+        "en": "poetry",
+        "zh": "诗"
+    },
+    {
+        "en": "trousers",
+        "zh": "裤子"
+    },
+    {
+        "en": "viewpoint",
+        "zh": "观点"
+    },
+    {
+        "en": "zoom",
+        "zh": "急速上升"
+    },
+    {
+        "en": "buffet",
+        "zh": "自助餐"
+    },
+    {
+        "en": "expense",
+        "zh": "开支"
+    },
+    {
+        "en": "college",
+        "zh": "大学"
+    },
+    {
+        "en": "opposite",
+        "zh": "相反的"
+    },
+    {
+        "en": "cheque",
+        "zh": "支票"
+    },
+    {
+        "en": "supervisor",
+        "zh": "监督人"
+    },
+    {
+        "en": "refrigerator",
+        "zh": "冰箱"
+    },
+    {
+        "en": "science",
+        "zh": "科学"
+    },
+    {
+        "en": "collection",
+        "zh": "采集"
+    },
+    {
+        "en": "collect",
+        "zh": "收集"
+    },
+    {
+        "en": "literature",
+        "zh": "文学"
+    },
+    {
+        "en": "bank",
+        "zh": "银行"
+    },
+    {
+        "en": "state",
+        "zh": "情形"
+    },
+    {
+        "en": "item",
+        "zh": "项目"
+    },
+    {
+        "en": "snake",
+        "zh": "蛇"
+    },
+    {
+        "en": "phone bill",
+        "zh": "电话账单"
+    },
+    {
+        "en": "wildlife",
+        "zh": "野生动植物"
+    },
+    {
+        "en": "photocopy",
+        "zh": "复印件"
+    },
+    {
+        "en": "camera",
+        "zh": "照相机"
+    },
+    {
+        "en": "reservation",
+        "zh": "预约"
+    },
+    {
+        "en": "hold",
+        "zh": "持有"
+    },
+    {
+        "en": "catalogue",
+        "zh": "目录"
+    },
+    {
+        "en": "book",
+        "zh": "预订"
+    },
+    {
+        "en": "noisy",
+        "zh": "吵闹的"
+    },
+    {
+        "en": "deposit",
+        "zh": "押金"
+    },
+    {
+        "en": "transfer",
+        "zh": "转让"
+    },
+    {
+        "en": "uniform",
+        "zh": "制服"
+    },
+    {
+        "en": "tropical",
+        "zh": "热带的"
+    },
+    {
+        "en": "preferred",
+        "zh": "优先的"
+    },
+    {
+        "en": "firework",
+        "zh": "烟花"
+    },
+    {
+        "en": "loan",
+        "zh": "贷款"
+    },
+    {
+        "en": "coach",
+        "zh": "教练"
+    },
+    {
+        "en": "identification",
+        "zh": "身份证明"
+    },
+    {
+        "en": "beach",
+        "zh": "海滩"
+    },
+    {
+        "en": "statement",
+        "zh": "清单"
+    },
+    {
+        "en": "expire",
+        "zh": "期满"
+    },
+    {
+        "en": "librarian",
+        "zh": "图书管理员"
+    },
+    {
+        "en": "nationality",
+        "zh": "国籍"
+    },
+    {
+        "en": "guidance",
+        "zh": "指导"
+    },
+    {
+        "en": "gift",
+        "zh": "礼物"
+    },
+    {
+        "en": "rule",
+        "zh": "规则"
+    },
+    {
+        "en": "side door",
+        "zh": "侧门"
+    },
+    {
+        "en": "fix",
+        "zh": "修理"
+    },
+    {
+        "en": "theme",
+        "zh": "主题"
+    },
+    {
+        "en": "normal",
+        "zh": "正常的"
+    },
+    {
+        "en": "benefit",
+        "zh": "好处"
+    },
+    {
+        "en": "tennis",
+        "zh": "网球"
+    },
+    {
+        "en": "interest rate",
+        "zh": "利率"
+    },
+    {
+        "en": "cable car",
+        "zh": "缆车"
+    },
+    {
+        "en": "online",
+        "zh": "在线的"
+    },
+    {
+        "en": "source",
+        "zh": "来源"
+    },
+    {
+        "en": "branch",
+        "zh": "分支"
+    },
+    {
+        "en": "Canadian",
+        "zh": "加拿大人"
+    },
+    {
+        "en": "reference number",
+        "zh": "参考号"
+    },
+    {
+        "en": "amount",
+        "zh": "数量"
+    },
+    {
+        "en": "automatically",
+        "zh": "自动地"
+    },
+    {
+        "en": "basement",
+        "zh": "地下室"
+    },
+    {
+        "en": "wet",
+        "zh": "潮湿的"
+    },
+    {
+        "en": "action movie",
+        "zh": "动作片"
+    },
+    {
+        "en": "engineer",
+        "zh": "工程师"
+    },
+    {
+        "en": "signature",
+        "zh": "署名"
+    },
+    {
+        "en": "payment",
+        "zh": "支付"
+    },
+    {
+        "en": "minimum",
+        "zh": "最小值"
+    },
+    {
+        "en": "relaxation",
+        "zh": "放松"
+    },
+    {
+        "en": "scheme",
+        "zh": "计划-体系"
+    },
+    {
+        "en": "racket",
+        "zh": "球拍"
+    },
+    {
+        "en": "printer",
+        "zh": "打印机"
+    },
+    {
+        "en": "withdraw",
+        "zh": "收回"
+    },
+    {
+        "en": "outstanding",
+        "zh": "杰出的"
+    },
+    {
+        "en": "canteen",
+        "zh": "食堂"
+    },
+    {
+        "en": "exact",
+        "zh": "精确的"
+    },
+    {
+        "en": "switch off",
+        "zh": "关掉"
+    },
+    {
+        "en": "boot",
+        "zh": "靴子"
+    },
+    {
+        "en": "wood",
+        "zh": "木材"
+    },
+    {
+        "en": "forbid",
+        "zh": "禁止"
+    },
+    {
+        "en": "client",
+        "zh": "客户"
+    },
+    {
+        "en": "rail",
+        "zh": "铁轨"
+    },
+    {
+        "en": "appliance",
+        "zh": "电器"
+    },
+    {
+        "en": "intensive",
+        "zh": "加强的"
+    },
+    {
+        "en": "allergy",
+        "zh": "过敏"
+    },
+    {
+        "en": "bargain",
+        "zh": "便宜货"
+    },
+    {
+        "en": "relative",
+        "zh": "相对的"
+    },
+    {
+        "en": "condition",
+        "zh": "情况"
+    },
+    {
+        "en": "package",
+        "zh": "包裹"
+    },
+    {
+        "en": "fare",
+        "zh": "费用"
+    },
+    {
+        "en": "armchair",
+        "zh": "扶手椅"
+    },
+    {
+        "en": "advanced",
+        "zh": "高级的"
+    },
+    {
+        "en": "material",
+        "zh": "物质"
+    },
+    {
+        "en": "jeans",
+        "zh": "牛仔裤"
+    },
+    {
+        "en": "trolley",
+        "zh": "手推车"
+    },
+    {
+        "en": "sightseeing",
+        "zh": "观光"
+    },
+    {
+        "en": "post office",
+        "zh": "邮局"
+    },
+    {
+        "en": "sports centre",
+        "zh": "体育中心"
+    },
+    {
+        "en": "Monday",
+        "zh": "星期一"
+    },
+    {
+        "en": "Sunday",
+        "zh": "星期天"
+    },
+    {
+        "en": "seat",
+        "zh": "座位"
+    },
+    {
+        "en": "living room",
+        "zh": "客厅起居室"
+    },
+    {
+        "en": "bathroom",
+        "zh": "浴室-卫生间"
+    },
+    {
+        "en": "kitchen",
+        "zh": "厨房"
+    },
+    {
+        "en": "washing machine",
+        "zh": "洗衣机"
+    },
+    {
+        "en": "video",
+        "zh": "电视-录像机"
+    },
+    {
+        "en": "basin",
+        "zh": "盆"
+    },
+    {
+        "en": "campus",
+        "zh": "校园"
+    },
+    {
+        "en": "lamp",
+        "zh": "灯"
+    },
+    {
+        "en": "survey",
+        "zh": "调查-测量"
+    },
+    {
+        "en": "community",
+        "zh": "社区-共同体"
+    },
+    {
+        "en": "dissatisfaction",
+        "zh": "不满"
+    },
+    {
+        "en": "quality",
+        "zh": "质量-品质"
+    },
+    {
+        "en": "local",
+        "zh": "当地的"
+    },
+    {
+        "en": "bedsheet",
+        "zh": "床单"
+    },
+    {
+        "en": "carpet",
+        "zh": "地毯"
+    },
+    {
+        "en": "Thursday",
+        "zh": "星期四"
+    },
+    {
+        "en": "iron",
+        "zh": "熨烫"
+    },
+    {
+        "en": "suburb",
+        "zh": "郊区"
+    },
+    {
+        "en": "setting",
+        "zh": "环境"
+    },
+    {
+        "en": "ceremony",
+        "zh": "典礼仪式"
+    },
+    {
+        "en": "premium",
+        "zh": "高品质的"
+    },
+    {
+        "en": "apply",
+        "zh": "申请"
+    },
+    {
+        "en": "brochure",
+        "zh": "小册子"
+    },
+    {
+        "en": "reception",
+        "zh": "招待"
+    },
+    {
+        "en": "annual",
+        "zh": "每年的"
+    },
+    {
+        "en": "guard",
+        "zh": "保卫"
+    },
+    {
+        "en": "poster",
+        "zh": "海报"
+    },
+    {
+        "en": "health check",
+        "zh": "体检"
+    },
+    {
+        "en": "petrol",
+        "zh": "汽油"
+    },
+    {
+        "en": "literacy",
+        "zh": "读写能力"
+    },
+    {
+        "en": "comedy",
+        "zh": "喜剧"
+    },
+    {
+        "en": "lounge",
+        "zh": "休息厅"
+    },
+    {
+        "en": "Spanish",
+        "zh": "西班牙语"
+    },
+    {
+        "en": "headache",
+        "zh": "头疼"
+    },
+    {
+        "en": "burglar",
+        "zh": "盗贼"
+    },
+    {
+        "en": "goods",
+        "zh": "商品"
+    },
+    {
+        "en": "purse",
+        "zh": "钱包"
+    },
+    {
+        "en": "suit",
+        "zh": "套装"
+    },
+    {
+        "en": "brick",
+        "zh": "砖块"
+    },
+    {
+        "en": "assignment",
+        "zh": "作业"
+    },
+    {
+        "en": "register",
+        "zh": "注册"
+    },
+    {
+        "en": "research",
+        "zh": "/v. 研究"
+    },
+    {
+        "en": "soil",
+        "zh": "土壤"
+    },
+    {
+        "en": "residence",
+        "zh": "住处-住宅"
+    },
+    {
+        "en": "designer",
+        "zh": "设计师"
+    },
+    {
+        "en": "board game",
+        "zh": "桌游"
+    },
+    {
+        "en": "locker",
+        "zh": "储物柜"
+    },
+    {
+        "en": "century",
+        "zh": "世纪"
+    },
+    {
+        "en": "agriculture",
+        "zh": "农业"
+    },
+    {
+        "en": "fair",
+        "zh": "展览会"
+    },
+    {
+        "en": "region",
+        "zh": "地区"
+    },
+    {
+        "en": "website",
+        "zh": "网站"
+    },
+    {
+        "en": "formal",
+        "zh": "正式的"
+    },
+    {
+        "en": "log in",
+        "zh": "登录"
+    },
+    {
+        "en": "cover",
+        "zh": "包括"
+    },
+    {
+        "en": "development",
+        "zh": "发展"
+    },
+    {
+        "en": "shelf",
+        "zh": "架子"
+    },
+    {
+        "en": "save",
+        "zh": "节省"
+    },
+    {
+        "en": "heat",
+        "zh": "高温"
+    },
+    {
+        "en": "indicator",
+        "zh": "指标"
+    },
+    {
+        "en": "kilogram",
+        "zh": "公斤"
+    },
+    {
+        "en": "specially",
+        "zh": "特别地"
+    },
+    {
+        "en": "traditional",
+        "zh": "传统的"
+    },
+    {
+        "en": "refund",
+        "zh": "退还"
+    },
+    {
+        "en": "trip",
+        "zh": "旅行"
+    },
+    {
+        "en": "sick",
+        "zh": "病人"
+    },
+    {
+        "en": "tap water",
+        "zh": "自来水"
+    },
+    {
+        "en": "advance",
+        "zh": "发展"
+    },
+    {
+        "en": "match",
+        "zh": "比赛"
+    },
+    {
+        "en": "length",
+        "zh": "长度"
+    },
+    {
+        "en": "remove",
+        "zh": "移除"
+    },
+    {
+        "en": "change",
+        "zh": "改变"
+    },
+    {
+        "en": "tools",
+        "zh": "工具"
+    },
+    {
+        "en": "garden",
+        "zh": "花园"
+    },
+    {
+        "en": "overfill",
+        "zh": "装满"
+    },
+    {
+        "en": "ferry",
+        "zh": "渡轮"
+    },
+    {
+        "en": "plastic",
+        "zh": "塑料的"
+    },
+    {
+        "en": "waterproof",
+        "zh": "防水的"
+    },
+    {
+        "en": "station",
+        "zh": "车站"
+    },
+    {
+        "en": "dancing",
+        "zh": "舞蹈"
+    },
+    {
+        "en": "monitor",
+        "zh": "监视"
+    },
+    {
+        "en": "questionnaire",
+        "zh": "调查问卷"
+    },
+    {
+        "en": "experiment",
+        "zh": "实验"
+    },
+    {
+        "en": "chip",
+        "zh": "芯片"
+    },
+    {
+        "en": "firewood",
+        "zh": "柴火"
+    },
+    {
+        "en": "information",
+        "zh": "信息"
+    },
+    {
+        "en": "prize",
+        "zh": "奖品"
+    },
+    {
+        "en": "inspection",
+        "zh": "视察"
+    },
+    {
+        "en": "fee",
+        "zh": "费用"
+    },
+    {
+        "en": "budget",
+        "zh": "预算"
+    },
+    {
+        "en": "insurance",
+        "zh": "保险"
+    },
+    {
+        "en": "health",
+        "zh": "健康"
+    },
+    {
+        "en": "land",
+        "zh": "陆地"
+    },
+    {
+        "en": "labour",
+        "zh": "劳动力"
+    },
+    {
+        "en": "furniture",
+        "zh": "家具"
+    },
+    {
+        "en": "art",
+        "zh": "艺术"
+    },
+    {
+        "en": "participate",
+        "zh": "参与"
+    },
+    {
+        "en": "mixed",
+        "zh": "混合的"
+    },
+    {
+        "en": "attend",
+        "zh": "出席"
+    },
+    {
+        "en": "government",
+        "zh": "政府"
+    },
+    {
+        "en": "fund",
+        "zh": "资助"
+    },
+    {
+        "en": "salary",
+        "zh": "工资"
+    },
+    {
+        "en": "confidence",
+        "zh": "信心"
+    },
+    {
+        "en": "flexible",
+        "zh": "灵活的"
+    },
+    {
+        "en": "password",
+        "zh": "密码"
+    },
+    {
+        "en": "personal officer",
+        "zh": "人事部员工"
+    },
+    {
+        "en": "booking form",
+        "zh": "预定表格"
+    },
+    {
+        "en": "file",
+        "zh": "文件"
+    },
+    {
+        "en": "cabin",
+        "zh": "船舱"
+    },
+    {
+        "en": "bill",
+        "zh": "清单"
+    },
+    {
+        "en": "neutral",
+        "zh": "中立的"
+    },
+    {
+        "en": "luggage",
+        "zh": "行李"
+    },
+    {
+        "en": "documentary film",
+        "zh": "纪录片"
+    },
+    {
+        "en": "unloaded",
+        "zh": "卸货"
+    },
+    {
+        "en": "parking lot",
+        "zh": "停车场"
+    },
+    {
+        "en": "campsite",
+        "zh": "营地"
+    },
+    {
+        "en": "fiction",
+        "zh": "小说"
+    },
+    {
+        "en": "metal paint",
+        "zh": "金属漆"
+    },
+    {
+        "en": "meadow",
+        "zh": "草地"
+    },
+    {
+        "en": "metal detector",
+        "zh": "金属探测器"
+    },
+    {
+        "en": "cash point",
+        "zh": "提款机"
+    },
+    {
+        "en": "label",
+        "zh": "标签"
+    },
+    {
+        "en": "ink",
+        "zh": "墨水"
+    },
+    {
+        "en": "statue",
+        "zh": "雕塑"
+    },
+    {
+        "en": "seed",
+        "zh": "种子"
+    },
+    {
+        "en": "award",
+        "zh": "奖品"
+    },
+    {
+        "en": "vehicle",
+        "zh": "车辆"
+    },
+    {
+        "en": "herb",
+        "zh": "草药"
+    },
+    {
+        "en": "excursion",
+        "zh": "短途旅行"
+    },
+    {
+        "en": "blanket",
+        "zh": "毛毯"
+    },
+    {
+        "en": "extra",
+        "zh": "额外的"
+    },
+    {
+        "en": "coal",
+        "zh": "煤"
+    },
+    {
+        "en": "terrain",
+        "zh": "地形"
+    },
+    {
+        "en": "aspect",
+        "zh": "方面"
+    },
+    {
+        "en": "allow",
+        "zh": "允许"
+    },
+    {
+        "en": "recommend",
+        "zh": "推荐"
+    },
+    {
+        "en": "mine",
+        "zh": "矿"
+    },
+    {
+        "en": "technological",
+        "zh": "科技的"
+    },
+    {
+        "en": "staff",
+        "zh": "职员"
+    },
+    {
+        "en": "insight",
+        "zh": "洞察力"
+    },
+    {
+        "en": "elevator",
+        "zh": "电梯"
+    },
+    {
+        "en": "underground",
+        "zh": "地铁"
+    },
+    {
+        "en": "employee",
+        "zh": "员工"
+    },
+    {
+        "en": "notice board",
+        "zh": "布告栏"
+    },
+    {
+        "en": "supportive",
+        "zh": "支持的"
+    },
+    {
+        "en": "responsibility",
+        "zh": "责任"
+    },
+    {
+        "en": "atmosphere",
+        "zh": "气氛"
+    },
+    {
+        "en": "guest",
+        "zh": "客人"
+    },
+    {
+        "en": "store room",
+        "zh": "储藏室"
+    },
+    {
+        "en": "main hall",
+        "zh": "大厅"
+    },
+    {
+        "en": "lobby",
+        "zh": "大厅"
+    },
+    {
+        "en": "tax",
+        "zh": "税"
+    },
+    {
+        "en": "accountant",
+        "zh": "会计师"
+    },
+    {
+        "en": "architecture",
+        "zh": "建筑"
+    },
+    {
+        "en": "solar energy",
+        "zh": "太阳能"
+    },
+    {
+        "en": "villa",
+        "zh": "别墅"
+    },
+    {
+        "en": "picnic",
+        "zh": "野餐"
+    },
+    {
+        "en": "pond",
+        "zh": "池塘"
+    },
+    {
+        "en": "pool",
+        "zh": "游泳池"
+    },
+    {
+        "en": "agent",
+        "zh": "中介"
+    },
+    {
+        "en": "real estate",
+        "zh": "房地产"
+    },
+    {
+        "en": "worthwhile",
+        "zh": "值得的"
+    },
+    {
+        "en": "location",
+        "zh": "位置"
+    },
+    {
+        "en": "decorate",
+        "zh": "装饰"
+    },
+    {
+        "en": "appointment",
+        "zh": "约定"
+    },
+    {
+        "en": "spare room",
+        "zh": "空房"
+    },
+    {
+        "en": "shade",
+        "zh": "树荫"
+    },
+    {
+        "en": "string",
+        "zh": "线"
+    },
+    {
+        "en": "lettuce",
+        "zh": "生菜"
+    },
+    {
+        "en": "spoon",
+        "zh": "勺子"
+    },
+    {
+        "en": "motor",
+        "zh": "汽车"
+    },
+    {
+        "en": "hot balloon",
+        "zh": "热气球"
+    },
+    {
+        "en": "calm",
+        "zh": "平静的"
+    },
+    {
+        "en": "postal",
+        "zh": "邮政的"
+    },
+    {
+        "en": "bonus",
+        "zh": "奖金"
+    },
+    {
+        "en": "insect",
+        "zh": "昆虫"
+    },
+    {
+        "en": "warning",
+        "zh": "警告"
+    },
+    {
+        "en": "custom",
+        "zh": "风俗习惯"
+    },
+    {
+        "en": "belonging",
+        "zh": "所有物"
+    },
+    {
+        "en": "monologue",
+        "zh": "独白"
+    },
+    {
+        "en": "applicant",
+        "zh": "申请人"
+    },
+    {
+        "en": "document",
+        "zh": "文件"
+    },
+    {
+        "en": "promotion",
+        "zh": "晋升"
+    },
+    {
+        "en": "networking",
+        "zh": "一种互助性的网络体系"
+    },
+    {
+        "en": "self-employment",
+        "zh": "自营"
+    },
+    {
+        "en": "organization",
+        "zh": "组织"
+    },
+    {
+        "en": "involvement",
+        "zh": "牵连"
+    },
+    {
+        "en": "washroom",
+        "zh": "卫生间"
+    },
+    {
+        "en": "corridor",
+        "zh": "走廊"
+    },
+    {
+        "en": "reward",
+        "zh": "报酬"
+    },
+    {
+        "en": "competitive",
+        "zh": "竞争的"
+    },
+    {
+        "en": "waste",
+        "zh": "垃圾"
+    },
+    {
+        "en": "reduce",
+        "zh": "减少"
+    },
+    {
+        "en": "improvement",
+        "zh": "改善"
+    },
+    {
+        "en": "safety",
+        "zh": "安全"
+    },
+    {
+        "en": "soft",
+        "zh": "柔软的"
+    },
+    {
+        "en": "fire disaster",
+        "zh": "火灾"
+    },
+    {
+        "en": "secure",
+        "zh": "安全的"
+    },
+    {
+        "en": "leaf",
+        "zh": "叶子"
+    },
+    {
+        "en": "rubbish",
+        "zh": "垃圾"
+    },
+    {
+        "en": "roof",
+        "zh": "屋顶"
+    },
+    {
+        "en": "gas tank",
+        "zh": "煤气罐"
+    },
+    {
+        "en": "gap",
+        "zh": "差距"
+    },
+    {
+        "en": "yard",
+        "zh": "院子"
+    },
+    {
+        "en": "occur",
+        "zh": "发生"
+    },
+    {
+        "en": "brushfire",
+        "zh": "山林火灾"
+    },
+    {
+        "en": "volunteer",
+        "zh": "志愿者"
+    },
+    {
+        "en": "battery",
+        "zh": "电池"
+    },
+    {
+        "en": "bottom",
+        "zh": "底部"
+    },
+    {
+        "en": "confirm",
+        "zh": "确认"
+    },
+    {
+        "en": "wooden",
+        "zh": "木制的"
+    },
+    {
+        "en": "urban",
+        "zh": "城市的"
+    },
+    {
+        "en": "souvenir",
+        "zh": "纪念品"
+    },
+    {
+        "en": "recycled",
+        "zh": "回收利用的"
+    },
+    {
+        "en": "golf",
+        "zh": "高尔夫球"
+    },
+    {
+        "en": "resort",
+        "zh": "度假胜地"
+    },
+    {
+        "en": "weave",
+        "zh": "编织"
+    },
+    {
+        "en": "car transfer",
+        "zh": "车辆中转"
+    },
+    {
+        "en": "endangered",
+        "zh": "濒危的"
+    },
+    {
+        "en": "herbal",
+        "zh": "草本的"
+    },
+    {
+        "en": "fur",
+        "zh": "皮毛"
+    },
+    {
+        "en": "consumption",
+        "zh": "消费"
+    },
+    {
+        "en": "fuel",
+        "zh": "燃料"
+    },
+    {
+        "en": "natural gas",
+        "zh": "天然气"
+    },
+    {
+        "en": "alter",
+        "zh": "改变"
+    },
+    {
+        "en": "smooth",
+        "zh": "光滑的"
+    },
+    {
+        "en": "utilize",
+        "zh": "利用"
+    },
+    {
+        "en": "taste",
+        "zh": "品味"
+    },
+    {
+        "en": "sheet",
+        "zh": "纸张"
+    },
+    {
+        "en": "storage",
+        "zh": "仓库"
+    },
+    {
+        "en": "rubber",
+        "zh": "橡胶"
+    },
+    {
+        "en": "download",
+        "zh": "下载"
+    },
+    {
+        "en": "invoice",
+        "zh": "发票"
+    },
+    {
+        "en": "security",
+        "zh": "安保"
+    },
+    {
+        "en": "evidence",
+        "zh": "证据"
+    },
+    {
+        "en": "stop watch",
+        "zh": "秒表"
+    },
+    {
+        "en": "ban",
+        "zh": "禁止"
+    },
+    {
+        "en": "filter",
+        "zh": "过滤器"
+    },
+    {
+        "en": "standard",
+        "zh": "标准"
+    },
+    {
+        "en": "operate",
+        "zh": "操作"
+    },
+    {
+        "en": "feedback",
+        "zh": "反馈"
+    },
+    {
+        "en": "brush",
+        "zh": "刷子"
+    },
+    {
+        "en": "captain",
+        "zh": "队长"
+    },
+    {
+        "en": "display",
+        "zh": "显示"
+    },
+    {
+        "en": "TV surveillance",
+        "zh": "TV监视"
+    },
+    {
+        "en": "button",
+        "zh": "按钮"
+    },
+    {
+        "en": "blinded",
+        "zh": "瞎的"
+    },
+    {
+        "en": "characteristic",
+        "zh": "特色"
+    },
+    {
+        "en": "fixed",
+        "zh": "固定的"
+    },
+    {
+        "en": "mathematics",
+        "zh": "数学"
+    },
+    {
+        "en": "academic",
+        "zh": "学术的"
+    },
+    {
+        "en": "scoring",
+        "zh": "得分"
+    },
+    {
+        "en": "heroine",
+        "zh": "女主角"
+    },
+    {
+        "en": "Town Hall",
+        "zh": "市政厅"
+    },
+    {
+        "en": "spare",
+        "zh": "节约"
+    },
+    {
+        "en": "altitude",
+        "zh": "海拔"
+    },
+    {
+        "en": "scenery",
+        "zh": "景色"
+    },
+    {
+        "en": "fishery",
+        "zh": "渔业"
+    },
+    {
+        "en": "injure",
+        "zh": "受伤"
+    },
+    {
+        "en": "strike",
+        "zh": "撞击"
+    },
+    {
+        "en": "fringe",
+        "zh": "边缘"
+    },
+    {
+        "en": "badge",
+        "zh": "徽章"
+    },
+    {
+        "en": "cooperative",
+        "zh": "合作的"
+    },
+    {
+        "en": "donkey",
+        "zh": "驴"
+    },
+    {
+        "en": "riverside",
+        "zh": "河边"
+    },
+    {
+        "en": "humid",
+        "zh": "湿润的"
+    },
+    {
+        "en": "escape",
+        "zh": "逃脱"
+    },
+    {
+        "en": "seek",
+        "zh": "寻找"
+    },
+    {
+        "en": "accompany",
+        "zh": "陪伴"
+    },
+    {
+        "en": "limb",
+        "zh": "四肢"
+    },
+    {
+        "en": "quiz",
+        "zh": "小型考试"
+    },
+    {
+        "en": "multimedia",
+        "zh": "多媒体"
+    },
+    {
+        "en": "championship",
+        "zh": "冠军地位"
+    },
+    {
+        "en": "influential",
+        "zh": "有影响力的"
+    },
+    {
+        "en": "regulation",
+        "zh": "规则"
+    },
+    {
+        "en": "calculate",
+        "zh": "计算"
+    },
+    {
+        "en": "assume",
+        "zh": "假定"
+    },
+    {
+        "en": "emergency",
+        "zh": "紧急事件"
+    },
+    {
+        "en": "sign",
+        "zh": "记号"
+    },
+    {
+        "en": "disabled",
+        "zh": "残疾的"
+    },
+    {
+        "en": "chain",
+        "zh": "链"
+    },
+    {
+        "en": "cafeteria",
+        "zh": "自助餐厅"
+    },
+    {
+        "en": "chess",
+        "zh": "国际象棋"
+    },
+    {
+        "en": "president",
+        "zh": "总统"
+    },
+    {
+        "en": "transport",
+        "zh": "运输"
+    },
+    {
+        "en": "senior",
+        "zh": "高级的"
+    },
+    {
+        "en": "direction",
+        "zh": "方向"
+    },
+    {
+        "en": "political",
+        "zh": "政治的"
+    },
+    {
+        "en": "landmark",
+        "zh": "地标性建筑"
+    },
+    {
+        "en": "submit",
+        "zh": "上交"
+    },
+    {
+        "en": "specific",
+        "zh": "具体的"
+    },
+    {
+        "en": "assess",
+        "zh": "评估"
+    },
+    {
+        "en": "junction",
+        "zh": "交叉路口"
+    },
+    {
+        "en": "assistance",
+        "zh": "帮助"
+    },
+    {
+        "en": "ambulance",
+        "zh": "救护车"
+    },
+    {
+        "en": "category",
+        "zh": "类别"
+    },
+    {
+        "en": "sufficient",
+        "zh": "足够的"
+    },
+    {
+        "en": "orchard",
+        "zh": "果园"
+    },
+    {
+        "en": "adjust",
+        "zh": "适应"
+    },
+    {
+        "en": "climate",
+        "zh": "天气"
+    },
+    {
+        "en": "previous",
+        "zh": "之前的"
+    },
+    {
+        "en": "routine",
+        "zh": "日常的"
+    },
+    {
+        "en": "illustration",
+        "zh": "说明"
+    },
+    {
+        "en": "carer",
+        "zh": "护工"
+    },
+    {
+        "en": "stretch",
+        "zh": "伸展"
+    },
+    {
+        "en": "career",
+        "zh": "生涯"
+    },
+    {
+        "en": "mammal",
+        "zh": "哺乳动物"
+    },
+    {
+        "en": "postpone",
+        "zh": "推迟"
+    },
+    {
+        "en": "woodland",
+        "zh": "林地"
+    },
+    {
+        "en": "cave",
+        "zh": "山洞"
+    },
+    {
+        "en": "order",
+        "zh": "订购"
+    },
+    {
+        "en": "lawyer",
+        "zh": "律师"
+    },
+    {
+        "en": "acid",
+        "zh": "酸的"
+    },
+    {
+        "en": "beat",
+        "zh": "（心脏）跳动"
+    },
+    {
+        "en": "fitness",
+        "zh": "健康"
+    },
+    {
+        "en": "necessity",
+        "zh": "必需品"
+    },
+    {
+        "en": "church",
+        "zh": "教堂"
+    },
+    {
+        "en": "flood",
+        "zh": "洪水"
+    },
+    {
+        "en": "publication",
+        "zh": "出版"
+    },
+    {
+        "en": "critical",
+        "zh": "批评的"
+    },
+    {
+        "en": "behavior",
+        "zh": "行为"
+    },
+    {
+        "en": "vote",
+        "zh": "投票"
+    },
+    {
+        "en": "session",
+        "zh": "会议"
+    },
+    {
+        "en": "crop",
+        "zh": "农作物"
+    },
+    {
+        "en": "technique",
+        "zh": "技巧"
+    },
+    {
+        "en": "entrant",
+        "zh": "参与者"
+    },
+    {
+        "en": "overload",
+        "zh": "使超载"
+    },
+    {
+        "en": "council",
+        "zh": "委员会"
+    },
+    {
+        "en": "chairman",
+        "zh": "主席"
+    },
+    {
+        "en": "railway",
+        "zh": "铁路"
+    },
+    {
+        "en": "contract",
+        "zh": "合同"
+    },
+    {
+        "en": "rare",
+        "zh": "稀少的"
+    },
+    {
+        "en": "common room",
+        "zh": "公共休息室"
+    },
+    {
+        "en": "enquiry",
+        "zh": "咨询"
+    },
+    {
+        "en": "thick",
+        "zh": "厚的"
+    },
+    {
+        "en": "liquid",
+        "zh": "液体"
+    },
+    {
+        "en": "dye",
+        "zh": "染"
+    },
+    {
+        "en": "rat",
+        "zh": "老鼠"
+    },
+    {
+        "en": "measure",
+        "zh": "测量"
+    },
+    {
+        "en": "intention",
+        "zh": "意图"
+    },
+    {
+        "en": "relevant",
+        "zh": "相关的"
+    },
+    {
+        "en": "outline",
+        "zh": "轮廓"
+    },
+    {
+        "en": "extinct",
+        "zh": "灭绝的"
+    },
+    {
+        "en": "wing",
+        "zh": "翅膀"
+    },
+    {
+        "en": "nest",
+        "zh": "巢"
+    },
+    {
+        "en": "interference",
+        "zh": "干预"
+    },
+    {
+        "en": "subtopic",
+        "zh": "副主题"
+    },
+    {
+        "en": "therapy",
+        "zh": "治疗"
+    },
+    {
+        "en": "morality",
+        "zh": "道德"
+    },
+    {
+        "en": "participation",
+        "zh": "参加"
+    },
+    {
+        "en": "faculty",
+        "zh": "科"
+    },
+    {
+        "en": "fit",
+        "zh": "健康的"
+    },
+    {
+        "en": "useful",
+        "zh": "有用的"
+    },
+    {
+        "en": "confuse",
+        "zh": "使混乱"
+    },
+    {
+        "en": "inconvenient",
+        "zh": "不便的"
+    },
+    {
+        "en": "valuable",
+        "zh": "有价值的"
+    },
+    {
+        "en": "advisor",
+        "zh": "顾问"
+    },
+    {
+        "en": "forget",
+        "zh": "忘记"
+    },
+    {
+        "en": "lecturer",
+        "zh": "讲师"
+    },
+    {
+        "en": "content",
+        "zh": "内容"
+    },
+    {
+        "en": "practical",
+        "zh": "实际的"
+    },
+    {
+        "en": "repetitive",
+        "zh": "重复性的"
+    },
+    {
+        "en": "village",
+        "zh": "村庄"
+    },
+    {
+        "en": "mission",
+        "zh": "使命"
+    },
+    {
+        "en": "qualification",
+        "zh": "资格"
+    },
+    {
+        "en": "curriculum",
+        "zh": "课程"
+    },
+    {
+        "en": "training",
+        "zh": "训练"
+    },
+    {
+        "en": "colleague",
+        "zh": "同事"
+    },
+    {
+        "en": "description",
+        "zh": "描述"
+    },
+    {
+        "en": "administration",
+        "zh": "管理"
+    },
+    {
+        "en": "farming",
+        "zh": "农业"
+    },
+    {
+        "en": "damage",
+        "zh": "损害"
+    },
+    {
+        "en": "checklist",
+        "zh": "清单"
+    },
+    {
+        "en": "figures",
+        "zh": "价格"
+    },
+    {
+        "en": "presentation",
+        "zh": "陈述"
+    },
+    {
+        "en": "professor",
+        "zh": "教授"
+    },
+    {
+        "en": "seminar",
+        "zh": "讨论会"
+    },
+    {
+        "en": "chemistry",
+        "zh": "化学"
+    },
+    {
+        "en": "trade",
+        "zh": "贸易"
+    },
+    {
+        "en": "portable",
+        "zh": "便携的"
+    },
+    {
+        "en": "pattern",
+        "zh": "模式"
+    },
+    {
+        "en": "fresh",
+        "zh": "新鲜的"
+    },
+    {
+        "en": "application",
+        "zh": "申请"
+    },
+    {
+        "en": "evaporate",
+        "zh": "蒸发"
+    },
+    {
+        "en": "limitation",
+        "zh": "限制"
+    },
+    {
+        "en": "grassland",
+        "zh": "草原"
+    },
+    {
+        "en": "marine",
+        "zh": "海洋的"
+    },
+    {
+        "en": "undergraduate",
+        "zh": "大学生"
+    },
+    {
+        "en": "scrub",
+        "zh": "用力擦洗"
+    },
+    {
+        "en": "journal",
+        "zh": "期刊"
+    },
+    {
+        "en": "base",
+        "zh": "基础"
+    },
+    {
+        "en": "archaeology",
+        "zh": "考古学"
+    },
+    {
+        "en": "classical",
+        "zh": "古典的"
+    },
+    {
+        "en": "brief",
+        "zh": "简短的"
+    },
+    {
+        "en": "module",
+        "zh": "模块"
+    },
+    {
+        "en": "compulsory",
+        "zh": "必修的"
+    },
+    {
+        "en": "classification",
+        "zh": "分类"
+    },
+    {
+        "en": "score",
+        "zh": "分数"
+    },
+    {
+        "en": "judge",
+        "zh": "判断"
+    },
+    {
+        "en": "coursework",
+        "zh": "课程作业"
+    },
+    {
+        "en": "origin",
+        "zh": "起源"
+    },
+    {
+        "en": "oral",
+        "zh": "口头的"
+    },
+    {
+        "en": "engine",
+        "zh": "发动机"
+    },
+    {
+        "en": "capacity",
+        "zh": "容量"
+    },
+    {
+        "en": "prefer",
+        "zh": "更喜欢"
+    },
+    {
+        "en": "commercial",
+        "zh": "商业的"
+    },
+    {
+        "en": "reliable",
+        "zh": "可靠的"
+    },
+    {
+        "en": "roll over",
+        "zh": "翻滚"
+    },
+    {
+        "en": "harmful",
+        "zh": "有害的"
+    },
+    {
+        "en": "statistics",
+        "zh": "统计学"
+    },
+    {
+        "en": "note",
+        "zh": "笔记"
+    },
+    {
+        "en": "raise",
+        "zh": "提高"
+    },
+    {
+        "en": "cost",
+        "zh": "花费"
+    },
+    {
+        "en": "reputation",
+        "zh": "名望"
+    },
+    {
+        "en": "software",
+        "zh": "软件"
+    },
+    {
+        "en": "creative",
+        "zh": "有创造力的"
+    },
+    {
+        "en": "diploma",
+        "zh": "毕业证书"
+    },
+    {
+        "en": "respondent",
+        "zh": "回答者"
+    },
+    {
+        "en": "uncertain",
+        "zh": "不确定的"
+    },
+    {
+        "en": "gradual",
+        "zh": "逐渐的"
+    },
+    {
+        "en": "privacy",
+        "zh": "隐私"
+    },
+    {
+        "en": "margin",
+        "zh": "边缘"
+    },
+    {
+        "en": "interaction",
+        "zh": "互动"
+    },
+    {
+        "en": "bibliography",
+        "zh": "参考书目"
+    },
+    {
+        "en": "scale",
+        "zh": "规模"
+    },
+    {
+        "en": "legislation",
+        "zh": "法律"
+    },
+    {
+        "en": "flexibility",
+        "zh": "灵活性"
+    },
+    {
+        "en": "overweigh",
+        "zh": "比...重要"
+    },
+    {
+        "en": "psycholinguistics",
+        "zh": "心理语言学"
+    },
+    {
+        "en": "distinguish",
+        "zh": "区别"
+    },
+    {
+        "en": "explode",
+        "zh": "爆炸"
+    },
+    {
+        "en": "celebrity",
+        "zh": "名人"
+    },
+    {
+        "en": "pigeon",
+        "zh": "鸽子"
+    },
+    {
+        "en": "vague",
+        "zh": "模糊的"
+    },
+    {
+        "en": "exploit",
+        "zh": "开发"
+    },
+    {
+        "en": "disguise",
+        "zh": "伪装"
+    },
+    {
+        "en": "index",
+        "zh": "索引"
+    },
+    {
+        "en": "text",
+        "zh": "文本"
+    },
+    {
+        "en": "factual",
+        "zh": "事实的"
+    },
+    {
+        "en": "digital",
+        "zh": "数字的"
+    },
+    {
+        "en": "editor",
+        "zh": "编辑"
+    },
+    {
+        "en": "status",
+        "zh": "地位"
+    },
+    {
+        "en": "theoretical",
+        "zh": "理论上的"
+    },
+    {
+        "en": "freedom",
+        "zh": "自由"
+    },
+    {
+        "en": "challenging",
+        "zh": "挑战的"
+    },
+    {
+        "en": "background",
+        "zh": "背景"
+    },
+    {
+        "en": "overview",
+        "zh": "概览"
+    },
+    {
+        "en": "existing",
+        "zh": "现存的"
+    },
+    {
+        "en": "chat",
+        "zh": "聊天"
+    },
+    {
+        "en": "technology",
+        "zh": "技术"
+    },
+    {
+        "en": "debate",
+        "zh": "辩论"
+    },
+    {
+        "en": "friendliness",
+        "zh": "友好"
+    },
+    {
+        "en": "exchange",
+        "zh": "交换"
+    },
+    {
+        "en": "conclusion",
+        "zh": "结论"
+    },
+    {
+        "en": "secretary",
+        "zh": "秘书"
+    },
+    {
+        "en": "upper",
+        "zh": "上层的"
+    },
+    {
+        "en": "cautious",
+        "zh": "谨慎的"
+    },
+    {
+        "en": "dissertation",
+        "zh": "论文"
+    },
+    {
+        "en": "methodology",
+        "zh": "方法论"
+    },
+    {
+        "en": "generalisation",
+        "zh": "概括"
+    },
+    {
+        "en": "referee",
+        "zh": "证明人"
+    },
+    {
+        "en": "puzzling",
+        "zh": "莫名其妙的"
+    },
+    {
+        "en": "perspective",
+        "zh": "观点"
+    },
+    {
+        "en": "path",
+        "zh": "小路"
+    },
+    {
+        "en": "representative",
+        "zh": "有代表性的"
+    },
+    {
+        "en": "discontinue",
+        "zh": "终止"
+    },
+    {
+        "en": "accounting",
+        "zh": "会记学"
+    },
+    {
+        "en": "satellite",
+        "zh": "卫星"
+    },
+    {
+        "en": "permission",
+        "zh": "允许"
+    },
+    {
+        "en": "variation",
+        "zh": "变化"
+    },
+    {
+        "en": "innovation",
+        "zh": "创新"
+    },
+    {
+        "en": "divide",
+        "zh": "划分"
+    },
+    {
+        "en": "diet",
+        "zh": "饮食"
+    },
+    {
+        "en": "partly",
+        "zh": "部分地"
+    },
+    {
+        "en": "stimulating",
+        "zh": "刺激的"
+    },
+    {
+        "en": "master",
+        "zh": "硕士"
+    },
+    {
+        "en": "microbiology",
+        "zh": "微生物学"
+    },
+    {
+        "en": "essay",
+        "zh": "论文"
+    },
+    {
+        "en": "strategy",
+        "zh": "战略"
+    },
+    {
+        "en": "cosmetics",
+        "zh": "化妆品"
+    },
+    {
+        "en": "extension",
+        "zh": "延期"
+    },
+    {
+        "en": "record",
+        "zh": "记录"
+    },
+    {
+        "en": "incorrect",
+        "zh": "错误的"
+    },
+    {
+        "en": "thorough",
+        "zh": "彻底的"
+    },
+    {
+        "en": "definition",
+        "zh": "定义"
+    },
+    {
+        "en": "connective",
+        "zh": "连接词"
+    },
+    {
+        "en": "solution",
+        "zh": "解决方案"
+    },
+    {
+        "en": "leisure",
+        "zh": "闲暇"
+    },
+    {
+        "en": "decisive",
+        "zh": "果断的"
+    },
+    {
+        "en": "ambitious",
+        "zh": "野心勃勃的"
+    },
+    {
+        "en": "specialised",
+        "zh": "专业的"
+    },
+    {
+        "en": "observe",
+        "zh": "观察"
+    },
+    {
+        "en": "dominance",
+        "zh": "支配"
+    },
+    {
+        "en": "stick",
+        "zh": "刺"
+    },
+    {
+        "en": "imaginable",
+        "zh": "可想象的"
+    },
+    {
+        "en": "worthy",
+        "zh": "值得的"
+    },
+    {
+        "en": "interpersonal",
+        "zh": "人际的"
+    },
+    {
+        "en": "accessible",
+        "zh": "可接近的"
+    },
+    {
+        "en": "regrettable",
+        "zh": "令人遗憾的"
+    },
+    {
+        "en": "wind",
+        "zh": "风"
+    },
+    {
+        "en": "economics",
+        "zh": "经济学"
+    },
+    {
+        "en": "postgraduate",
+        "zh": "研究生"
+    },
+    {
+        "en": "management",
+        "zh": "管理"
+    },
+    {
+        "en": "adviser",
+        "zh": "顾问"
+    },
+    {
+        "en": "folder",
+        "zh": "文件夹"
+    },
+    {
+        "en": "identify",
+        "zh": "辨认出"
+    },
+    {
+        "en": "worksheet",
+        "zh": "练习册"
+    },
+    {
+        "en": "access",
+        "zh": "接近"
+    },
+    {
+        "en": "profit",
+        "zh": "利益"
+    },
+    {
+        "en": "cultivate",
+        "zh": "培养"
+    },
+    {
+        "en": "highlight",
+        "zh": "精彩部分"
+    },
+    {
+        "en": "tutorial",
+        "zh": "指导"
+    },
+    {
+        "en": "assessment",
+        "zh": "评定"
+    },
+    {
+        "en": "brand",
+        "zh": "牌子"
+    },
+    {
+        "en": "image",
+        "zh": "图像"
+    },
+    {
+        "en": "residential",
+        "zh": "住宅的"
+    },
+    {
+        "en": "intimacy",
+        "zh": "亲密行为"
+    },
+    {
+        "en": "inappropriate",
+        "zh": "不合适的"
+    },
+    {
+        "en": "underline",
+        "zh": "强调"
+    },
+    {
+        "en": "analyse",
+        "zh": "分析"
+    },
+    {
+        "en": "quote",
+        "zh": "引述"
+    },
+    {
+        "en": "sub-topic",
+        "zh": "小标题"
+    },
+    {
+        "en": "frustrated",
+        "zh": "挫败的"
+    },
+    {
+        "en": "premise",
+        "zh": "前提"
+    },
+    {
+        "en": "intelligent",
+        "zh": "聪明的"
+    },
+    {
+        "en": "sector",
+        "zh": "部门"
+    },
+    {
+        "en": "transcription",
+        "zh": "抄写"
+    },
+    {
+        "en": "chimpanzee",
+        "zh": "黑猩猩"
+    },
+    {
+        "en": "imitate",
+        "zh": "模仿"
+    },
+    {
+        "en": "nutshell",
+        "zh": "坚果的外壳"
+    },
+    {
+        "en": "invalid",
+        "zh": "无效的"
+    },
+    {
+        "en": "ability",
+        "zh": "能力"
+    },
+    {
+        "en": "leadership",
+        "zh": "领导能力"
+    },
+    {
+        "en": "majority",
+        "zh": "多数"
+    },
+    {
+        "en": "seat belt",
+        "zh": "安全带"
+    },
+    {
+        "en": "theory",
+        "zh": "理论"
+    },
+    {
+        "en": "power steering",
+        "zh": "动力方向盘"
+    },
+    {
+        "en": "photo journalism",
+        "zh": "图片新闻"
+    },
+    {
+        "en": "structure",
+        "zh": "结构"
+    },
+    {
+        "en": "repetition",
+        "zh": "重复"
+    },
+    {
+        "en": "invest",
+        "zh": "投资"
+    },
+    {
+        "en": "framing",
+        "zh": "框架"
+    },
+    {
+        "en": "crime",
+        "zh": "罪行"
+    },
+    {
+        "en": "frame",
+        "zh": "设计"
+    },
+    {
+        "en": "inspire",
+        "zh": "鼓舞"
+    },
+    {
+        "en": "handout",
+        "zh": "讲义"
+    },
+    {
+        "en": "disappoint",
+        "zh": "使失望"
+    },
+    {
+        "en": "independent",
+        "zh": "独立的"
+    },
+    {
+        "en": "external",
+        "zh": "外部的"
+    },
+    {
+        "en": "obey",
+        "zh": "遵守"
+    },
+    {
+        "en": "procedure",
+        "zh": "手续"
+    },
+    {
+        "en": "consumer",
+        "zh": "消费者"
+    },
+    {
+        "en": "effect",
+        "zh": "影响"
+    },
+    {
+        "en": "mineral",
+        "zh": "矿物"
+    },
+    {
+        "en": "stitch",
+        "zh": "缝补"
+    },
+    {
+        "en": "pure",
+        "zh": "纯净的"
+    },
+    {
+        "en": "virus",
+        "zh": "病毒"
+    },
+    {
+        "en": "identity",
+        "zh": "身份"
+    },
+    {
+        "en": "evaluation",
+        "zh": "评估"
+    },
+    {
+        "en": "sound quality",
+        "zh": "音质"
+    },
+    {
+        "en": "case study",
+        "zh": "案例分析"
+    },
+    {
+        "en": "coral",
+        "zh": "珊瑚"
+    },
+    {
+        "en": "frog",
+        "zh": "青蛙"
+    },
+    {
+        "en": "bacteria",
+        "zh": "细菌"
+    },
+    {
+        "en": "optimisation",
+        "zh": "最佳化"
+    },
+    {
+        "en": "fibre",
+        "zh": "纤维"
+    },
+    {
+        "en": "stabilise",
+        "zh": "使稳定"
+    },
+    {
+        "en": "bone",
+        "zh": "骨头"
+    },
+    {
+        "en": "patterns",
+        "zh": "模式"
+    },
+    {
+        "en": "robot",
+        "zh": "机器人"
+    },
+    {
+        "en": "attention",
+        "zh": "注意力"
+    },
+    {
+        "en": "smell",
+        "zh": "嗅"
+    },
+    {
+        "en": "delay",
+        "zh": "延期"
+    },
+    {
+        "en": "accurate",
+        "zh": "正确的"
+    },
+    {
+        "en": "chapter",
+        "zh": "章"
+    },
+    {
+        "en": "darkroom",
+        "zh": "暗室"
+    },
+    {
+        "en": "volume",
+        "zh": "音量"
+    },
+    {
+        "en": "craft",
+        "zh": "手工"
+    },
+    {
+        "en": "packing",
+        "zh": "包装"
+    },
+    {
+        "en": "appreciate",
+        "zh": "感激"
+    },
+    {
+        "en": "stimulate",
+        "zh": "刺激"
+    },
+    {
+        "en": "utility",
+        "zh": "实用性"
+    },
+    {
+        "en": "strict",
+        "zh": "严格的"
+    },
+    {
+        "en": "font",
+        "zh": "字体"
+    },
+    {
+        "en": "retail",
+        "zh": "零售"
+    },
+    {
+        "en": "staircase",
+        "zh": "楼梯间"
+    },
+    {
+        "en": "accumulate",
+        "zh": "积累"
+    },
+    {
+        "en": "steam",
+        "zh": "蒸汽"
+    },
+    {
+        "en": "timber",
+        "zh": "木材"
+    },
+    {
+        "en": "aggressive",
+        "zh": "侵略的"
+    },
+    {
+        "en": "analysis",
+        "zh": "分析"
+    },
+    {
+        "en": "additive",
+        "zh": "添加剂"
+    },
+    {
+        "en": "proofread",
+        "zh": "校对"
+    },
+    {
+        "en": "ignore",
+        "zh": "忽略"
+    },
+    {
+        "en": "rural",
+        "zh": "乡下的"
+    },
+    {
+        "en": "nitrogen",
+        "zh": "氮气"
+    },
+    {
+        "en": "ozone layer",
+        "zh": "臭氧层"
+    },
+    {
+        "en": "sculpture",
+        "zh": "雕刻"
+    },
+    {
+        "en": "moisture",
+        "zh": "水分"
+    },
+    {
+        "en": "downhill",
+        "zh": "下坡路"
+    },
+    {
+        "en": "fluid",
+        "zh": "液体"
+    },
+    {
+        "en": "kidney",
+        "zh": "肾"
+    },
+    {
+        "en": "machine",
+        "zh": "机械"
+    },
+    {
+        "en": "eyesight",
+        "zh": "视力"
+    },
+    {
+        "en": "camel",
+        "zh": "骆驼"
+    },
+    {
+        "en": "intelligence",
+        "zh": "智力"
+    },
+    {
+        "en": "gene",
+        "zh": "[遗]基因"
+    },
+    {
+        "en": "seasonal",
+        "zh": "季节的"
+    },
+    {
+        "en": "crocodile",
+        "zh": "鳄鱼"
+    },
+    {
+        "en": "wetland",
+        "zh": "湿地"
+    },
+    {
+        "en": "population",
+        "zh": "人口"
+    },
+    {
+        "en": "depth",
+        "zh": "深度"
+    },
+    {
+        "en": "cultivation",
+        "zh": "培养"
+    },
+    {
+        "en": "relationship",
+        "zh": "关系"
+    },
+    {
+        "en": "ingredients",
+        "zh": "材料"
+    },
+    {
+        "en": "motivation",
+        "zh": "动机"
+    },
+    {
+        "en": "business",
+        "zh": "商人"
+    },
+    {
+        "en": "preparation",
+        "zh": "准备"
+    },
+    {
+        "en": "outdoor",
+        "zh": "户外的"
+    },
+    {
+        "en": "merchandiser",
+        "zh": "商人"
+    },
+    {
+        "en": "lateral",
+        "zh": "侧面的"
+    },
+    {
+        "en": "rope",
+        "zh": "绳子"
+    },
+    {
+        "en": "lack",
+        "zh": "缺少"
+    },
+    {
+        "en": "danger",
+        "zh": "危险"
+    },
+    {
+        "en": "sensitive",
+        "zh": "敏感的"
+    },
+    {
+        "en": "history",
+        "zh": "历史"
+    },
+    {
+        "en": "lifestyle",
+        "zh": "生活方式"
+    },
+    {
+        "en": "create",
+        "zh": "创造"
+    },
+    {
+        "en": "social class",
+        "zh": "社会地位"
+    },
+    {
+        "en": "reason",
+        "zh": "原因"
+    },
+    {
+        "en": "fear",
+        "zh": "害怕"
+    },
+    {
+        "en": "instead of",
+        "zh": "代替"
+    },
+    {
+        "en": "competition",
+        "zh": "竞争"
+    },
+    {
+        "en": "conflict",
+        "zh": "冲突"
+    },
+    {
+        "en": "a sense of community",
+        "zh": "集体归属感"
+    },
+    {
+        "en": "inefficient",
+        "zh": "无效率的"
+    },
+    {
+        "en": "rate",
+        "zh": "率"
+    },
+    {
+        "en": "attitude",
+        "zh": "态度"
+    },
+    {
+        "en": "completion",
+        "zh": "完成"
+    },
+    {
+        "en": "psychology",
+        "zh": "心理学"
+    },
+    {
+        "en": "desert",
+        "zh": "遗弃"
+    },
+    {
+        "en": "olive oil",
+        "zh": "橄榄油"
+    },
+    {
+        "en": "vegetation",
+        "zh": "植被"
+    },
+    {
+        "en": "migration",
+        "zh": "迁移"
+    },
+    {
+        "en": "shrimp",
+        "zh": "虾"
+    },
+    {
+        "en": "worm",
+        "zh": "虫"
+    },
+    {
+        "en": "nutrition",
+        "zh": "营养"
+    },
+    {
+        "en": "temperature",
+        "zh": "温度"
+    },
+    {
+        "en": "entertainment",
+        "zh": "娱乐"
+    },
+    {
+        "en": "journalism",
+        "zh": "新闻业"
+    },
+    {
+        "en": "symbolism",
+        "zh": "象征"
+    },
+    {
+        "en": "castle",
+        "zh": "城堡"
+    },
+    {
+        "en": "method",
+        "zh": "方式"
+    },
+    {
+        "en": "portrait",
+        "zh": "肖像"
+    },
+    {
+        "en": "poet",
+        "zh": "诗人"
+    },
+    {
+        "en": "male",
+        "zh": "男性"
+    },
+    {
+        "en": "female",
+        "zh": "女性"
+    },
+    {
+        "en": "elephant",
+        "zh": "大象"
+    },
+    {
+        "en": "weight",
+        "zh": "重量"
+    },
+    {
+        "en": "wild",
+        "zh": "荒野"
+    },
+    {
+        "en": "ancient",
+        "zh": "古代的"
+    },
+    {
+        "en": "extreme sport",
+        "zh": "极限运动"
+    },
+    {
+        "en": "equipment",
+        "zh": "设备"
+    },
+    {
+        "en": "restricted",
+        "zh": "有受限制的"
+    },
+    {
+        "en": "confront",
+        "zh": "面对"
+    },
+    {
+        "en": "individual",
+        "zh": "个人的"
+    },
+    {
+        "en": "tend to",
+        "zh": "倾向于"
+    },
+    {
+        "en": "authority",
+        "zh": "权威"
+    },
+    {
+        "en": "lecture",
+        "zh": "讲座"
+    },
+    {
+        "en": "absent",
+        "zh": "缺席的"
+    },
+    {
+        "en": "recall",
+        "zh": "召回"
+    },
+    {
+        "en": "sentence",
+        "zh": "句子"
+    },
+    {
+        "en": "real",
+        "zh": "真实的"
+    },
+    {
+        "en": "activity",
+        "zh": "活动"
+    },
+    {
+        "en": "impact",
+        "zh": "影响"
+    },
+    {
+        "en": "sociable",
+        "zh": "社交的"
+    },
+    {
+        "en": "focus on",
+        "zh": "聚焦于"
+    },
+    {
+        "en": "realistic",
+        "zh": "现实的"
+    },
+    {
+        "en": "bungalow",
+        "zh": "平房"
+    },
+    {
+        "en": "pest",
+        "zh": "害虫"
+    },
+    {
+        "en": "polish",
+        "zh": "打磨"
+    },
+    {
+        "en": "paddle",
+        "zh": "划桨"
+    },
+    {
+        "en": "speed",
+        "zh": "速度"
+    },
+    {
+        "en": "resistant",
+        "zh": "反抗的"
+    },
+    {
+        "en": "contest",
+        "zh": "争辩"
+    },
+    {
+        "en": "survive",
+        "zh": "幸存"
+    },
+    {
+        "en": "sailor",
+        "zh": "水手"
+    },
+    {
+        "en": "rival",
+        "zh": "对手"
+    },
+    {
+        "en": "humidity",
+        "zh": "湿度"
+    },
+    {
+        "en": "acid rainfall",
+        "zh": "酸雨"
+    },
+    {
+        "en": "movement",
+        "zh": "活动"
+    },
+    {
+        "en": "appearance",
+        "zh": "外观"
+    },
+    {
+        "en": "herbivorous",
+        "zh": "食草的"
+    },
+    {
+        "en": "organ",
+        "zh": "器官"
+    },
+    {
+        "en": "tongue",
+        "zh": "舌头"
+    },
+    {
+        "en": "self defence",
+        "zh": "自我防御"
+    },
+    {
+        "en": "varied",
+        "zh": "多变的"
+    },
+    {
+        "en": "physical",
+        "zh": "身体的"
+    },
+    {
+        "en": "destruction",
+        "zh": "破坏"
+    },
+    {
+        "en": "subsidy",
+        "zh": "津贴"
+    },
+    {
+        "en": "income",
+        "zh": "收入"
+    },
+    {
+        "en": "charge",
+        "zh": "要价"
+    },
+    {
+        "en": "calculator",
+        "zh": "计算器"
+    },
+    {
+        "en": "caterpillar",
+        "zh": "毛虫"
+    },
+    {
+        "en": "antifreeze",
+        "zh": "防冻剂"
+    },
+    {
+        "en": "concentration",
+        "zh": "专心"
+    },
+    {
+        "en": "pepper",
+        "zh": "胡椒"
+    },
+    {
+        "en": "mood",
+        "zh": "心情"
+    },
+    {
+        "en": "domestic",
+        "zh": "国内的"
+    },
+    {
+        "en": "nursery",
+        "zh": "幼儿园"
+    },
+    {
+        "en": "melt",
+        "zh": "熔化"
+    },
+    {
+        "en": "quantity",
+        "zh": "数量"
+    },
+    {
+        "en": "pause",
+        "zh": "暂停"
+    },
+    {
+        "en": "happiness",
+        "zh": "幸福"
+    },
+    {
+        "en": "negative",
+        "zh": "消极的"
+    },
+    {
+        "en": "human",
+        "zh": "人类"
+    },
+    {
+        "en": "goal",
+        "zh": "目标"
+    },
+    {
+        "en": "suppressing",
+        "zh": "压制的"
+    },
+    {
+        "en": "wax",
+        "zh": "蜡"
+    },
+    {
+        "en": "dragonfly",
+        "zh": "蜻蜓"
+    },
+    {
+        "en": "malaria",
+        "zh": "疟疾"
+    },
+    {
+        "en": "weakness",
+        "zh": "弱点"
+    },
+    {
+        "en": "contaminate",
+        "zh": "污染"
+    },
+    {
+        "en": "reinforce",
+        "zh": "加强"
+    },
+    {
+        "en": "distance",
+        "zh": "距离"
+    },
+    {
+        "en": "pump",
+        "zh": "抽水"
+    },
+    {
+        "en": "competitor",
+        "zh": "竞争者"
+    },
+    {
+        "en": "skyscraper",
+        "zh": "摩天大楼"
+    },
+    {
+        "en": "construction",
+        "zh": "建设"
+    },
+    {
+        "en": "guideline",
+        "zh": "指导方针"
+    },
+    {
+        "en": "carnivorous",
+        "zh": "食肉的"
+    },
+    {
+        "en": "prey",
+        "zh": "捕食者"
+    },
+    {
+        "en": "evolve",
+        "zh": "进化"
+    },
+    {
+        "en": "sting",
+        "zh": "刺"
+    },
+    {
+        "en": "scent",
+        "zh": "气味"
+    },
+    {
+        "en": "cure",
+        "zh": "治愈"
+    },
+    {
+        "en": "particular",
+        "zh": "特别的"
+    },
+    {
+        "en": "planet",
+        "zh": "行星"
+    },
+    {
+        "en": "supplement",
+        "zh": "补充"
+    },
+    {
+        "en": "dentist",
+        "zh": "牙医"
+    },
+    {
+        "en": "personality",
+        "zh": "品格"
+    },
+    {
+        "en": "hibernate",
+        "zh": "冬眠"
+    },
+    {
+        "en": "substance",
+        "zh": "物质"
+    },
+    {
+        "en": "bark",
+        "zh": "树皮"
+    },
+    {
+        "en": "surface",
+        "zh": "表面"
+    },
+    {
+        "en": "wealth",
+        "zh": "财富"
+    },
+    {
+        "en": "exploration",
+        "zh": "探测"
+    },
+    {
+        "en": "boost",
+        "zh": "促进"
+    },
+    {
+        "en": "immigration",
+        "zh": "移居"
+    },
+    {
+        "en": "compose",
+        "zh": "构成"
+    },
+    {
+        "en": "trace",
+        "zh": "痕迹"
+    },
+    {
+        "en": "metabolism",
+        "zh": "新陈代谢"
+    },
+    {
+        "en": "deserve",
+        "zh": "应得"
+    },
+    {
+        "en": "maintenance",
+        "zh": "维护"
+    },
+    {
+        "en": "intrigue",
+        "zh": "激起"
+    },
+    {
+        "en": "poison",
+        "zh": "毒"
+    },
+    {
+        "en": "decline",
+        "zh": "下降"
+    },
+    {
+        "en": "aging",
+        "zh": "老化"
+    },
+    {
+        "en": "ocean",
+        "zh": "大洋"
+    },
+    {
+        "en": "marriage",
+        "zh": "结婚"
+    },
+    {
+        "en": "curve",
+        "zh": "曲线"
+    },
+    {
+        "en": "constant",
+        "zh": "不变的"
+    },
+    {
+        "en": "muscle",
+        "zh": "肌肉"
+    },
+    {
+        "en": "immune",
+        "zh": "免疫的"
+    },
+    {
+        "en": "spider",
+        "zh": "蜘蛛"
+    },
+    {
+        "en": "extensive",
+        "zh": "广泛的"
+    },
+    {
+        "en": "pottery",
+        "zh": "陶瓷"
+    },
+    {
+        "en": "enrollment",
+        "zh": "登记"
+    },
+    {
+        "en": "oxygen",
+        "zh": "氧气"
+    },
+    {
+        "en": "shark",
+        "zh": "鲨鱼"
+    },
+    {
+        "en": "straightforward",
+        "zh": "简单的"
+    },
+    {
+        "en": "injury",
+        "zh": "伤害"
+    },
+    {
+        "en": "corporate",
+        "zh": "公司的"
+    },
+    {
+        "en": "attack",
+        "zh": "攻击"
+    },
+    {
+        "en": "reserve",
+        "zh": "储备"
+    },
+    {
+        "en": "plough",
+        "zh": "耕地"
+    },
+    {
+        "en": "commodity",
+        "zh": "商品"
+    },
+    {
+        "en": "transportation",
+        "zh": "运输"
+    },
+    {
+        "en": "operational",
+        "zh": "合作"
+    },
+    {
+        "en": "aerial",
+        "zh": "空中的"
+    },
+    {
+        "en": "barrier",
+        "zh": "障碍物"
+    },
+    {
+        "en": "fertilizer",
+        "zh": "肥料"
+    },
+    {
+        "en": "yield",
+        "zh": "产出"
+    },
+    {
+        "en": "shellfish",
+        "zh": "甲壳类动物"
+    },
+    {
+        "en": "nomadic",
+        "zh": "游动的"
+    },
+    {
+        "en": "grain",
+        "zh": "谷类"
+    },
+    {
+        "en": "pedal",
+        "zh": "踏板"
+    },
+    {
+        "en": "stomach",
+        "zh": "胃"
+    },
+    {
+        "en": "peer",
+        "zh": "同龄人"
+    },
+    {
+        "en": "confusion",
+        "zh": "困惑"
+    },
+    {
+        "en": "drum",
+        "zh": "鼓"
+    },
+    {
+        "en": "intensity",
+        "zh": "强度"
+    },
+    {
+        "en": "fade",
+        "zh": "逐渐消失"
+    },
+    {
+        "en": "pirate",
+        "zh": "海盗"
+    },
+    {
+        "en": "steel",
+        "zh": "钢"
+    },
+    {
+        "en": "preserve",
+        "zh": "保存"
+    },
+    {
+        "en": "finger",
+        "zh": "手指"
+    },
+    {
+        "en": "protein",
+        "zh": "蛋白质"
+    },
+    {
+        "en": "philosopher",
+        "zh": "哲学家"
+    },
+    {
+        "en": "corporation",
+        "zh": "公司"
+    },
+    {
+        "en": "gun",
+        "zh": "枪"
+    },
+    {
+        "en": "lane",
+        "zh": "车道"
+    },
+    {
+        "en": "achievement",
+        "zh": "成就"
+    },
+    {
+        "en": "frequent",
+        "zh": "频繁的"
+    },
+    {
+        "en": "axe",
+        "zh": "斧头"
+    },
+    {
+        "en": "soldier",
+        "zh": "士兵"
+    },
+    {
+        "en": "energy-saving",
+        "zh": "节能的"
+    },
+    {
+        "en": "life span",
+        "zh": "寿命"
+    },
+    {
+        "en": "presence",
+        "zh": "存在"
+    },
+    {
+        "en": "jam",
+        "zh": "（纸）浆"
+    },
+    {
+        "en": "barcode",
+        "zh": "条形码"
+    },
+    {
+        "en": "argument",
+        "zh": "论据"
+    },
+    {
+        "en": "traffic flow",
+        "zh": "交通吞吐量"
+    },
+    {
+        "en": "random",
+        "zh": "随机的"
+    },
+    {
+        "en": "genetic",
+        "zh": "基因的"
+    },
+    {
+        "en": "generation",
+        "zh": "一代人"
+    },
+    {
+        "en": "mechanism",
+        "zh": "机理"
+    },
+    {
+        "en": "angle",
+        "zh": "角度"
+    },
+    {
+        "en": "crowded",
+        "zh": "拥挤的"
+    },
+    {
+        "en": "storm",
+        "zh": "暴风雨（雪）"
+    },
+    {
+        "en": "shortage",
+        "zh": "短缺"
+    },
+    {
+        "en": "laboratory",
+        "zh": "实验室"
+    },
+    {
+        "en": "aboriginal",
+        "zh": "土著居民"
+    },
+    {
+        "en": "gravity",
+        "zh": "重力"
+    },
+    {
+        "en": "digest",
+        "zh": "消化"
+    },
+    {
+        "en": "comprehension",
+        "zh": "理解"
+    },
+    {
+        "en": "enthusiasm",
+        "zh": "热情"
+    },
+    {
+        "en": "powder",
+        "zh": "粉末"
+    },
+    {
+        "en": "dioxide",
+        "zh": "二氧化物"
+    },
+    {
+        "en": "retain",
+        "zh": "保持"
+    },
+    {
+        "en": "accountable",
+        "zh": "有责任的"
+    },
+    {
+        "en": "morale",
+        "zh": "士气"
+    },
+    {
+        "en": "triangle",
+        "zh": "三角形"
+    },
+    {
+        "en": "trash",
+        "zh": "垃圾"
+    },
+    {
+        "en": "coin",
+        "zh": "硬币"
+    },
+    {
+        "en": "mall",
+        "zh": "商场"
+    },
+    {
+        "en": "aspiration",
+        "zh": "抱负"
+    },
+    {
+        "en": "moral",
+        "zh": "道德的"
+    },
+    {
+        "en": "passage",
+        "zh": "文章"
+    },
+    {
+        "en": "permit",
+        "zh": "许可"
+    },
+    {
+        "en": "adapt",
+        "zh": "适应"
+    },
+    {
+        "en": "conservation",
+        "zh": "保存"
+    },
+    {
+        "en": "geological",
+        "zh": "地理的"
+    },
+    {
+        "en": "life cycle",
+        "zh": "生命周期"
+    },
+    {
+        "en": "operation",
+        "zh": "操作"
+    },
+    {
+        "en": "persuasive",
+        "zh": "有说服力的"
+    },
+    {
+        "en": "efficient",
+        "zh": "有效率的"
+    },
+    {
+        "en": "rush",
+        "zh": "仓促行事"
+    },
+    {
+        "en": "signal",
+        "zh": "信号"
+    },
+    {
+        "en": "density",
+        "zh": "密度"
+    },
+    {
+        "en": "port",
+        "zh": "港口"
+    },
+    {
+        "en": "cliff",
+        "zh": "悬崖"
+    },
+    {
+        "en": "mobility",
+        "zh": "流动性"
+    },
+    {
+        "en": "velvet",
+        "zh": "丝绒"
+    },
+    {
+        "en": "fence",
+        "zh": "栅栏"
+    },
+    {
+        "en": "flock",
+        "zh": "兽群"
+    },
+    {
+        "en": "passive",
+        "zh": "被动的"
+    },
+    {
+        "en": "stem",
+        "zh": "茎"
+    },
+    {
+        "en": "industry",
+        "zh": "工业"
+    },
+    {
+        "en": "cycle",
+        "zh": "骑自行车"
+    },
+    {
+        "en": "oven",
+        "zh": "烤箱"
+    },
+    {
+        "en": "criteria",
+        "zh": "标准"
+    },
+    {
+        "en": "license",
+        "zh": "许可证"
+    },
+    {
+        "en": "curriculum vitae",
+        "zh": "个人简历"
+    }
+]
