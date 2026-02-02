@@ -4344,6 +4344,18 @@ Prompt Studio目录下</p>
                     }
                 }
             } catch(_) {}
+
+            // 从IELTS数据中查找中文
+            try {
+                if (Array.isArray(ieltsData)) {
+                    for (const item of ieltsData) {
+                        if ((item?.en || '').trim().toLowerCase() === enText.trim().toLowerCase()) {
+                            return (item?.zh || '').trim();
+                        }
+                    }
+                }
+            } catch(_) {}
+
             return '';
         }
 
@@ -6167,6 +6179,9 @@ Prompt Studio目录下</p>
             showInfo('已清空所有标签与分类', '完成');
         }
 
+        // 全局IELTS数据存储
+        let ieltsData = [];
+
         // 搜索提示词模态框
         function openSearchTagsModal() {
             const wrap = document.getElementById('modal-search-tags');
@@ -6177,7 +6192,6 @@ Prompt Studio目录下</p>
             const sourceButtons = document.querySelectorAll('#search-source-buttons .btn-toggle');
 
             let currentSource = 'default'; // 'default' 或 'ielts'
-            let ieltsData = [];
 
             // 加载IELTS数据
             async function loadIELTSData() {
