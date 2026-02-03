@@ -6,8 +6,8 @@
     <meta name="color-scheme" content="light dark">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https://*.tencentcos.com https://*.myqcloud.com https://*.dropboxapi.com https://api.dropboxapi.com https://api.mymemory.translated.net https://api.interpreter.caiyunai.com/;">
     <title>IIIStudio - AI绘画提示词工具</title>
-    <meta name="keywords" content="AI绘画提示词 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI" />
-    <meta name="description" content="一个纯前端的提示词管理与编辑页面。支持分类/分组管理、标签拖拽排序、历史快照存储、翻译、JSON 导入/导出、本地持久化，以及可选的 Dropbox 云同步；同时提供一键导出提示词区域为图片（html2canvas）。" />
+    <meta name="keywords" content="AIGC 提示词可视化编辑器 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI" />
+    <meta name="description" content="一个纯前端的AIGC 提示词可视化编辑器。" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1188,9 +1188,6 @@
                 <button class="btn btn-outline" id="modal-tag-close">关闭</button>
             </div>
             <div class="modal-body">
-                <div class="modal-row" style="font-size:12px;opacity:.75;">
-                    支持批量添加多个标签，使用分号(;)或顿号(、)分隔
-                </div>
                 <div class="modal-row">
                     <label for="modal-tag-zh">中文</label>
                     <input class="modal-input" id="modal-tag-zh" type="text" placeholder="例如：斗鸡眼;歪嘴;龅牙" />
@@ -1208,6 +1205,17 @@
                     <div id="modal-subcat-buttons" style="display:flex;flex-wrap:wrap;gap:8px;">
                         <button class="btn btn-outline" id="modal-subcat-newbtn" type="button">新建类别</button>
                         <!-- 下面的现有类别按钮将由 openTagModal 动态生成 -->
+                    </div>
+                </div>
+
+                <div class="modal-row">
+                    <label>样式</label>
+                    <div id="modal-style-buttons" style="display:flex;flex-wrap:wrap;gap:8px;">
+                        <button class="btn btn-toggle btn-outline active" data-style="default" type="button">默认</button>
+                        <button class="btn btn-toggle btn-outline" data-style="purple" type="button" style="background: linear-gradient(#8d79c0, #7a78dc);color:white;border:none;">紫色</button>
+                        <button class="btn btn-toggle btn-outline" data-style="green" type="button" style="background: linear-gradient(#a0b181, #57b049);color:white;border:none;">绿色</button>
+                        <button class="btn btn-toggle btn-outline" data-style="blue" type="button" style="background: linear-gradient(#45507a, #69728b);color:white;border:none;">蓝色</button>
+                        <button class="btn btn-toggle btn-outline" data-style="dark-purple" type="button" style="background: linear-gradient(#584589, #7774a0);color:white;border:none;">深紫</button>
                     </div>
                 </div>
 
@@ -4214,6 +4222,7 @@ Prompt Studio目录下</p>
                     const label = item?.lang_zh || item?.text || '';
                     const value = item?.text || '';
                     const related = item?.related || '';
+                    const style = item?.style || 'default';
                     if (!label || !value) return;
                     const span = document.createElement('span');
                     span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
@@ -4223,6 +4232,18 @@ Prompt Studio目录下</p>
                     span.draggable = true;
                     span.textContent = label;
                     span.title = value;
+
+                    // 根据样式设置背景
+                    const styleMap = {
+                        'default': '',
+                        'purple': 'linear-gradient(#8d79c0, #7a78dc)',
+                        'green': 'linear-gradient(#a0b181, #57b049)',
+                        'blue': 'linear-gradient(#45507a, #69728b)',
+                        'dark-purple': 'linear-gradient(#584589, #7774a0)'
+                    };
+                    if (styleMap[style]) {
+                        span.style.background = styleMap[style];
+                    }
 
                     // 创建关联提示词悬浮框
                     if (related) {
@@ -4367,6 +4388,7 @@ Prompt Studio目录下</p>
                         const label = item?.lang_zh || item?.text || '';
                         const value = item?.text || '';
                         const related = item?.related || '';
+                        const style = item?.style || 'default';
                         if (!label || !value) return;
                         const span = document.createElement('span');
                         span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
@@ -4376,6 +4398,18 @@ Prompt Studio目录下</p>
                         span.draggable = true;
                         span.textContent = label;
                         span.title = value;
+
+                        // 根据样式设置背景
+                        const styleMap = {
+                            'default': '',
+                            'purple': 'linear-gradient(#8d79c0, #7a78dc)',
+                            'green': 'linear-gradient(#a0b181, #57b049)',
+                            'blue': 'linear-gradient(#45507a, #69728b)',
+                            'dark-purple': 'linear-gradient(#584589, #7774a0)'
+                        };
+                        if (styleMap[style]) {
+                            span.style.background = styleMap[style];
+                        }
 
                         // 创建关联提示词悬浮框
                         if (related) {
@@ -5637,10 +5671,55 @@ Prompt Studio目录下</p>
             const closeBtn = document.getElementById('modal-tag-close');
             const subBtnsWrap = document.getElementById('modal-subcat-buttons');
             const subNewBtn = document.getElementById('modal-subcat-newbtn');
+            const styleBtnsWrap = document.getElementById('modal-style-buttons');
             const LAST_SUBCAT_KEY = 'ops_last_subcat_' + cat;
+            const LAST_STYLE_KEY = 'ops_last_style';
 
             const editing = typeof index === 'number';
             title.textContent = editing ? '编辑标签' : '添加标签';
+
+            // 样式选择
+            let selectedStyle = 'default';
+            const styleMap = {
+                'default': '',
+                'purple': 'linear-gradient(#8d79c0, #7a78dc)',
+                'green': 'linear-gradient(#a0b181, #57b049)',
+                'blue': 'linear-gradient(#45507a, #69728b)',
+                'dark-purple': 'linear-gradient(#584589, #7774a0)'
+            };
+
+            // 初始化样式按钮
+            function initStyleButtons() {
+                if (!styleBtnsWrap) return;
+                const buttons = styleBtnsWrap.querySelectorAll('button[data-style]');
+                buttons.forEach(btn => {
+                    btn.onclick = null;
+                    btn.addEventListener('click', () => {
+                        selectedStyle = btn.dataset.style;
+                        try { localStorage.setItem(LAST_STYLE_KEY, selectedStyle); } catch(e) {}
+                        updateStyleButtons();
+                    });
+                });
+                // 恢复上次选择的样式
+                try { selectedStyle = localStorage.getItem(LAST_STYLE_KEY) || 'default'; } catch(e) {}
+                updateStyleButtons();
+            }
+
+            function updateStyleButtons() {
+                if (!styleBtnsWrap) return;
+                const buttons = styleBtnsWrap.querySelectorAll('button[data-style]');
+                buttons.forEach(btn => {
+                    if (btn.dataset.style === selectedStyle) {
+                        btn.classList.add('active');
+                        btn.setAttribute('aria-pressed', 'true');
+                    } else {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-pressed', 'false');
+                    }
+                });
+            }
+
+            initStyleButtons();
 
             // 类别按钮渲染（默认恢复上次选择；若无记录，稍后自动选第一个）
             let selectedSub = subcat || (function(){ try { return localStorage.getItem(LAST_SUBCAT_KEY) || ''; } catch(e){ return ''; } })();
@@ -5708,16 +5787,21 @@ Prompt Studio目录下</p>
                     zh.value = item.lang_zh || '';
                     en.value = item.text || '';
                     related.value = item.related || '';
+                    selectedStyle = item.style || 'default';
                 } else {
                     const item = (Array.isArray(v) ? v : [])[index] || {};
                     zh.value = item.lang_zh || '';
                     en.value = item.text || '';
                     related.value = item.related || '';
+                    selectedStyle = item.style || 'default';
                 }
+                updateStyleButtons();
             } else {
                 zh.value = '';
                 en.value = '';
                 related.value = '';
+                selectedStyle = 'default';
+                updateStyleButtons();
             }
             // 预填 token
             try { tokenInput.value = localStorage.getItem('ops_cy_token') || ''; } catch(e) {}
@@ -5848,10 +5932,10 @@ Prompt Studio目录下</p>
                             // 移动到其他类别
                             fromArr.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2, style: selectedStyle });
                         } else {
                             // 就地更新
-                            fromArr[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 };
+                            fromArr[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2, style: selectedStyle };
                         }
                     } else if (isGroupedCategory(vNow) && !subcat) {
                         const g = vNow.groups || {};
@@ -5860,9 +5944,9 @@ Prompt Studio目录下</p>
                         if (targetSub && targetSub !== '未分组') {
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2, style: selectedStyle });
                         } else {
-                            uf[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 };
+                            uf[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2, style: selectedStyle };
                         }
                     } else {
                         commonData[cat] = Array.isArray(vNow) ? vNow : [];
@@ -5875,10 +5959,10 @@ Prompt Studio目录下</p>
                             const old = uf[index] || {};
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2, style: selectedStyle });
                         } else {
                             const old = commonData[cat][index] || {};
-                            commonData[cat][index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 };
+                            commonData[cat][index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2, style: selectedStyle };
                         }
                     }
                 } else {
@@ -5890,16 +5974,16 @@ Prompt Studio目录下</p>
                                 ensureGrouped(cat);
                                 const groups = commonData[cat].groups;
                                 if (!groups[targetSub]) groups[targetSub] = [];
-                                groups[targetSub].push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 });
+                                groups[targetSub].push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2, style: selectedStyle });
                             } else {
                                 if (Array.isArray(vNow)) {
-                                    vNow.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 });
+                                    vNow.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2, style: selectedStyle });
                                     commonData[cat] = vNow;
                                 } else if (isGroupedCategory(vNow)) {
                                     const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
-                                    arr.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 });
+                                    arr.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2, style: selectedStyle });
                                 } else {
-                                    commonData[cat] = [{ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 }];
+                                    commonData[cat] = [{ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2, style: selectedStyle }];
                                 }
                             }
                         }
