@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https://*.tencentcos.com https://*.myqcloud.com https://*.dropboxapi.com https://api.dropboxapi.com https://api.mymemory.translated.net https://api.interpreter.caiyunai.com/;">
-    <title>IIIStudio - AI绘画提示词工具</title>
-    <meta name="keywords" content="AIGC 提示词可视化编辑器 , 工具 , 咒语 , 炼金 , 翻译 ,ComfyUI" />
-    <meta name="description" content="一个纯前端的AIGC 提示词可视化编辑器。" />
+    <title>IIIStudio - PromptStudio提示词可视化编辑器</title>
+    <meta name="keywords" content="AIGC,提示词,可视化编辑器,AI绘画,Stable Diffusion,Midjourney,ComfyUI,咒语,炼金,翻译" />
+    <meta name="description" content="PromptStudio是AIGC提示词可视化编辑器纯前端网站，支持AI绘画提示词管理、分类、翻译和云端同步，兼容Stable Diffusion、Midjourney、ComfyUI等主流AI绘画工具。" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -4378,7 +4378,7 @@ Prompt Studio目录下</p>
                     const body = document.createElement('div');
                     body.style.display = getSubcatOpen(catKey, sub) ? 'flex' : 'none';
                     body.style.flexWrap = 'wrap';
-                    body.style.gap = '8px';
+                    body.style.gap = '4px';
                     body.style.padding = '10px';
                     body.style.width = '100%';
                     body.dataset.containerType = 'common-tag-group';
@@ -6264,14 +6264,34 @@ Prompt Studio目录下</p>
         const ctxMenu = document.getElementById('context-menu');
         const ctxList = document.getElementById('context-menu-list');
         let activeSubMenu = null;
+        let hideSubMenuTimer = null;
+
+        // 隐藏子菜单的通用函数
+        function hideSubMenu() {
+            if (activeSubMenu && activeSubMenu.parentNode) {
+                activeSubMenu.parentNode.removeChild(activeSubMenu);
+                activeSubMenu = null;
+            }
+        }
+
+        // 取消隐藏子菜单
+        function cancelHideSubMenu() {
+            if (hideSubMenuTimer) {
+                clearTimeout(hideSubMenuTimer);
+                hideSubMenuTimer = null;
+            }
+        }
+
+        // 延迟隐藏子菜单
+        function scheduleHideSubMenu() {
+            hideSubMenuTimer = setTimeout(hideSubMenu, 200);
+        }
 
         function hideContextMenu() {
             ctxMenu.style.display = 'none';
             ctxList.innerHTML = '';
-            if (activeSubMenu) {
-                document.body.removeChild(activeSubMenu);
-                activeSubMenu = null;
-            }
+            cancelHideSubMenu();
+            hideSubMenu();
         }
         function showContextMenu(x, y, items) {
             ctxList.innerHTML = '';
@@ -6308,10 +6328,14 @@ Prompt Studio目录下</p>
 
                     // 鼠标悬停显示子菜单
                     div.addEventListener('mouseenter', () => {
-                        if (activeSubMenu) {
-                            document.body.removeChild(activeSubMenu);
-                        }
+                        cancelHideSubMenu();
+                        hideSubMenu();
                         submenu();
+                    });
+
+                    // 鼠标移出延迟隐藏子菜单
+                    div.addEventListener('mouseleave', () => {
+                        scheduleHideSubMenu();
                     });
                 } else {
                     div.addEventListener('click', () => {
@@ -6334,8 +6358,8 @@ Prompt Studio目录下</p>
         // 显示样式选择菜单
         function showStyleMenu(cat, sub, idx, currentStyle) {
             // 移除之前的子菜单
-            if (activeSubMenu) {
-                document.body.removeChild(activeSubMenu);
+            if (activeSubMenu && activeSubMenu.parentNode) {
+                activeSubMenu.parentNode.removeChild(activeSubMenu);
             }
 
             const styleMenu = document.createElement('div');
@@ -6345,7 +6369,7 @@ Prompt Studio目录下</p>
 
             const styleOptions = [
                 { value: 'default', label: '默认', background: '' },
-                { value: 'purple', label: '紫色', background: 'linear-gradient(#8d79c0, #7a78dc)' },
+                { value: 'purple', label: '紫色', background: '#a29bfe' },
                 { value: 'green', label: '绿色', background: 'linear-gradient(#a0b181, #57b049)' },
                 { value: 'blue', label: '蓝色', background: 'linear-gradient(#45507a, #69728b)' },
                 { value: 'dark-purple', label: '深紫', background: 'linear-gradient(#584589, #7774a0)' }
@@ -6373,7 +6397,7 @@ Prompt Studio目录下</p>
                 if (opt.background) {
                     preview.style.background = opt.background;
                 } else {
-                    preview.style.background = 'var(--secondary-color)';
+                    preview.style.background = '#406e6d';
                 }
 
                 // 选中标记
@@ -6408,6 +6432,12 @@ Prompt Studio目录下</p>
             const rect = ctxMenu.getBoundingClientRect();
             styleMenu.style.left = rect.right + 'px';
             styleMenu.style.top = rect.top + 'px';
+
+            // 鼠标进入子菜单时取消隐藏
+            styleMenu.addEventListener('mouseenter', cancelHideSubMenu);
+
+            // 鼠标离开子菜单时延迟隐藏
+            styleMenu.addEventListener('mouseleave', scheduleHideSubMenu);
 
             document.body.appendChild(styleMenu);
         }
