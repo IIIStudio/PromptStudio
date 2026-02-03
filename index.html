@@ -553,6 +553,30 @@
             box-shadow: 0 6px 16px rgba(0,0,0,.2);
         }
 
+        /* 置顶按钮（位于设置按钮之上） */
+        .top-toggle {
+            position: fixed;
+            bottom: 134px;
+            right: 20px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        .top-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0,0,0,.2);
+        }
+
         /* 响应式设计 */
         @media (max-width: 968px) {
             .sidebar {
@@ -1039,7 +1063,11 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- 置顶按钮 -->
+    <div class="top-toggle" id="top-toggle" title="回到顶部">
+        <i class="fas fa-arrow-up"></i>
+    </div>
     <!-- 设置按钮 -->
     <div class="settings-toggle" id="settings-toggle" title="右键菜单设置">
         <i class="fas fa-cog"></i>
@@ -1379,7 +1407,13 @@ Prompt Studio目录下</p>
             applyTheme(next);
             try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
         });
-        
+
+        // 置顶按钮功能
+        const topToggle = document.getElementById('top-toggle');
+        topToggle?.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
         // 提示词编辑器
         const promptEditor = document.getElementById('prompt-editor');
 
@@ -4102,7 +4136,7 @@ Prompt Studio目录下</p>
                         promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
                         normalizePromptInput();
                         updateTags();
-                        promptEditor.focus();
+                        promptEditor.focus({ preventScroll: true });
                     });
                     // 添加拖拽事件
                     span.addEventListener('dragstart', handleCommonTagDragStart);
@@ -4204,7 +4238,7 @@ Prompt Studio目录下</p>
                             promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
                             normalizePromptInput();
                             updateTags();
-                            promptEditor.focus();
+                            promptEditor.focus({ preventScroll: true });
                         });
                         // 添加拖拽事件
                         span.addEventListener('dragstart', handleCommonTagDragStart);
