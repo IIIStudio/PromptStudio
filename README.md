@@ -100,6 +100,8 @@ B站演示：https://www.bilibili.com/video/BV1VgykBQEp5/
   - 操作 Methods：GET, PUT, POST, DELETE, HEAD
   - 其他默认
 
+使用JS：[cos-js-sdk-v5](https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js)
+
 ## 彩云api（可选）
 
 - 地址：https://platform.caiyunapp.com/login
