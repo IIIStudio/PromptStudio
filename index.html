@@ -7112,6 +7112,23 @@ Prompt Studio目录下</p>
         // 绑定搜索按钮事件
         document.getElementById('search-tags-btn')?.addEventListener('click', openSearchTagsModal);
 
+        // 全局快捷键 / 打开搜索
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/') {
+                // 检查是否在输入框中
+                const activeElement = document.activeElement;
+                const isInputActive = activeElement && (
+                    activeElement.tagName === 'INPUT' ||
+                    activeElement.tagName === 'TEXTAREA' ||
+                    activeElement.isContentEditable
+                );
+                if (!isInputActive) {
+                    e.preventDefault();
+                    openSearchTagsModal();
+                }
+            }
+        });
+
         // 初始化
         updateTags();
         loadCommonTagsFromStorage();
