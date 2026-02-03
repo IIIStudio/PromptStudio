@@ -6072,7 +6072,7 @@ Prompt Studio目录下</p>
 
                 // 组装右键菜单：固定项 + 自定义项 + 删除
                 const menuItems = [
-                    { label: isPinned ? '取消置顶' : '置顶', icon: 'fas fa-thumbtack', action: () => pinTag(cat, sub, idx, !isPinned) },
+                    { label: isPinned ? '取消标记' : '标记', icon: 'fas fa-thumbtack', action: () => pinTag(cat, sub, idx, !isPinned) },
                     { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) }
                 ];
 
@@ -6131,23 +6131,17 @@ Prompt Studio目录下</p>
             }
         });
 
-        // 置顶/取消置顶（支持分组）
+        // 标记/取消标记（支持分组）
         function pinTag(cat, subcat, index, shouldPin) {
             const v = commonData[cat];
             if (Array.isArray(v)) {
                 if (!v[index]) return;
-                const [it] = v.splice(index, 1);
-                it.pinned = !!shouldPin;
-                if (shouldPin) v.unshift(it);
-                else v.splice(Math.min(index, v.length), 0, it);
+                v[index].pinned = !!shouldPin;
                 commonData[cat] = v;
             } else if (isGroupedCategory(v)) {
                 const arr = v.groups?.[subcat] || [];
                 if (!arr[index]) return;
-                const [it] = arr.splice(index, 1);
-                it.pinned = !!shouldPin;
-                if (shouldPin) arr.unshift(it);
-                else arr.splice(Math.min(index, arr.length), 0, it);
+                arr[index].pinned = !!shouldPin;
             }
             saveCommonData();
             renderCommonTagsByCategory(cat);
