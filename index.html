@@ -6563,11 +6563,27 @@ Prompt Studio目录下</p>
                 const segEn = promptTagEl.querySelector('.seg-en');
                 const currentTag = segEn ? (segEn.textContent || '').trim() : '';
                 if (!currentTag) return;
-                showContextMenu(e.clientX, e.clientY, [
+
+                // 查找标签对应的原始数据
+                const tagInfo = findTagByEnglish(currentTag);
+
+                const menuItems = [
                     { label: '权重+', icon: 'fas fa-plus', action: () => adjustTagWeightBySteps(currentTag, +1) },
-                    { label: '权重-', icon: 'fas fa-minus', action: () => adjustTagWeightBySteps(currentTag, -1) },
-                    { label: '删除', icon: 'fas fa-trash', action: () => removeWeightedTag(currentTag) }
-                ]);
+                    { label: '权重-', icon: 'fas fa-minus', action: () => adjustTagWeightBySteps(currentTag, -1) }
+                ];
+
+                // 如果找到对应的标签数据，添加编辑选项
+                if (tagInfo) {
+                    menuItems.splice(2, 0, {
+                        label: '编辑',
+                        icon: 'fas fa-pen',
+                        action: () => openTagModal(tagInfo.category, tagInfo.index, tagInfo.subcategory)
+                    });
+                }
+
+                menuItems.push({ label: '删除', icon: 'fas fa-trash', action: () => removeWeightedTag(currentTag) });
+
+                showContextMenu(e.clientX, e.clientY, menuItems);
                 return;
             }
 
@@ -6708,6 +6724,40 @@ Prompt Studio目录下</p>
             normalizePromptInput({ restoreCaret: true });
             updateTags();
         });
+
+        // 根据英文查找标签对应的原始数据
+        function findTagByEnglish(englishText) {
+            const normalizedEn = englishText.trim().toLowerCase();
+            // 移除权重标记，如 (1.2)、::1.2 等
+            const cleanEn = normalizedEn.replace(/\([^)]*\)|::[\d.]+/g, '').trim();
+
+            for (const cat in commonData) {
+                const data = commonData[cat];
+                if (Array.isArray(data)) {
+                    // 数组格式
+                    const idx = data.findIndex(t => {
+                        const tagEn = (t.text || '').trim().toLowerCase();
+                        return tagEn === cleanEn || tagEn === normalizedEn;
+                    });
+                    if (idx >= 0) {
+                        return { category: cat, index: idx, subcategory: '' };
+                    }
+                } else if (data.groups) {
+                    // 分组格式
+                    for (const sub in data.groups) {
+                        const tags = data.groups[sub];
+                        const idx = tags.findIndex(t => {
+                            const tagEn = (t.text || '').trim().toLowerCase();
+                            return tagEn === cleanEn || tagEn === normalizedEn;
+                        });
+                        if (idx >= 0) {
+                            return { category: cat, index: idx, subcategory: sub };
+                        }
+                    }
+                }
+            }
+            return null;
+        }
 
         // 重置：清空所有分类、类别与历史
         async function resetAll() {
