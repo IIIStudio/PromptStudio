@@ -6741,6 +6741,11 @@ Prompt Studio目录下</p>
             // 使用Set存储选中的数据源，支持多选
             let selectedSources = new Set(['default']);
 
+            // 分页配置
+            const PAGE_SIZE = 50; // 每页显示50条
+            let currentPage = 1;
+            let allSearchResults = []; // 存储所有搜索结果
+
             // 加载IELTS数据
             async function loadIELTSData() {
                 try {
@@ -6864,15 +6869,25 @@ Prompt Studio目录下</p>
                 return results;
             }
 
-            // 渲染搜索结果
-            function renderSearchResults(results) {
+            // 渲染搜索结果（支持分页）
+            function renderSearchResults(results, page = 1) {
+                allSearchResults = results; // 保存所有结果
+
                 if (results.length === 0) {
                     searchResults.innerHTML = '<div style="opacity:0.6;font-size:0.9rem;">未找到匹配的提示词</div>';
                     return;
                 }
 
                 searchResults.innerHTML = '';
-                results.forEach((result, index) => {
+
+                // 计算分页
+                const startIndex = (page - 1) * PAGE_SIZE;
+                const endIndex = startIndex + PAGE_SIZE;
+                const pageResults = results.slice(startIndex, endIndex);
+                const totalPages = Math.ceil(results.length / PAGE_SIZE);
+
+                // 渲染当前页结果
+                pageResults.forEach((result, index) => {
                     const row = document.createElement('div');
                     row.style.border = '1px solid var(--border-color)';
                     row.style.borderRadius = '8px';
@@ -6891,6 +6906,7 @@ Prompt Studio目录下</p>
                     title.style.fontWeight = '600';
                     title.style.color = 'var(--primary-color)';
                     title.textContent = result.zh || result.en || '未命名';
+
 
                     const en = document.createElement('div');
                     en.style.fontSize = '0.9rem';
@@ -7041,6 +7057,55 @@ Prompt Studio目录下</p>
 
                     searchResults.appendChild(row);
                 });
+
+                // 添加分页控制
+                if (totalPages > 1) {
+                    const pagination = document.createElement('div');
+                    pagination.style.display = 'flex';
+                    pagination.style.justifyContent = 'center';
+                    pagination.style.alignItems = 'center';
+                    pagination.style.gap = '8px';
+                    pagination.style.marginTop = '16px';
+                    pagination.style.padding = '12px';
+                    pagination.style.borderTop = '1px solid var(--border-color)';
+
+                    // 显示当前页信息
+                    const pageInfo = document.createElement('span');
+                    pageInfo.style.fontSize = '0.9rem';
+                    pageInfo.style.opacity = '0.7';
+                    pageInfo.textContent = `第 ${page} / ${totalPages} 页 (共 ${results.length} 条)`;
+                    pagination.appendChild(pageInfo);
+
+                    // 上一页按钮
+                    if (page > 1) {
+                        const prevBtn = document.createElement('button');
+                        prevBtn.className = 'btn btn-outline';
+                        prevBtn.style.padding = '4px 12px';
+                        prevBtn.style.fontSize = '0.85rem';
+                        prevBtn.textContent = '上一页';
+                        prevBtn.addEventListener('click', () => {
+                            currentPage = page - 1;
+                            renderSearchResults(allSearchResults, currentPage);
+                        });
+                        pagination.appendChild(prevBtn);
+                    }
+
+                    // 下一页按钮
+                    if (page < totalPages) {
+                        const nextBtn = document.createElement('button');
+                        nextBtn.className = 'btn btn-outline';
+                        nextBtn.style.padding = '4px 12px';
+                        nextBtn.style.fontSize = '0.85rem';
+                        nextBtn.textContent = '下一页';
+                        nextBtn.addEventListener('click', () => {
+                            currentPage = page + 1;
+                            renderSearchResults(allSearchResults, currentPage);
+                        });
+                        pagination.appendChild(nextBtn);
+                    }
+
+                    searchResults.appendChild(pagination);
+                }
             }
 
             // 搜索输入监听
@@ -7052,7 +7117,8 @@ Prompt Studio目录下</p>
                 }
 
                 const results = searchTags(keyword);
-                renderSearchResults(results);
+                currentPage = 1; // 重置到第一页
+                renderSearchResults(results, currentPage);
             });
 
             // 清空按钮
