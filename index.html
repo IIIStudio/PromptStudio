@@ -506,6 +506,52 @@
             opacity: 0.5;
         }
 
+        /* 关联提示词悬浮框 */
+        .related-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 120px;
+            display: none;
+            white-space: nowrap;
+            pointer-events: auto;
+        }
+        .related-tooltip.show {
+            display: block;
+        }
+        .related-tooltip-title {
+            font-size: 0.75rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+        .related-tooltip-item {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .related-tooltip-item:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+        .common-tag {
+            position: relative;
+        }
+
         /* 主题切换按钮 */
         .theme-toggle {
             position: fixed;
@@ -1114,6 +1160,10 @@
                 <div class="modal-row">
                     <label for="modal-tag-en">英文</label>
                     <input class="modal-input" id="modal-tag-en" type="text" placeholder="例如：cross-eyed;crooked mouth;bucktooth" />
+                </div>
+                <div class="modal-row">
+                    <label for="modal-tag-related">关联</label>
+                    <input class="modal-input" id="modal-tag-related" type="text" placeholder="例如：smile,happy 或 smile;happy" />
                 </div>
                 <div class="modal-row">
                     <label>类别</label>
@@ -4121,6 +4171,7 @@ Prompt Studio目录下</p>
                 data.forEach((item, index) => {
                     const label = item?.lang_zh || item?.text || '';
                     const value = item?.text || '';
+                    const related = item?.related || '';
                     if (!label || !value) return;
                     const span = document.createElement('span');
                     span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
@@ -4130,6 +4181,56 @@ Prompt Studio目录下</p>
                     span.draggable = true;
                     span.textContent = label;
                     span.title = value;
+
+                    // 创建关联提示词悬浮框
+                    if (related) {
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'related-tooltip';
+                        const title = document.createElement('div');
+                        title.className = 'related-tooltip-title';
+                        title.textContent = '关联提示词：';
+                        tooltip.appendChild(title);
+
+                        // 解析关联提示词（支持中英文逗号或分号分隔不同按钮，竖线分隔同一按钮内的多个词）
+                        const relatedTags = related.split(/[,，;；]+/).map(s => s.trim()).filter(Boolean);
+                        relatedTags.forEach(tag => {
+                            const tagEl = document.createElement('span');
+                            tagEl.className = 'related-tooltip-item';
+                            // 显示时用空格替换竖线，更美观
+                            tagEl.textContent = tag.replace(/\|/g, ' ');
+                            tagEl.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const cur = promptEditor.value.trim();
+                                // 将竖线替换为逗号，同时插入主提示词和关联提示词
+                                const relatedValue = tag.replace(/\|/g, ', ');
+                                const suffix = value.trim() + ', ' + relatedValue;
+                                promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                                normalizePromptInput();
+                                updateTags();
+                                promptEditor.focus({ preventScroll: true });
+                            });
+                            tooltip.appendChild(tagEl);
+                        });
+                        span.appendChild(tooltip);
+
+                        // 鼠标悬停显示关联提示词
+                        let hideTimeout;
+                        const showTooltip = () => {
+                            clearTimeout(hideTimeout);
+                            tooltip.classList.add('show');
+                        };
+                        const hideTooltip = () => {
+                            hideTimeout = setTimeout(() => {
+                                tooltip.classList.remove('show');
+                            }, 100);
+                        };
+
+                        span.addEventListener('mouseenter', showTooltip);
+                        span.addEventListener('mouseleave', hideTooltip);
+                        tooltip.addEventListener('mouseenter', showTooltip);
+                        tooltip.addEventListener('mouseleave', hideTooltip);
+                    }
+
                     span.addEventListener('click', () => {
                         const cur = promptEditor.value.trim();
                         const suffix = value.trim();
@@ -4162,7 +4263,7 @@ Prompt Studio目录下</p>
                     section.style.border = '1px solid var(--border-color)';
                     section.style.borderRadius = '8px';
                     section.style.marginBottom = '8px';
-                    section.style.overflow = 'hidden';
+                    section.style.overflow = 'visible';
                     section.style.width = '100%';
 
                     const header = document.createElement('div');
@@ -4223,6 +4324,7 @@ Prompt Studio目录下</p>
                     arr.forEach((item, index) => {
                         const label = item?.lang_zh || item?.text || '';
                         const value = item?.text || '';
+                        const related = item?.related || '';
                         if (!label || !value) return;
                         const span = document.createElement('span');
                         span.className = 'common-tag' + ((item && item.pinned) ? ' pinned' : '');
@@ -4232,6 +4334,56 @@ Prompt Studio目录下</p>
                         span.draggable = true;
                         span.textContent = label;
                         span.title = value;
+
+                        // 创建关联提示词悬浮框
+                        if (related) {
+                            const tooltip = document.createElement('div');
+                            tooltip.className = 'related-tooltip';
+                            const title = document.createElement('div');
+                            title.className = 'related-tooltip-title';
+                            title.textContent = '关联提示词：';
+                            tooltip.appendChild(title);
+
+                            // 解析关联提示词（支持中英文逗号或分号分隔不同按钮，竖线分隔同一按钮内的多个词）
+                            const relatedTags = related.split(/[,，;；]+/).map(s => s.trim()).filter(Boolean);
+                            relatedTags.forEach(tag => {
+                                const tagEl = document.createElement('span');
+                                tagEl.className = 'related-tooltip-item';
+                                // 显示时用空格替换竖线，更美观
+                                tagEl.textContent = tag.replace(/\|/g, ' ');
+                                tagEl.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    const cur = promptEditor.value.trim();
+                                    // 将竖线替换为逗号，同时插入主提示词和关联提示词
+                                    const relatedValue = tag.replace(/\|/g, ', ');
+                                    const suffix = value.trim() + ', ' + relatedValue;
+                                    promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+                                    normalizePromptInput();
+                                    updateTags();
+                                    promptEditor.focus({ preventScroll: true });
+                                });
+                                tooltip.appendChild(tagEl);
+                            });
+                            span.appendChild(tooltip);
+
+                            // 鼠标悬停显示关联提示词
+                            let hideTimeout;
+                            const showTooltip = () => {
+                                clearTimeout(hideTimeout);
+                                tooltip.classList.add('show');
+                            };
+                            const hideTooltip = () => {
+                                hideTimeout = setTimeout(() => {
+                                    tooltip.classList.remove('show');
+                                }, 100);
+                            };
+
+                            span.addEventListener('mouseenter', showTooltip);
+                            span.addEventListener('mouseleave', hideTooltip);
+                            tooltip.addEventListener('mouseenter', showTooltip);
+                            tooltip.addEventListener('mouseleave', hideTooltip);
+                        }
+
                         span.addEventListener('click', () => {
                             const cur = promptEditor.value.trim();
                             const suffix = value.trim();
@@ -5434,6 +5586,7 @@ Prompt Studio目录下</p>
             const title = document.getElementById('modal-tag-title');
             const zh = document.getElementById('modal-tag-zh');
             const en = document.getElementById('modal-tag-en');
+            const related = document.getElementById('modal-tag-related');
             const tokenInput = document.getElementById('modal-cy-token');
             const translateBtn = document.getElementById('modal-tag-translate');
             const translateMyBtn = document.getElementById('modal-tag-translate-mymemory');
@@ -5512,14 +5665,17 @@ Prompt Studio目录下</p>
                     const item = ((v.groups?.[subcat]) || [])[index] || {};
                     zh.value = item.lang_zh || '';
                     en.value = item.text || '';
+                    related.value = item.related || '';
                 } else {
                     const item = (Array.isArray(v) ? v : [])[index] || {};
                     zh.value = item.lang_zh || '';
                     en.value = item.text || '';
+                    related.value = item.related || '';
                 }
             } else {
                 zh.value = '';
                 en.value = '';
+                related.value = '';
             }
             // 预填 token
             try { tokenInput.value = localStorage.getItem('ops_cy_token') || ''; } catch(e) {}
@@ -5578,6 +5734,7 @@ Prompt Studio目录下</p>
             const onConfirm = async () => {
                 const lang_zh2 = (zh.value || '').trim();
                 let text2 = (en.value || '').trim();
+                const related2 = (related.value || '').trim();
 
                 // 自动翻译：若存在 Token 且英文为空，仅有中文，则先翻译再保存
                 if (lang_zh2 && !text2) {
@@ -5649,10 +5806,10 @@ Prompt Studio目录下</p>
                             // 移动到其他类别
                             fromArr.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 });
                         } else {
                             // 就地更新
-                            fromArr[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
+                            fromArr[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 };
                         }
                     } else if (isGroupedCategory(vNow) && !subcat) {
                         const g = vNow.groups || {};
@@ -5661,9 +5818,9 @@ Prompt Studio目录下</p>
                         if (targetSub && targetSub !== '未分组') {
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 });
                         } else {
-                            uf[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
+                            uf[index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 };
                         }
                     } else {
                         commonData[cat] = Array.isArray(vNow) ? vNow : [];
@@ -5676,10 +5833,10 @@ Prompt Studio目录下</p>
                             const old = uf[index] || {};
                             uf.splice(index, 1);
                             if (!g[targetSub]) g[targetSub] = [];
-                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned });
+                            g[targetSub].push({ text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 });
                         } else {
                             const old = commonData[cat][index] || {};
-                            commonData[cat][index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned };
+                            commonData[cat][index] = { text: enSingle, lang_zh: zhSingle, pinned: !!old.pinned, related: related2 };
                         }
                     }
                 } else {
@@ -5691,16 +5848,16 @@ Prompt Studio目录下</p>
                                 ensureGrouped(cat);
                                 const groups = commonData[cat].groups;
                                 if (!groups[targetSub]) groups[targetSub] = [];
-                                groups[targetSub].push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                                groups[targetSub].push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 });
                             } else {
                                 if (Array.isArray(vNow)) {
-                                    vNow.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                                    vNow.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 });
                                     commonData[cat] = vNow;
                                 } else if (isGroupedCategory(vNow)) {
                                     const arr = vNow.groups?.['未分组'] || (vNow.groups['未分组'] = []);
-                                    arr.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false });
+                                    arr.push({ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 });
                                 } else {
-                                    commonData[cat] = [{ text: tag.text, lang_zh: tag.lang_zh, pinned: false }];
+                                    commonData[cat] = [{ text: tag.text, lang_zh: tag.lang_zh, pinned: false, related: related2 }];
                                 }
                             }
                         }
@@ -5726,6 +5883,7 @@ Prompt Studio目录下</p>
                 closeBtn.removeEventListener('click', onCancel);
                 zh.removeEventListener('keydown', onKey);
                 en.removeEventListener('keydown', onKey);
+                related.removeEventListener('keydown', onKey);
                 hide(wrap);
             }
             function onKey(e) {
@@ -5740,6 +5898,7 @@ Prompt Studio目录下</p>
             closeBtn.addEventListener('click', onCancel);
             zh.addEventListener('keydown', onKey);
             en.addEventListener('keydown', onKey);
+            related.addEventListener('keydown', onKey);
         }
 
         // 通用信息提示（居中模态，仅"确定"）
