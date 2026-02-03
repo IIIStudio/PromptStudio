@@ -3007,7 +3007,8 @@ Prompt Studio目录下</p>
                         text: (x?.text || '').trim(),
                         lang_zh: (x?.lang_zh || '').trim() || (x?.text || '').trim(),
                         pinned: !!x?.pinned,
-                        related: (x?.related || '').trim()
+                        related: (x?.related || '').trim(),
+                        style: x?.style || 'default'
                     })).filter(x => x.text);
                 }
                 if (isGroupedCategory(val)) {
@@ -3018,7 +3019,8 @@ Prompt Studio目录下</p>
                             text: (x?.text || '').trim(),
                             lang_zh: (x?.lang_zh || '').trim() || (x?.text || '').trim(),
                             pinned: !!x?.pinned,
-                            related: (x?.related || '').trim()
+                            related: (x?.related || '').trim(),
+                            style: x?.style || 'default'
                         })).filter(x => x.text);
                     });
                     return out;
