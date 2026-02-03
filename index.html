@@ -6818,7 +6818,7 @@ Prompt Studio目录下</p>
                         // 判断是数组格式还是分组格式
                         if (Array.isArray(data)) {
                             // 数组格式（旧版），类别为"未分组"
-                            data.forEach(tag => {
+                            data.forEach((tag, idx) => {
                                 const zh = (tag.lang_zh || '').trim();
                                 const en = (tag.text || '').trim();
                                 const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
@@ -6829,7 +6829,9 @@ Prompt Studio目录下</p>
                                         zh: zh,
                                         en: en,
                                         category: cat,
-                                        subcategory: '未分组'
+                                        subcategory: '未分组',
+                                        index: idx,
+                                        tagRef: tag
                                     });
                                 }
                             });
@@ -6837,7 +6839,7 @@ Prompt Studio目录下</p>
                             // 分组格式（新版）
                             for (const sub in data.groups) {
                                 const tags = data.groups[sub];
-                                tags.forEach(tag => {
+                                tags.forEach((tag, idx) => {
                                     const zh = (tag.lang_zh || '').trim();
                                     const en = (tag.text || '').trim();
                                     const zhMatch = zh && zh.toLowerCase().includes(lowerKeyword);
@@ -6848,7 +6850,9 @@ Prompt Studio目录下</p>
                                             zh: zh,
                                             en: en,
                                             category: cat,
-                                            subcategory: sub
+                                            subcategory: sub,
+                                            index: idx,
+                                            tagRef: tag
                                         });
                                     }
                                 });
@@ -6963,33 +6967,13 @@ Prompt Studio目录下</p>
                             editBtn.addEventListener('click', () => {
                                 ctxMenu.remove();
 
-                                // 找到标签在原数据中的索引
+                                // 直接使用搜索结果中保存的索引
                                 const category = result.category;
                                 const subcategory = result.subcategory;
-                                let tagIndex = -1;
+                                const tagIndex = result.index;
 
-                                if (commonData[category]) {
-                                    const data = commonData[category];
-                                    if (Array.isArray(data)) {
-                                        // 数组格式
-                                        tagIndex = data.findIndex(t =>
-                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                                (t.text || '').trim() === (result.en || '').trim()
-                                        );
-                                        if (tagIndex >= 0) {
-                                            openTagModal(category, tagIndex, '');
-                                        }
-                                    } else if (data.groups && data.groups[subcategory]) {
-                                        // 分组格式
-                                        const tags = data.groups[subcategory];
-                                        tagIndex = tags.findIndex(t =>
-                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                                (t.text || '').trim() === (result.en || '').trim()
-                                        );
-                                        if (tagIndex >= 0) {
-                                            openTagModal(category, tagIndex, subcategory);
-                                        }
-                                    }
+                                if (tagIndex >= 0 && commonData[category]) {
+                                    openTagModal(category, tagIndex, subcategory);
                                 }
                             });
 
@@ -7000,43 +6984,31 @@ Prompt Studio目录下</p>
                             deleteBtn.addEventListener('click', async () => {
                                 ctxMenu.remove();
 
+                                // 直接使用搜索结果中保存的索引
                                 const category = result.category;
                                 const subcategory = result.subcategory;
+                                const tagIndex = result.index;
 
-                                if (commonData[category]) {
+                                if (tagIndex >= 0 && commonData[category]) {
                                     const data = commonData[category];
+                                    let deletedTag = null;
+
                                     if (Array.isArray(data)) {
                                         // 数组格式
-                                        tagIndex = data.findIndex(t =>
-                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                                (t.text || '').trim() === (result.en || '').trim()
-                                        );
-                                        if (tagIndex >= 0) {
-                                            const deletedTag = data[tagIndex];
-                                            data.splice(tagIndex, 1);
-                                            saveCommonData();
-                                            renderCommonTagsByCategory(category);
-                                            // 重新搜索以刷新结果
-                                            searchInput.dispatchEvent(new Event('input'));
-                                            showInfo(`已删除 <b>${deletedTag.lang_zh || deletedTag.text}</b> 提示词`);
-                                        }
+                                        deletedTag = data[tagIndex];
+                                        data.splice(tagIndex, 1);
                                     } else if (data.groups && data.groups[subcategory]) {
                                         // 分组格式
                                         const tags = data.groups[subcategory];
-                                        tagIndex = tags.findIndex(t =>
-                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                                (t.text || '').trim() === (result.en || '').trim()
-                                        );
-                                        if (tagIndex >= 0) {
-                                            const deletedTag = tags[tagIndex];
-                                            tags.splice(tagIndex, 1);
-                                            saveCommonData();
-                                            renderCommonTagsByCategory(category);
-                                            // 重新搜索以刷新结果
-                                            searchInput.dispatchEvent(new Event('input'));
-                                            showInfo(`已删除 <b>${deletedTag.lang_zh || deletedTag.text}</b> 提示词`);
-                                        }
+                                        deletedTag = tags[tagIndex];
+                                        tags.splice(tagIndex, 1);
                                     }
+
+                                    saveCommonData();
+                                    renderCommonTagsByCategory(category);
+                                    // 重新搜索以刷新结果
+                                    searchInput.dispatchEvent(new Event('input'));
+                                    showInfo(`已删除 <b>${deletedTag?.lang_zh || deletedTag?.text}</b> 提示词`);
                                 }
                             });
 
