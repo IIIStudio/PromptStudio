@@ -5978,9 +5978,9 @@ Prompt Studio目录下</p>
                     }
                 }
 
-                // 支持多标签：按分号(;)或顿号(、)分割
-                const zhParts = lang_zh2.split(/[;、]+/).map(s => s.trim()).filter(Boolean);
-                const enParts = text2.split(/[;、]+/).map(s => s.trim()).filter(Boolean);
+                // 支持多标签：按英文逗号(,)、中文逗号(,)、英文分号(;)、中文分号(；)、顿号(、)分割
+                const zhParts = lang_zh2.split(/[,，;；、]+/).map(s => s.trim()).filter(Boolean);
+                const enParts = text2.split(/[,，;；、]+/).map(s => s.trim()).filter(Boolean);
 
                 // 验证至少有一个标签对
                 if (zhParts.length === 0 || enParts.length === 0) {
@@ -6130,7 +6130,7 @@ Prompt Studio目录下</p>
 
             const toast = document.createElement('div');
             toast.className = 'toast-notification';
-            toast.textContent = message;
+            toast.innerHTML = message;
             document.body.appendChild(toast);
 
             // 触发进入动画
@@ -6631,19 +6631,16 @@ Prompt Studio目录下</p>
                         if (Array.isArray(v2)) {
                             it2 = v2[idx];
                             if (!it2) return;
-                            const ok = await showConfirm(`确认删除标签「${it2.lang_zh || it2.text}」？`, '删除标签');
-                            if (!ok) return;
                             v2.splice(idx, 1);
                         } else if (isGroupedCategory(v2)) {
                             const arr = v2.groups?.[sub] || [];
                             it2 = arr[idx];
                             if (!it2) return;
-                            const ok = await showConfirm(`确认删除标签「${it2.lang_zh || it2.text}」？`, '删除标签');
-                            if (!ok) return;
                             arr.splice(idx, 1);
                         }
                         saveCommonData();
                         renderCommonTagsByCategory(cat);
+                        showInfo(`已删除 <b>${it2.lang_zh || it2.text}</b> 提示词`);
                     }
                 });
 
@@ -6949,12 +6946,15 @@ Prompt Studio目录下</p>
                         row.addEventListener('contextmenu', (e) => {
                             e.preventDefault();
 
+                            // 移除搜索框相关的右键菜单（通过特定标记）
+                            document.querySelectorAll('.context-menu.search-context-menu').forEach(menu => menu.remove());
+
                             // 创建右键菜单
                             const ctxMenu = document.createElement('div');
-                            ctxMenu.className = 'context-menu';
+                            ctxMenu.className = 'context-menu search-context-menu';
                             ctxMenu.style.display = 'block';
-                            ctxMenu.style.left = e.pageX + 'px';
-                            ctxMenu.style.top = e.pageY + 'px';
+                            ctxMenu.style.left = e.clientX + 'px';
+                            ctxMenu.style.top = e.clientY + 'px';
                             ctxMenu.style.zIndex = '4000';
 
                             const editBtn = document.createElement('div');
@@ -6974,7 +6974,7 @@ Prompt Studio目录下</p>
                                         // 数组格式
                                         tagIndex = data.findIndex(t =>
                                             (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                            (t.text || '').trim() === (result.en || '').trim()
+                                                (t.text || '').trim() === (result.en || '').trim()
                                         );
                                         if (tagIndex >= 0) {
                                             openTagModal(category, tagIndex, '');
@@ -6984,7 +6984,7 @@ Prompt Studio目录下</p>
                                         const tags = data.groups[subcategory];
                                         tagIndex = tags.findIndex(t =>
                                             (t.lang_zh || '').trim() === (result.zh || '').trim() ||
-                                            (t.text || '').trim() === (result.en || '').trim()
+                                                (t.text || '').trim() === (result.en || '').trim()
                                         );
                                         if (tagIndex >= 0) {
                                             openTagModal(category, tagIndex, subcategory);
@@ -6993,7 +6993,55 @@ Prompt Studio目录下</p>
                                 }
                             });
 
+                            // 删除按钮
+                            const deleteBtn = document.createElement('div');
+                            deleteBtn.className = 'item';
+                            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> 删除标签';
+                            deleteBtn.addEventListener('click', async () => {
+                                ctxMenu.remove();
+
+                                const category = result.category;
+                                const subcategory = result.subcategory;
+
+                                if (commonData[category]) {
+                                    const data = commonData[category];
+                                    if (Array.isArray(data)) {
+                                        // 数组格式
+                                        tagIndex = data.findIndex(t =>
+                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                                (t.text || '').trim() === (result.en || '').trim()
+                                        );
+                                        if (tagIndex >= 0) {
+                                            const deletedTag = data[tagIndex];
+                                            data.splice(tagIndex, 1);
+                                            saveCommonData();
+                                            renderCommonTagsByCategory(category);
+                                            // 重新搜索以刷新结果
+                                            searchInput.dispatchEvent(new Event('input'));
+                                            showInfo(`已删除 <b>${deletedTag.lang_zh || deletedTag.text}</b> 提示词`);
+                                        }
+                                    } else if (data.groups && data.groups[subcategory]) {
+                                        // 分组格式
+                                        const tags = data.groups[subcategory];
+                                        tagIndex = tags.findIndex(t =>
+                                            (t.lang_zh || '').trim() === (result.zh || '').trim() ||
+                                                (t.text || '').trim() === (result.en || '').trim()
+                                        );
+                                        if (tagIndex >= 0) {
+                                            const deletedTag = tags[tagIndex];
+                                            tags.splice(tagIndex, 1);
+                                            saveCommonData();
+                                            renderCommonTagsByCategory(category);
+                                            // 重新搜索以刷新结果
+                                            searchInput.dispatchEvent(new Event('input'));
+                                            showInfo(`已删除 <b>${deletedTag.lang_zh || deletedTag.text}</b> 提示词`);
+                                        }
+                                    }
+                                }
+                            });
+
                             ctxMenu.appendChild(editBtn);
+                            ctxMenu.appendChild(deleteBtn);
                             document.body.appendChild(ctxMenu);
 
                             // 点击其他地方关闭菜单
