@@ -832,7 +832,7 @@
         .context-menu {
             position: fixed;
             z-index: 2000;
-            min-width: 160px;
+            min-width: 80px;
             background: var(--card-bg);
             color: var(--text-color);
             border: 1px solid var(--border-color);
@@ -6508,10 +6508,20 @@ Prompt Studio目录下</p>
                 styleMenu.appendChild(div);
             });
 
-            // 定位菜单
+            // 定位菜单,确保不超出屏幕边界
             const rect = ctxMenu.getBoundingClientRect();
-            styleMenu.style.left = rect.right + 'px';
-            styleMenu.style.top = rect.top + 'px';
+            const styleMenuWidth = 180;
+            const styleMenuHeight = styleOptions.length * 40;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            // 如果放在右侧会超出屏幕,则放在左侧(紧贴主菜单)
+            const left = rect.right + styleMenuWidth > vw ? rect.left - styleMenuWidth - -98 : rect.right;
+            // 如果底部会超出屏幕,则向上调整
+            const top = rect.top + styleMenuHeight > vh ? vh - styleMenuHeight - 8 : rect.top;
+
+            styleMenu.style.left = left + 'px';
+            styleMenu.style.top = top + 'px';
 
             // 鼠标进入子菜单时取消隐藏
             styleMenu.addEventListener('mouseenter', cancelHideSubMenu);
