@@ -1932,6 +1932,8 @@ Prompt Studio目录下</p>
         } else {
             window.__weightControlsEnabled = savedWeightPref === 'true';
         }
+        // 中英文模式标志: true = 中文模式(不自动转英文), false = 英文模式(自动转英文)
+        window.__chineseMode = false;
         function updateWeightControlVisibility() {
             const enabled = window.__weightControlsEnabled;
             if (!tagsContainer) return;
@@ -1968,16 +1970,32 @@ Prompt Studio目录下</p>
                     const toggleWrap = document.createElement('div');
                     toggleWrap.style.display = 'flex';
                     toggleWrap.style.alignItems = 'center';
-                    toggleWrap.style.gap = '8px';
+                    toggleWrap.style.gap = '12px';
                     toggleWrap.appendChild(labelText);
                     toggleWrap.appendChild(toggleLabel);
+
+                    // 中英文切换按钮
+                    const langToggleBtn = document.createElement('button');
+                    langToggleBtn.id = 'lang-toggle-btn';
+                    langToggleBtn.className = 'btn btn-outline';
+                    langToggleBtn.textContent = '中文';
+                    langToggleBtn.title = '点击切换中英文显示';
+                    langToggleBtn.style.fontSize = '12px';
+                    langToggleBtn.style.padding = '4px 10px';
+                    langToggleBtn.style.marginRight = '8px';
+
+                    const finalToggleWrap = document.createElement('div');
+                    finalToggleWrap.style.display = 'flex';
+                    finalToggleWrap.style.alignItems = 'center';
+                    finalToggleWrap.appendChild(langToggleBtn);
+                    finalToggleWrap.appendChild(toggleWrap);
 
                     const counter = document.createElement('div');
                     counter.id = 'token-counter';
                     counter.className = 'token-counter';
                     counter.textContent = 'Tokens: 0/75';
 
-                    wrap.appendChild(toggleWrap);
+                    wrap.appendChild(finalToggleWrap);
                     wrap.appendChild(counter);
 
                     if (promptEditor && promptEditor.parentNode) {
@@ -1997,6 +2015,57 @@ Prompt Studio目录下</p>
                             updateWeightControlVisibility();
                         });
                     }
+
+                    // 中英文切换功能
+                    langToggleBtn.addEventListener('click', () => {
+                        const currentText = promptEditor.value || '';
+                        if (!currentText.trim()) return;
+
+                        const parts = currentText.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+                        const convertedParts = [];
+
+                        let isChineseMode = langToggleBtn.textContent === '中文';
+
+                        // 确保 findZh 和 findEn 函数已定义
+                        if (typeof findZh !== 'function' || typeof findEn !== 'function') {
+                            showInfo('翻译函数未就绪,请稍后再试', '错误');
+                            return;
+                        }
+
+                        // 切换中文模式标志
+                        window.__chineseMode = isChineseMode;
+
+                        parts.forEach(part => {
+                            const parsed = parseWeightedTag(part);
+                            const baseText = parsed.base;
+                            const weight = parsed.weight;
+
+                            if (isChineseMode) {
+                                // 按钮显示"中文" -> 当前是英文模式,点击后转为中文
+                                let zh = findZh(baseText);
+                                if (!zh) zh = baseText; // 找不到则保持原样
+                                const converted = formatWeightedTag(zh, weight);
+                                convertedParts.push(converted);
+                            } else {
+                                // 按钮显示"English" -> 当前是中文模式,点击后转为英文
+                                let en = findEn(baseText);
+                                if (!en) en = baseText; // 找不到则保持原样
+                                const converted = formatWeightedTag(en, weight);
+                                convertedParts.push(converted);
+                            }
+                        });
+
+                        promptEditor.value = convertedParts.join(', ');
+                        normalizePromptInput();
+                        updateTags();
+
+                        // 切换按钮文本
+                        if (isChineseMode) {
+                            langToggleBtn.textContent = 'English';
+                        } else {
+                            langToggleBtn.textContent = '中文';
+                        }
+                    });
                 } else {
                     const counter = document.getElementById('token-counter');
                     if (counter) counter.textContent = 'Tokens: 0/75';
@@ -4266,9 +4335,12 @@ Prompt Studio目录下</p>
                             tagEl.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const cur = promptEditor.value.trim();
+                                // 根据全局变量判断当前语言模式
+                                const isChineseMode = window.__chineseMode;
                                 // 将竖线替换为逗号，同时插入主提示词和关联提示词
                                 const relatedValue = tag.replace(/\|/g, ', ');
-                                const suffix = value.trim() + ', ' + relatedValue;
+                                const mainText = isChineseMode ? label.trim() : value.trim();
+                                const suffix = mainText + ', ' + relatedValue;
                                 promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
                                 normalizePromptInput();
                                 updateTags();
@@ -4298,7 +4370,9 @@ Prompt Studio目录下</p>
 
                     span.addEventListener('click', () => {
                         const cur = promptEditor.value.trim();
-                        const suffix = value.trim();
+                        // 根据全局变量判断当前语言模式
+                        const isChineseMode = window.__chineseMode;
+                        const suffix = isChineseMode ? label.trim() : value.trim();
                         promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
                         normalizePromptInput();
                         updateTags();
@@ -4432,9 +4506,12 @@ Prompt Studio目录下</p>
                                 tagEl.addEventListener('click', (e) => {
                                     e.stopPropagation();
                                     const cur = promptEditor.value.trim();
+                                    // 根据全局变量判断当前语言模式
+                                    const isChineseMode = window.__chineseMode;
                                     // 将竖线替换为逗号，同时插入主提示词和关联提示词
                                     const relatedValue = tag.replace(/\|/g, ', ');
-                                    const suffix = value.trim() + ', ' + relatedValue;
+                                    const mainText = isChineseMode ? label.trim() : value.trim();
+                                    const suffix = mainText + ', ' + relatedValue;
                                     promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
                                     normalizePromptInput();
                                     updateTags();
@@ -4464,7 +4541,9 @@ Prompt Studio目录下</p>
 
                         span.addEventListener('click', () => {
                             const cur = promptEditor.value.trim();
-                            const suffix = value.trim();
+                            // 根据全局变量判断当前语言模式
+                            const isChineseMode = window.__chineseMode;
+                            const suffix = isChineseMode ? label.trim() : value.trim();
                             promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
                             normalizePromptInput();
                             updateTags();
@@ -4634,7 +4713,8 @@ Prompt Studio目录下</p>
                 const trimmed = segment.trim();
                 if (!trimmed) return;
                 const parsed = parseWeightedTag(trimmed);
-                const en = findEn(parsed.base);
+                // 中文模式下不自动转换为英文
+                const en = window.__chineseMode ? null : findEn(parsed.base);
                 if (en) {
                     const formatted = formatWeightedTag(en, parsed.weight);
                     normalized.push(formatted);
@@ -6821,7 +6901,9 @@ Prompt Studio目录下</p>
                     }
 
                     row.addEventListener('click', () => {
-                        const textToInsert = result.en || result.zh;
+                        // 根据全局变量判断当前语言模式
+                        const isChineseMode = window.__chineseMode;
+                        const textToInsert = isChineseMode ? (result.zh || result.en) : (result.en || result.zh);
 
                         // 插入到提示词编辑器
                         const currentText = promptEditor.value || '';
