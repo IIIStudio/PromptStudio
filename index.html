@@ -688,6 +688,44 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-color);
         }
+
+        /* Toast 提示样式 */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            z-index: 10000;
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 0.95rem;
+            font-weight: 500;
+            max-width: 400px;
+            opacity: 0;
+            transform: translateX(120%);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast-notification::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-notification.hide {
+            opacity: 0;
+            transform: translateX(120%);
+        }
+
         /* 居中模态框样式 */
         .modal-backdrop {
             position: fixed;
@@ -2943,7 +2981,7 @@ Prompt Studio目录下</p>
             URL.revokeObjectURL(url);
         }
 
-        async function importJsonText(text) {
+        async function importJsonText(text, showNotification = true) {
             const data = JSON.parse(text);
             if (!data || typeof data !== 'object') throw new Error('无效JSON');
 
@@ -2960,7 +2998,8 @@ Prompt Studio目录下</p>
                     return val.map(x => ({
                         text: (x?.text || '').trim(),
                         lang_zh: (x?.lang_zh || '').trim() || (x?.text || '').trim(),
-                        pinned: !!x?.pinned
+                        pinned: !!x?.pinned,
+                        related: (x?.related || '').trim()
                     })).filter(x => x.text);
                 }
                 if (isGroupedCategory(val)) {
@@ -2970,7 +3009,8 @@ Prompt Studio目录下</p>
                         out.groups[sub] = (Array.isArray(g[sub]) ? g[sub] : []).map(x => ({
                             text: (x?.text || '').trim(),
                             lang_zh: (x?.lang_zh || '').trim() || (x?.text || '').trim(),
-                            pinned: !!x?.pinned
+                            pinned: !!x?.pinned,
+                            related: (x?.related || '').trim()
                         })).filter(x => x.text);
                     });
                     return out;
@@ -3003,7 +3043,9 @@ Prompt Studio目录下</p>
                 try { localStorage.setItem('ops_ctx_menu_items', JSON.stringify(nextMenus)); } catch(e) {}
             }
             renderSidebar();
-            showInfo('JSON 导入完成' + (nextHistory.length ? '（含历史）' : ''), '导入成功');
+            if (showNotification) {
+                showInfo('JSON 导入完成' + (nextHistory.length ? '（含历史）' : ''), '导入成功');
+            }
         }
 
         async function importJsonFile(file) {
@@ -3020,7 +3062,7 @@ Prompt Studio目录下</p>
             try {
                 const filename = getDropboxSelectedFilename();
                 const text = await downloadFromDropbox(filename);
-                await importJsonText(text);
+                await importJsonText(text, false);
                 showInfo('已从 Dropbox 导入 ' + filename, '导入成功');
             } catch (e) {
                 showInfo('从 Dropbox 下载失败：' + (e?.message || e), '下载失败');
@@ -3031,7 +3073,7 @@ Prompt Studio目录下</p>
             try {
                 const filename = getS3SelectedFilename();
                 const text = await downloadFromS3(filename);
-                await importJsonText(text);
+                await importJsonText(text, false);
                 showInfo('已从 S3 导入 ' + filename, '导入成功');
             } catch (e) {
                 showInfo('从 S3 下载失败：' + (e?.message || e), '下载失败');
@@ -5921,27 +5963,25 @@ Prompt Studio目录下</p>
             const { message, resolve } = toastQueue.shift();
 
             const toast = document.createElement('div');
-            toast.style.position = 'fixed';
-            toast.style.top = '50%';
-            toast.style.left = '50%';
-            toast.style.transform = 'translate(-50%, -50%)';
-            toast.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
-            toast.style.color = 'white';
-            toast.style.padding = '12px 20px';
-            toast.style.borderRadius = '8px';
-            toast.style.zIndex = '10000';
-            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-            toast.style.fontSize = '1rem';
+            toast.className = 'toast-notification';
             toast.textContent = message;
             document.body.appendChild(toast);
 
+            // 触发进入动画
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
             setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-                isShowingToast = false;
-                resolve();
-                processToastQueue();
+                toast.classList.add('hide');
+                toast.addEventListener('transitionend', () => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                    isShowingToast = false;
+                    resolve();
+                    processToastQueue();
+                });
             }, 2000);
         }
 
@@ -6558,24 +6598,24 @@ Prompt Studio目录下</p>
                         // 触发输入事件以更新标签显示
                         promptEditor.dispatchEvent(new Event('input'));
 
-                        // 创建临时提示元素
+                        // 创建临时提示元素（使用统一样式）
                         const toast = document.createElement('div');
-                        toast.style.position = 'fixed';
-                        toast.style.top = '50%';
-                        toast.style.left = '50%';
-                        toast.style.transform = 'translate(-50%, -50%)';
-                        toast.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
-                        toast.style.color = 'white';
-                        toast.style.padding = '5px 16px';
-                        toast.style.borderRadius = '8px';
-                        toast.style.zIndex = '10000';
-                        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-                        toast.style.fontSize = '1rem';
+                        toast.className = 'toast-notification';
                         toast.textContent = `已插入: ${textToInsert}`;
-
                         document.body.appendChild(toast);
+
+                        // 触发进入动画
+                        requestAnimationFrame(() => {
+                            toast.classList.add('show');
+                        });
+
                         setTimeout(() => {
-                            document.body.removeChild(toast);
+                            toast.classList.add('hide');
+                            toast.addEventListener('transitionend', () => {
+                                if (toast.parentNode) {
+                                    toast.parentNode.removeChild(toast);
+                                }
+                            });
                         }, 1000);
                     });
 
