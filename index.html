@@ -6263,31 +6263,63 @@ Prompt Studio目录下</p>
         // 右键菜单逻辑（委托）
         const ctxMenu = document.getElementById('context-menu');
         const ctxList = document.getElementById('context-menu-list');
+        let activeSubMenu = null;
 
         function hideContextMenu() {
             ctxMenu.style.display = 'none';
             ctxList.innerHTML = '';
+            if (activeSubMenu) {
+                document.body.removeChild(activeSubMenu);
+                activeSubMenu = null;
+            }
         }
         function showContextMenu(x, y, items) {
             ctxList.innerHTML = '';
-            items.forEach(({label, action, icon}) => {
+            items.forEach(({label, action, icon, submenu}) => {
                 const div = document.createElement('div');
                 div.className = 'item';
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.justifyContent = 'space-between';
+
+                const left = document.createElement('div');
+                left.style.display = 'flex';
+                left.style.alignItems = 'center';
+                left.style.gap = '8px';
+
                 if (icon) {
                     const iEl = document.createElement('i');
                     iEl.className = icon;
-                    iEl.style.marginRight = '8px';
-                    div.appendChild(iEl);
-                    const span = document.createElement('span');
-                    span.textContent = label;
-                    div.appendChild(span);
-                } else {
-                    div.textContent = label;
+                    left.appendChild(iEl);
                 }
-                div.addEventListener('click', () => {
-                    hideContextMenu();
-                    action();
-                });
+                const span = document.createElement('span');
+                span.textContent = label;
+                left.appendChild(span);
+
+                div.appendChild(left);
+
+                // 如果有子菜单，添加箭头
+                if (submenu) {
+                    const arrow = document.createElement('i');
+                    arrow.className = 'fas fa-chevron-right';
+                    arrow.style.fontSize = '12px';
+                    arrow.style.opacity = '0.5';
+                    div.appendChild(arrow);
+
+                    // 鼠标悬停显示子菜单
+                    div.addEventListener('mouseenter', () => {
+                        if (activeSubMenu) {
+                            document.body.removeChild(activeSubMenu);
+                        }
+                        submenu();
+                    });
+                } else {
+                    div.addEventListener('click', () => {
+                        hideContextMenu();
+                        action();
+                    });
+                }
+
                 ctxList.appendChild(div);
             });
             ctxMenu.style.display = 'block';
@@ -6297,6 +6329,87 @@ Prompt Studio目录下</p>
             const py = Math.min(y, vh - rect.h - 8);
             ctxMenu.style.left = px + 'px';
             ctxMenu.style.top = py + 'px';
+        }
+
+        // 显示样式选择菜单
+        function showStyleMenu(cat, sub, idx, currentStyle) {
+            // 移除之前的子菜单
+            if (activeSubMenu) {
+                document.body.removeChild(activeSubMenu);
+            }
+
+            const styleMenu = document.createElement('div');
+            styleMenu.className = 'context-menu';
+            styleMenu.style.display = 'block';
+            activeSubMenu = styleMenu;
+
+            const styleOptions = [
+                { value: 'default', label: '默认', background: '' },
+                { value: 'purple', label: '紫色', background: 'linear-gradient(#8d79c0, #7a78dc)' },
+                { value: 'green', label: '绿色', background: 'linear-gradient(#a0b181, #57b049)' },
+                { value: 'blue', label: '蓝色', background: 'linear-gradient(#45507a, #69728b)' },
+                { value: 'dark-purple', label: '深紫', background: 'linear-gradient(#584589, #7774a0)' }
+            ];
+
+            styleOptions.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.gap = '10px';
+
+                const label = document.createElement('span');
+                label.textContent = opt.label;
+
+                div.appendChild(label);
+
+                // 颜色预览（在右侧）
+                const preview = document.createElement('div');
+                preview.style.width = '20px';
+                preview.style.height = '20px';
+                preview.style.borderRadius = '4px';
+                preview.style.border = '1px solid var(--border-color)';
+                preview.style.marginLeft = 'auto';
+                if (opt.background) {
+                    preview.style.background = opt.background;
+                } else {
+                    preview.style.background = 'var(--secondary-color)';
+                }
+
+                // 选中标记
+                if (opt.value === currentStyle) {
+                    const check = document.createElement('i');
+                    check.className = 'fas fa-check';
+                    check.style.color = 'var(--success-color)';
+                    check.style.fontSize = '12px';
+                    preview.appendChild(check);
+                }
+
+                div.appendChild(preview);
+
+                div.addEventListener('click', () => {
+                    // 更新标签样式
+                    const v = commonData[cat];
+                    if (Array.isArray(v)) {
+                        v[idx].style = opt.value;
+                    } else if (isGroupedCategory(v)) {
+                        const arr = v.groups?.[sub] || [];
+                        arr[idx].style = opt.value;
+                    }
+                    saveCommonData();
+                    renderCommonTagsByCategory(cat);
+                    hideContextMenu();
+                });
+
+                styleMenu.appendChild(div);
+            });
+
+            // 定位菜单
+            const rect = ctxMenu.getBoundingClientRect();
+            styleMenu.style.left = rect.right + 'px';
+            styleMenu.style.top = rect.top + 'px';
+
+            document.body.appendChild(styleMenu);
         }
 
         document.addEventListener('click', hideContextMenu, { passive: true });
@@ -6353,12 +6466,16 @@ Prompt Studio目录下</p>
                     it = (v.groups?.[sub] || [])[idx];
                 }
                 if (!it) return;
-                isPinned = !!it.pinned;
+                const currentStyle = it?.style || 'default';
 
                 // 组装右键菜单：固定项 + 自定义项 + 删除
                 const menuItems = [
-                    { label: isPinned ? '取消标记' : '标记', icon: 'fas fa-thumbtack', action: () => pinTag(cat, sub, idx, !isPinned) },
-                    { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) }
+                    { label: '编辑标签', icon: 'fas fa-pen', action: () => openTagModal(cat, idx, sub) },
+                    {
+                        label: '修改样式',
+                        icon: 'fas fa-palette',
+                        submenu: () => showStyleMenu(cat, sub, idx, currentStyle)
+                    }
                 ];
 
                 // 自定义外链项（出现在"删除"上方）
