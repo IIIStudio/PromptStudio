@@ -1153,7 +1153,7 @@
         <i class="fas fa-arrow-up"></i>
     </div>
     <!-- 设置按钮 -->
-    <div class="settings-toggle" id="settings-toggle" title="右键菜单设置">
+    <div class="settings-toggle" id="settings-toggle" title="设置">
         <i class="fas fa-cog"></i>
     </div>
     <!-- 主题切换按钮 -->
@@ -1300,7 +1300,7 @@
     <div class="modal-backdrop" id="modal-ctxmenu">
         <div class="modal">
             <div class="modal-header">
-                <span>右键菜单设置</span>
+                <span>设置</span>
                 <button class="btn btn-outline" id="modal-ctx-close">关闭</button>
             </div>
             <div class="modal-body">
@@ -1312,6 +1312,27 @@
                 </div>
                 <div class="modal-row">
                     <div id="ctx-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
+                <div class="modal-row" style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:16px;">
+                    <label style="font-weight:600;margin-bottom:12px;">快捷键设置</label>
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label style="width:80px;">搜索</label>
+                            <input class="modal-input" id="shortcut-search" type="text" placeholder="默认: /" style="flex:1;" />
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label style="width:80px;">重置</label>
+                            <input class="modal-input" id="shortcut-reset" type="text" placeholder="留空则不设置" style="flex:1;" />
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label style="width:80px;">复制</label>
+                            <input class="modal-input" id="shortcut-copy" type="text" placeholder="留空则不设置" style="flex:1;" />
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label style="width:80px;">存储</label>
+                            <input class="modal-input" id="shortcut-save" type="text" placeholder="留空则不设置" style="flex:1;" />
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1909,6 +1930,20 @@ Prompt Studio目录下</p>
                 const cleaned = data.filter(m => (m && (m.url || '').trim() && (m.name || '').trim()))
                     .map(m => ({ icon: (m.icon || 'fas fa-globe').trim(), name: m.name.trim(), url: m.url.trim() }));
                 setCtxMenus(cleaned);
+
+                // 保存快捷键设置
+                const searchShortcut = (document.getElementById('shortcut-search').value || '').trim() || '/';
+                const resetShortcut = (document.getElementById('shortcut-reset').value || '').trim();
+                const copyShortcut = (document.getElementById('shortcut-copy').value || '').trim();
+                const saveShortcut = (document.getElementById('shortcut-save').value || '').trim();
+
+                try {
+                    localStorage.setItem('ops_shortcut_search', searchShortcut);
+                    localStorage.setItem('ops_shortcut_reset', resetShortcut);
+                    localStorage.setItem('ops_shortcut_copy', copyShortcut);
+                    localStorage.setItem('ops_shortcut_save', saveShortcut);
+                } catch(e) {}
+
                 hide(wrap);
             }
             function onClose() { hide(wrap); }
@@ -1920,6 +1955,17 @@ Prompt Studio目录下</p>
             saveBtn.onclick = onSave;
             closeBtn.onclick = onClose;
             document.addEventListener('keydown', onKey);
+
+            // 加载保存的快捷键
+            const savedSearchShortcut = localStorage.getItem('ops_shortcut_search') || '/';
+            const savedResetShortcut = localStorage.getItem('ops_shortcut_reset') || '';
+            const savedCopyShortcut = localStorage.getItem('ops_shortcut_copy') || '';
+            const savedSaveShortcut = localStorage.getItem('ops_shortcut_save') || '';
+
+            document.getElementById('shortcut-search').value = savedSearchShortcut;
+            document.getElementById('shortcut-reset').value = savedResetShortcut;
+            document.getElementById('shortcut-copy').value = savedCopyShortcut;
+            document.getElementById('shortcut-save').value = savedSaveShortcut;
 
             renderList();
             show(wrap);
@@ -7210,20 +7256,40 @@ Prompt Studio目录下</p>
         // 绑定搜索按钮事件
         document.getElementById('search-tags-btn')?.addEventListener('click', openSearchTagsModal);
 
-        // 全局快捷键 / 打开搜索
+        // 全局快捷键 - 使用保存的设置
         document.addEventListener('keydown', (e) => {
-            if (e.key === '/') {
-                // 检查是否在输入框中
-                const activeElement = document.activeElement;
-                const isInputActive = activeElement && (
-                    activeElement.tagName === 'INPUT' ||
-                    activeElement.tagName === 'TEXTAREA' ||
-                    activeElement.isContentEditable
-                );
-                if (!isInputActive) {
-                    e.preventDefault();
-                    openSearchTagsModal();
-                }
+            const activeElement = document.activeElement;
+            const isInputActive = activeElement && (
+                activeElement.tagName === 'INPUT' ||
+                activeElement.tagName === 'TEXTAREA' ||
+                activeElement.isContentEditable
+            );
+
+            // 获取保存的快捷键
+            const searchShortcut = localStorage.getItem('ops_shortcut_search') || '/';
+            const resetShortcut = localStorage.getItem('ops_shortcut_reset') || '';
+            const copyShortcut = localStorage.getItem('ops_shortcut_copy') || '';
+            const saveShortcut = localStorage.getItem('ops_shortcut_save') || '';
+
+            // 搜索快捷键
+            if (e.key === searchShortcut && !isInputActive) {
+                e.preventDefault();
+                openSearchTagsModal();
+            }
+            // 重置快捷键
+            else if (e.key === resetShortcut && !isInputActive) {
+                e.preventDefault();
+                resetPrompt();
+            }
+            // 复制快捷键
+            else if (e.key === copyShortcut && !isInputActive) {
+                e.preventDefault();
+                copyPrompt();
+            }
+            // 存储快捷键
+            else if (e.key === saveShortcut && !isInputActive) {
+                e.preventDefault();
+                document.getElementById('save-prompt-btn')?.click();
             }
         });
 
