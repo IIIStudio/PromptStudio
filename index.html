@@ -519,9 +519,10 @@
             margin-bottom: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
-            min-width: 120px;
+            width: auto;
+            max-width: 300px;
             display: none;
-            white-space: nowrap;
+            white-space: normal;
             pointer-events: auto;
         }
         .related-tooltip.show {
@@ -543,6 +544,7 @@
             font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
         .related-tooltip-item:hover {
             background: var(--secondary-color);
@@ -4400,11 +4402,32 @@ Prompt Studio目录下</p>
                         });
                         span.appendChild(tooltip);
 
+                        // 调整tooltip位置，防止超出屏幕
+                        const adjustTooltipPosition = () => {
+                            const rect = tooltip.getBoundingClientRect();
+                            const vw = window.innerWidth;
+                            const vh = window.innerHeight;
+
+                            // 检查右侧边界
+                            if (rect.right > vw - 10) {
+                                tooltip.style.left = 'auto';
+                                tooltip.style.right = '0';
+                                tooltip.style.transform = 'none';
+                            }
+                            // 检查底部边界
+                            if (rect.bottom > vh - 10) {
+                                tooltip.style.bottom = 'auto';
+                                tooltip.style.top = '100%';
+                            }
+                        };
+
                         // 鼠标悬停显示关联提示词
                         let hideTimeout;
                         const showTooltip = () => {
                             clearTimeout(hideTimeout);
                             tooltip.classList.add('show');
+                            // 显示后调整位置
+                            requestAnimationFrame(adjustTooltipPosition);
                         };
                         const hideTooltip = () => {
                             hideTimeout = setTimeout(() => {
@@ -4573,11 +4596,32 @@ Prompt Studio目录下</p>
                             });
                             span.appendChild(tooltip);
 
+                            // 调整tooltip位置，防止超出屏幕
+                            const adjustTooltipPosition = () => {
+                                const rect = tooltip.getBoundingClientRect();
+                                const vw = window.innerWidth;
+                                const vh = window.innerHeight;
+
+                                // 检查右侧边界
+                                if (rect.right > vw - 10) {
+                                    tooltip.style.left = 'auto';
+                                    tooltip.style.right = '0';
+                                    tooltip.style.transform = 'none';
+                                }
+                                // 检查底部边界
+                                if (rect.bottom > vh - 10) {
+                                    tooltip.style.bottom = 'auto';
+                                    tooltip.style.top = '100%';
+                                }
+                            };
+
                             // 鼠标悬停显示关联提示词
                             let hideTimeout;
                             const showTooltip = () => {
                                 clearTimeout(hideTimeout);
                                 tooltip.classList.add('show');
+                                // 显示后调整位置
+                                requestAnimationFrame(adjustTooltipPosition);
                             };
                             const hideTooltip = () => {
                                 hideTimeout = setTimeout(() => {
