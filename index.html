@@ -3100,7 +3100,11 @@ Prompt Studio目录下</p>
             const exportObj = {
                 common: commonData || {},
                 history: (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
-                menus: (function(){ try { const raw = localStorage.getItem('ops_ctx_menu_items'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })()
+                menus: (function(){ try { const raw = localStorage.getItem('ops_ctx_menu_items'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
+                triggerWords: {
+                    prefix: localStorage.getItem('ops_prefix_trigger_zh') || '',
+                    suffix: localStorage.getItem('ops_suffix_trigger_zh') || ''
+                }
             };
             const dataStr = JSON.stringify(exportObj, null, 2);
             const useCloud = isCloudEnabled();
@@ -3200,6 +3204,17 @@ Prompt Studio目录下</p>
             }
             if (Array.isArray(nextMenus)) {
                 try { localStorage.setItem('ops_ctx_menu_items', JSON.stringify(nextMenus)); } catch(e) {}
+            }
+            // 导入触发词设置
+            if (data.triggerWords && typeof data.triggerWords === 'object') {
+                try {
+                    if (data.triggerWords.prefix !== undefined) {
+                        localStorage.setItem('ops_prefix_trigger_zh', String(data.triggerWords.prefix));
+                    }
+                    if (data.triggerWords.suffix !== undefined) {
+                        localStorage.setItem('ops_suffix_trigger_zh', String(data.triggerWords.suffix));
+                    }
+                } catch(e) {}
             }
             renderSidebar();
             if (showNotification) {
