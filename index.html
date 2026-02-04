@@ -1320,11 +1320,11 @@
                     <label style="font-weight:600;margin-bottom:12px;display:block;">触发词设置</label>
                     <div style="display:flex;flex-direction:column;gap:12px;">
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <label style="width:60px;min-width:60px;">前缀触发词</label>
+                            <label style="width:60px;min-width:60px;">前缀</label>
                             <input class="modal-input" id="prefix-trigger-zh" type="text" placeholder="中文：打开|张开" style="flex:1;padding:6px 8px;" />
                         </div>
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <label style="width:60px;min-width:60px;">后缀触发词</label>
+                            <label style="width:60px;min-width:60px;">后缀</label>
                             <input class="modal-input" id="suffix-trigger-zh" type="text" placeholder="中文：视角|角度" style="flex:1;padding:6px 8px;" />
                         </div>
                         <div style="font-size:12px;opacity:0.7;">
@@ -4445,24 +4445,11 @@ Prompt Studio目录下</p>
                                 // 解析关联词
                                 const relatedParts = relatedValue.split(',').map(p => p.trim());
 
-                                let result = [];
+                                // 合并所有关联词用于触发词匹配
+                                const allRelatedText = relatedParts.join('|');
+                                const processed = applyTrigger(mainText, allRelatedText);
 
-                                // 先插入主标签
-                                result.push(mainText);
-
-                                // 处理每个关联词
-                                relatedParts.forEach(part => {
-                                    const processed = applyTrigger(mainText, part);
-                                    if (processed) {
-                                        // 匹配触发词，替换主标签
-                                        result = [processed];
-                                    } else {
-                                        // 没匹配，独立插入关联词
-                                        result.push(part);
-                                    }
-                                });
-
-                                const combinedText = result.join(', ');
+                                const combinedText = processed || (mainText + (relatedParts.length ? ', ' + relatedParts.join(', ') : ''));
 
                                 promptEditor.value = cur ? (cur + ', ' + combinedText) : combinedText;
                                 normalizePromptInput();
@@ -4651,24 +4638,11 @@ Prompt Studio目录下</p>
                                     // 解析关联词
                                     const relatedParts = relatedValue.split(',').map(p => p.trim());
 
-                                    let result = [];
+                                    // 合并所有关联词用于触发词匹配
+                                    const allRelatedText = relatedParts.join('|');
+                                    const processed = applyTrigger(mainText, allRelatedText);
 
-                                    // 先插入主标签
-                                    result.push(mainText);
-
-                                    // 处理每个关联词
-                                    relatedParts.forEach(part => {
-                                        const processed = applyTrigger(mainText, part);
-                                        if (processed) {
-                                            // 匹配触发词，替换主标签
-                                            result = [processed];
-                                        } else {
-                                            // 没匹配，独立插入关联词
-                                            result.push(part);
-                                        }
-                                    });
-
-                                    const combinedText = result.join(', ');
+                                    const combinedText = processed || (mainText + (relatedParts.length ? ', ' + relatedParts.join(', ') : ''));
 
                                     promptEditor.value = cur ? (cur + ', ' + combinedText) : combinedText;
                                     normalizePromptInput();
@@ -4961,38 +4935,52 @@ Prompt Studio目录下</p>
         window.__disabledTagSet = window.__disabledTagSet || new Set();
         window.__lastRenderList = window.__lastRenderList || [];
 
-        // 处理触发词组合
+        // 处理触发词组合（支持多重组合：前缀+主标签+后缀）
         function applyTrigger(mainText, relatedText) {
             const prefixTriggerZh = localStorage.getItem('ops_prefix_trigger_zh') || '';
             const suffixTriggerZh = localStorage.getItem('ops_suffix_trigger_zh') || '';
 
-            // 检查 relatedText 是否匹配前缀触发词（中文匹配，英文插入）
-            if (prefixTriggerZh) {
-                const triggers = prefixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
-                for (const triggerZh of triggers) {
-                    if (relatedText.toLowerCase() === triggerZh.toLowerCase()) {
-                        const triggerEn = findEn(triggerZh);
-                        if (triggerEn) {
-                            return `${triggerEn}_${mainText}`;
-                        }
-                    }
+            const prefixTriggers = prefixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
+            const suffixTriggers = suffixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
+
+            // 解析关联词（用逗号或竖线分隔）
+            const relatedParts = relatedText.split(/[,|]/).map(t => t.trim()).filter(Boolean);
+
+            const matchedPrefix = [];
+            const matchedSuffix = [];
+
+            // 检查每个关联词是否匹配前缀或后缀触发词
+            for (const part of relatedParts) {
+                const lowerPart = part.toLowerCase();
+                const isPrefix = prefixTriggers.some(t => t.toLowerCase() === lowerPart);
+                const isSuffix = suffixTriggers.some(t => t.toLowerCase() === lowerPart);
+
+                if (isPrefix) {
+                    matchedPrefix.push(part);
+                } else if (isSuffix) {
+                    matchedSuffix.push(part);
                 }
             }
 
-            // 检查 relatedText 是否匹配后缀触发词（中文匹配，英文插入）
-            if (suffixTriggerZh) {
-                const triggers = suffixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
-                for (const triggerZh of triggers) {
-                    if (relatedText.toLowerCase() === triggerZh.toLowerCase()) {
-                        const triggerEn = findEn(triggerZh);
-                        if (triggerEn) {
-                            return `${mainText}_${triggerEn}`;
-                        }
-                    }
+            // 如果有匹配的触发词，按顺序组合
+            if (matchedPrefix.length > 0 || matchedSuffix.length > 0) {
+                const parts = [];
+                // 添加前缀（按顺序转换为英文）
+                for (const zh of matchedPrefix) {
+                    const en = findEn(zh);
+                    parts.push(en || zh);
                 }
+                // 添加主标签
+                parts.push(mainText);
+                // 添加后缀（按顺序转换为英文）
+                for (const zh of matchedSuffix) {
+                    const en = findEn(zh);
+                    parts.push(en || zh);
+                }
+                return parts.join('_');
             }
 
-            // 没有匹配触发词，返回空字符串（表示独立插入关联词）
+            // 没有匹配触发词，返回 null（表示独立插入关联词）
             return null;
         }
 
