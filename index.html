@@ -4445,11 +4445,21 @@ Prompt Studio目录下</p>
                                 // 解析关联词
                                 const relatedParts = relatedValue.split(',').map(p => p.trim());
 
-                                // 合并所有关联词用于触发词匹配
-                                const allRelatedText = relatedParts.join('|');
-                                const processed = applyTrigger(mainText, allRelatedText);
+                                // 处理触发词匹配
+                                const processed = applyTrigger(mainText, relatedValue);
 
-                                const combinedText = processed || (mainText + (relatedParts.length ? ', ' + relatedParts.join(', ') : ''));
+                                // 处理触发词结果
+                                let combinedText;
+                                if (processed && typeof processed === 'object') {
+                                    // 有匹配触发词：组合结果 + 未匹配的词
+                                    combinedText = processed.combined;
+                                    if (processed.unmatched && processed.unmatched.length > 0) {
+                                        combinedText += ', ' + processed.unmatched.join(', ');
+                                    }
+                                } else {
+                                    // 没有匹配触发词：主标签 + 所有关联词
+                                    combinedText = mainText + (relatedParts.length ? ', ' + relatedParts.join(', ') : '');
+                                }
 
                                 promptEditor.value = cur ? (cur + ', ' + combinedText) : combinedText;
                                 normalizePromptInput();
@@ -4638,11 +4648,21 @@ Prompt Studio目录下</p>
                                     // 解析关联词
                                     const relatedParts = relatedValue.split(',').map(p => p.trim());
 
-                                    // 合并所有关联词用于触发词匹配
-                                    const allRelatedText = relatedParts.join('|');
-                                    const processed = applyTrigger(mainText, allRelatedText);
+                                    // 处理触发词匹配
+                                    const processed = applyTrigger(mainText, relatedValue);
 
-                                    const combinedText = processed || (mainText + (relatedParts.length ? ', ' + relatedParts.join(', ') : ''));
+                                    // 处理触发词结果
+                                    let combinedText;
+                                    if (processed && typeof processed === 'object') {
+                                        // 有匹配触发词：组合结果 + 未匹配的词
+                                        combinedText = processed.combined;
+                                        if (processed.unmatched && processed.unmatched.length > 0) {
+                                            combinedText += ', ' + processed.unmatched.join(', ');
+                                        }
+                                    } else {
+                                        // 没有匹配触发词：主标签 + 所有关联词
+                                        combinedText = mainText + (relatedParts.length ? ', ' + relatedParts.join(', ') : '');
+                                    }
 
                                     promptEditor.value = cur ? (cur + ', ' + combinedText) : combinedText;
                                     normalizePromptInput();
@@ -4940,14 +4960,16 @@ Prompt Studio目录下</p>
             const prefixTriggerZh = localStorage.getItem('ops_prefix_trigger_zh') || '';
             const suffixTriggerZh = localStorage.getItem('ops_suffix_trigger_zh') || '';
 
-            const prefixTriggers = prefixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
-            const suffixTriggers = suffixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
+            // 支持 ; 或 | 作为触发词分隔符
+            const prefixTriggers = prefixTriggerZh.split(/[;|]/).map(t => t.trim()).filter(Boolean);
+            const suffixTriggers = suffixTriggerZh.split(/[;|]/).map(t => t.trim()).filter(Boolean);
 
             // 解析关联词（用逗号或竖线分隔）
             const relatedParts = relatedText.split(/[,|]/).map(t => t.trim()).filter(Boolean);
 
             const matchedPrefix = [];
             const matchedSuffix = [];
+            const unmatched = [];
 
             // 检查每个关联词是否匹配前缀或后缀触发词
             for (const part of relatedParts) {
@@ -4959,6 +4981,8 @@ Prompt Studio目录下</p>
                     matchedPrefix.push(part);
                 } else if (isSuffix) {
                     matchedSuffix.push(part);
+                } else {
+                    unmatched.push(part);
                 }
             }
 
@@ -4977,7 +5001,7 @@ Prompt Studio目录下</p>
                     const en = findEn(zh);
                     parts.push(en || zh);
                 }
-                return parts.join('_');
+                return { combined: parts.join('_'), unmatched };
             }
 
             // 没有匹配触发词，返回 null（表示独立插入关联词）
