@@ -1311,29 +1311,45 @@
                     支持占位符：{{中文}}、{{英文}}（将自动进行 URL 编码）
                 </div>
                 <div class="modal-row">
-                    <button class="btn btn-outline" id="ctx-add-btn">新增菜单项</button>
+                    <button class="btn btn-primary" id="ctx-add-btn" style="width:fit-content;">新增菜单项</button>
                 </div>
                 <div class="modal-row">
                     <div id="ctx-list" style="display:flex;flex-direction:column;gap:8px;"></div>
                 </div>
                 <div class="modal-row" style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:16px;">
-                    <label style="font-weight:600;margin-bottom:12px;">快捷键设置</label>
+                    <label style="font-weight:600;margin-bottom:12px;display:block;">触发词设置</label>
                     <div style="display:flex;flex-direction:column;gap:12px;">
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <label style="width:80px;">搜索</label>
-                            <input class="modal-input" id="shortcut-search" type="text" placeholder="默认: /" style="flex:1;" />
+                            <label style="width:60px;min-width:60px;">前缀触发词</label>
+                            <input class="modal-input" id="prefix-trigger-zh" type="text" placeholder="中文：打开|张开" style="flex:1;padding:6px 8px;" />
                         </div>
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <label style="width:80px;">重置</label>
-                            <input class="modal-input" id="shortcut-reset" type="text" placeholder="留空则不设置" style="flex:1;" />
+                            <label style="width:60px;min-width:60px;">后缀触发词</label>
+                            <input class="modal-input" id="suffix-trigger-zh" type="text" placeholder="中文：视角|角度" style="flex:1;padding:6px 8px;" />
                         </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <label style="width:80px;">复制</label>
-                            <input class="modal-input" id="shortcut-copy" type="text" placeholder="留空则不设置" style="flex:1;" />
+                        <div style="font-size:12px;opacity:0.7;">
+                            多个触发词用 | 分隔，英文自动从JSON中查找
                         </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <label style="width:80px;">存储</label>
-                            <input class="modal-input" id="shortcut-save" type="text" placeholder="留空则不设置" style="flex:1;" />
+                    </div>
+                </div>
+                <div class="modal-row" style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:16px;">
+                    <label style="font-weight:600;margin-bottom:12px;display:block;">快捷键设置</label>
+                    <div style="display:grid;grid-template-columns:repeat(4,auto);gap:4px;">
+                        <div style="display:flex;align-items:center;gap:2px;">
+                            <label style="width:50px;font-size:0.9rem;opacity:0.8;">搜索</label>
+                            <input class="modal-input" id="shortcut-search" type="text" placeholder="默认: /" style="width:70px;padding:6px 8px;font-family:monospace;text-align:center;" />
+                        </div>
+                        <div style="display:flex;align-items:center;gap:2px;">
+                            <label style="width:50px;font-size:0.9rem;opacity:0.8;">重置</label>
+                            <input class="modal-input" id="shortcut-reset" type="text" placeholder="留空则不设置" style="width:70px;padding:6px 8px;font-family:monospace;text-align:center;" />
+                        </div>
+                        <div style="display:flex;align-items:center;gap:2px;">
+                            <label style="width:50px;font-size:0.9rem;opacity:0.8;">复制</label>
+                            <input class="modal-input" id="shortcut-copy" type="text" placeholder="留空则不设置" style="width:70px;padding:6px 8px;font-family:monospace;text-align:center;" />
+                        </div>
+                        <div style="display:flex;align-items:center;gap:2px;">
+                            <label style="width:50px;font-size:0.9rem;opacity:0.8;">存储</label>
+                            <input class="modal-input" id="shortcut-save" type="text" placeholder="留空则不设置" style="width:70px;padding:6px 8px;font-family:monospace;text-align:center;" />
                         </div>
                     </div>
                 </div>
@@ -1940,11 +1956,17 @@ Prompt Studio目录下</p>
                 const copyShortcut = (document.getElementById('shortcut-copy').value || '').trim();
                 const saveShortcut = (document.getElementById('shortcut-save').value || '').trim();
 
+                // 保存触发词设置
+                const prefixTriggerZh = (document.getElementById('prefix-trigger-zh').value || '').trim();
+                const suffixTriggerZh = (document.getElementById('suffix-trigger-zh').value || '').trim();
+
                 try {
                     localStorage.setItem('ops_shortcut_search', searchShortcut);
                     localStorage.setItem('ops_shortcut_reset', resetShortcut);
                     localStorage.setItem('ops_shortcut_copy', copyShortcut);
                     localStorage.setItem('ops_shortcut_save', saveShortcut);
+                    localStorage.setItem('ops_prefix_trigger_zh', prefixTriggerZh);
+                    localStorage.setItem('ops_suffix_trigger_zh', suffixTriggerZh);
                 } catch(e) {}
 
                 hide(wrap);
@@ -1969,6 +1991,13 @@ Prompt Studio目录下</p>
             document.getElementById('shortcut-reset').value = savedResetShortcut;
             document.getElementById('shortcut-copy').value = savedCopyShortcut;
             document.getElementById('shortcut-save').value = savedSaveShortcut;
+
+            // 加载保存的触发词
+            const savedPrefixTriggerZh = localStorage.getItem('ops_prefix_trigger_zh') || '';
+            const savedSuffixTriggerZh = localStorage.getItem('ops_suffix_trigger_zh') || '';
+
+            document.getElementById('prefix-trigger-zh').value = savedPrefixTriggerZh;
+            document.getElementById('suffix-trigger-zh').value = savedSuffixTriggerZh;
 
             renderList();
             show(wrap);
@@ -4385,23 +4414,46 @@ Prompt Studio目录下</p>
                         relatedTags.forEach(tag => {
                             const tagEl = document.createElement('span');
                             tagEl.className = 'related-tooltip-item';
+
                             // 显示时用空格替换竖线，更美观
                             tagEl.textContent = tag.replace(/\|/g, ' ');
+
                             tagEl.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const cur = promptEditor.value.trim();
                                 // 根据全局变量判断当前语言模式
                                 const isChineseMode = window.__chineseMode;
-                                // 将竖线替换为逗号，同时插入主提示词和关联提示词
+                                // 将竖线替换为逗号
                                 const relatedValue = tag.replace(/\|/g, ', ');
                                 const mainText = isChineseMode ? label.trim() : value.trim();
-                                const suffix = mainText + ', ' + relatedValue;
-                                promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+
+                                // 解析关联词
+                                const relatedParts = relatedValue.split(',').map(p => p.trim());
+
+                                let result = [];
+
+                                // 先插入主标签
+                                result.push(mainText);
+
+                                // 处理每个关联词
+                                relatedParts.forEach(part => {
+                                    const processed = applyTrigger(mainText, part);
+                                    if (processed) {
+                                        // 匹配触发词，替换主标签
+                                        result = [processed];
+                                    } else {
+                                        // 没匹配，独立插入关联词
+                                        result.push(part);
+                                    }
+                                });
+
+                                const combinedText = result.join(', ');
+
+                                promptEditor.value = cur ? (cur + ', ' + combinedText) : combinedText;
                                 normalizePromptInput();
                                 updateTags();
                                 promptEditor.focus({ preventScroll: true });
                             });
-                            tooltip.appendChild(tagEl);
                         });
                         span.appendChild(tooltip);
 
@@ -4577,11 +4629,33 @@ Prompt Studio目录下</p>
                                     const cur = promptEditor.value.trim();
                                     // 根据全局变量判断当前语言模式
                                     const isChineseMode = window.__chineseMode;
-                                    // 将竖线替换为逗号，同时插入主提示词和关联提示词
+                                    // 将竖线替换为逗号
                                     const relatedValue = tag.replace(/\|/g, ', ');
                                     const mainText = isChineseMode ? label.trim() : value.trim();
-                                    const suffix = mainText + ', ' + relatedValue;
-                                    promptEditor.value = cur ? (cur + ', ' + suffix) : suffix;
+
+                                    // 解析关联词
+                                    const relatedParts = relatedValue.split(',').map(p => p.trim());
+
+                                    let result = [];
+
+                                    // 先插入主标签
+                                    result.push(mainText);
+
+                                    // 处理每个关联词
+                                    relatedParts.forEach(part => {
+                                        const processed = applyTrigger(mainText, part);
+                                        if (processed) {
+                                            // 匹配触发词，替换主标签
+                                            result = [processed];
+                                        } else {
+                                            // 没匹配，独立插入关联词
+                                            result.push(part);
+                                        }
+                                    });
+
+                                    const combinedText = result.join(', ');
+
+                                    promptEditor.value = cur ? (cur + ', ' + combinedText) : combinedText;
                                     normalizePromptInput();
                                     updateTags();
                                     promptEditor.focus({ preventScroll: true });
@@ -4755,6 +4829,36 @@ Prompt Studio目录下</p>
         function findZh(enText) {
             if (!enText) return '';
             try {
+                // 处理触发词组合格式: trigger_tag 或 tag_trigger
+                const prefixTriggerZh = localStorage.getItem('ops_prefix_trigger_zh') || '';
+                const suffixTriggerZh = localStorage.getItem('ops_suffix_trigger_zh') || '';
+
+                // 尝试匹配前缀触发词（从多个触发词中查找）
+                if (prefixTriggerZh) {
+                    const prefixTriggers = prefixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
+                    for (const triggerZh of prefixTriggers) {
+                        const triggerEn = findEn(triggerZh);
+                        if (triggerEn && enText.toLowerCase().startsWith(triggerEn.toLowerCase() + '_')) {
+                            const tagEn = enText.substring(triggerEn.length + 1);
+                            const tagZh = findZh(tagEn);
+                            return tagZh ? `${triggerZh} ${tagZh}` : '';
+                        }
+                    }
+                }
+
+                // 尝试匹配后缀触发词（从多个触发词中查找）
+                if (suffixTriggerZh) {
+                    const suffixTriggers = suffixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
+                    for (const triggerZh of suffixTriggers) {
+                        const triggerEn = findEn(triggerZh);
+                        if (triggerEn && enText.toLowerCase().endsWith('_' + triggerEn.toLowerCase())) {
+                            const tagEn = enText.substring(0, enText.length - triggerEn.length - 1);
+                            const tagZh = findZh(tagEn);
+                            return tagZh ? `${tagZh} ${triggerZh}` : '';
+                        }
+                    }
+                }
+
                 const keys = Object.keys(commonData || {});
                 for (const k of keys) {
                     const v = commonData[k];
@@ -4841,6 +4945,41 @@ Prompt Studio目录下</p>
         // 维护：被置灰的标签集合与上一次渲染的标签顺序
         window.__disabledTagSet = window.__disabledTagSet || new Set();
         window.__lastRenderList = window.__lastRenderList || [];
+
+        // 处理触发词组合
+        function applyTrigger(mainText, relatedText) {
+            const prefixTriggerZh = localStorage.getItem('ops_prefix_trigger_zh') || '';
+            const suffixTriggerZh = localStorage.getItem('ops_suffix_trigger_zh') || '';
+
+            // 检查 relatedText 是否匹配前缀触发词（中文匹配，英文插入）
+            if (prefixTriggerZh) {
+                const triggers = prefixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
+                for (const triggerZh of triggers) {
+                    if (relatedText.toLowerCase() === triggerZh.toLowerCase()) {
+                        const triggerEn = findEn(triggerZh);
+                        if (triggerEn) {
+                            return `${triggerEn}_${mainText}`;
+                        }
+                    }
+                }
+            }
+
+            // 检查 relatedText 是否匹配后缀触发词（中文匹配，英文插入）
+            if (suffixTriggerZh) {
+                const triggers = suffixTriggerZh.split('|').map(t => t.trim()).filter(Boolean);
+                for (const triggerZh of triggers) {
+                    if (relatedText.toLowerCase() === triggerZh.toLowerCase()) {
+                        const triggerEn = findEn(triggerZh);
+                        if (triggerEn) {
+                            return `${mainText}_${triggerEn}`;
+                        }
+                    }
+                }
+            }
+
+            // 没有匹配触发词，返回空字符串（表示独立插入关联词）
+            return null;
+        }
 
         // 初始化标签（支持点击置灰/恢复，保持原位置不变）
         function updateTags() {
