@@ -1216,10 +1216,10 @@
                         <button class="btn btn-toggle btn-outline active" data-style="default" type="button">默认</button>
                         <button class="btn btn-toggle btn-outline" data-style="purple" type="button" style="background: linear-gradient(#8d79c0, #7a78dc);color:white;border:none;">紫色</button>
                         <button class="btn btn-toggle btn-outline" data-style="green" type="button" style="background: linear-gradient(#a0b181, #57b049);color:white;border:none;">绿色</button>
-                        <button class="btn btn-toggle btn-outline" data-style="orange" type="button" style="background: linear-gradient(#ff9f43, #ee5a24);color:white;border:none;">橙色</button>
+                        <button class="btn btn-toggle btn-outline" data-style="orange" type="button" style="background: linear-gradient(#cb9131, #b57e22);color:white;border:none;">橙色</button>
                         <button class="btn btn-toggle btn-outline" data-style="pink" type="button" style="background: linear-gradient(#fd79a8, #e84393);color:white;border:none;">粉色</button>
-                        <button class="btn btn-toggle btn-outline" data-style="blue" type="button" style="background: linear-gradient(#0abde3, #10ac84);color:white;border:none;">蓝色</button>
                         <button class="btn btn-toggle btn-outline" data-style="dark-purple" type="button" style="background: linear-gradient(#584589, #7774a0);color:white;border:none;">深紫</button>
+                        <button class="btn btn-toggle btn-outline" data-style="blue" type="button" style="background: linear-gradient(#2c3e80, #344495);color:white;border:none;">深蓝</button>
                     </div>
                 </div>
 
@@ -4327,6 +4327,17 @@ Prompt Studio目录下</p>
             }
         }
 
+        // 全局样式映射配置
+        const GLOBAL_STYLE_MAP = {
+            'default': '',
+            'purple': 'linear-gradient(#8d79c0, #7a78dc)',
+            'green': 'linear-gradient(#a0b181, #57b049)',
+            'orange': 'linear-gradient(#cb9131, #b57e22)',
+            'pink': 'linear-gradient(#fd79a8, #e84393)',
+            'blue': 'linear-gradient(#2c3e80, #344495)',
+            'dark-purple': 'linear-gradient(#584589, #7774a0)'
+        };
+
         function renderCommonTagsByCategory(catKey) {
             if (!commonTagsContainer) return;
             commonTagsContainer.innerHTML = '';
@@ -4355,17 +4366,8 @@ Prompt Studio目录下</p>
                     span.title = value;
 
                     // 根据样式设置背景
-                    const styleMap = {
-                        'default': '',
-                        'purple': 'linear-gradient(#8d79c0, #7a78dc)',
-                        'green': 'linear-gradient(#a0b181, #57b049)',
-                        'orange': 'linear-gradient(#ff9f43, #ee5a24)',
-                        'pink': 'linear-gradient(#fd79a8, #e84393)',
-                        'blue': 'linear-gradient(#0abde3, #10ac84)',
-                        'dark-purple': 'linear-gradient(#584589, #7774a0)'
-                    };
-                    if (styleMap[style]) {
-                        span.style.background = styleMap[style];
+                    if (GLOBAL_STYLE_MAP[style]) {
+                        span.style.background = GLOBAL_STYLE_MAP[style];
                     }
 
                     // 创建关联提示词悬浮框
@@ -4549,17 +4551,8 @@ Prompt Studio目录下</p>
                         span.title = value;
 
                         // 根据样式设置背景
-                        const styleMap = {
-                            'default': '',
-                            'purple': 'linear-gradient(#8d79c0, #7a78dc)',
-                            'green': 'linear-gradient(#a0b181, #57b049)',
-                            'orange': 'linear-gradient(#ff9f43, #ee5a24)',
-                            'pink': 'linear-gradient(#fd79a8, #e84393)',
-                            'blue': 'linear-gradient(#0abde3, #10ac84)',
-                            'dark-purple': 'linear-gradient(#584589, #7774a0)'
-                        };
-                        if (styleMap[style]) {
-                            span.style.background = styleMap[style];
+                        if (GLOBAL_STYLE_MAP[style]) {
+                            span.style.background = GLOBAL_STYLE_MAP[style];
                         }
 
                         // 创建关联提示词悬浮框
@@ -5858,15 +5851,6 @@ Prompt Studio目录下</p>
 
             // 样式选择
             let selectedStyle = 'default';
-            const styleMap = {
-                'default': '',
-                'purple': 'linear-gradient(#8d79c0, #7a78dc)',
-                'green': 'linear-gradient(#a0b181, #57b049)',
-                'orange': 'linear-gradient(#ff9f43, #ee5a24)',
-                'pink': 'linear-gradient(#fd79a8, #e84393)',
-                'blue': 'linear-gradient(#0abde3, #10ac84)',
-                'dark-purple': 'linear-gradient(#584589, #7774a0)'
-            };
 
             // 初始化样式按钮
             function initStyleButtons() {
@@ -6549,10 +6533,11 @@ Prompt Studio目录下</p>
                 { value: 'default', label: '默认', background: '' },
                 { value: 'purple', label: '紫色', background: '#a29bfe' },
                 { value: 'green', label: '绿色', background: 'linear-gradient(#a0b181, #57b049)' },
-                { value: 'orange', label: '橙色', background: 'linear-gradient(#ff9f43, #ee5a24)' },
+                { value: 'orange', label: '橙色', background: 'linear-gradient(#cb9131, #b57e22)' },
                 { value: 'pink', label: '粉色', background: 'linear-gradient(#fd79a8, #e84393)' },
-                { value: 'blue', label: '蓝色', background: 'linear-gradient(#0abde3, #10ac84)' },
-                { value: 'dark-purple', label: '深紫', background: 'linear-gradient(#584589, #7774a0)' }
+                { value: 'dark-purple', label: '深紫', background: 'linear-gradient(#584589, #7774a0)' },
+                { value: 'blue', label: '深蓝', background: 'linear-gradient(#2c3e80, #344495)' }
+                
             ];
 
             styleOptions.forEach(opt => {
