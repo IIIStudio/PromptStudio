@@ -6341,6 +6341,11 @@ Prompt Studio目录下</p>
                 en.removeEventListener('keydown', onKey);
                 related.removeEventListener('keydown', onKey);
                 hide(wrap);
+                // 调用关闭回调（用于刷新搜索结果）
+                if (window.__tagModalOnClose) {
+                    window.__tagModalOnClose();
+                    window.__tagModalOnClose = null;
+                }
             }
             function onKey(e) {
                 if (e.key === 'Enter') onConfirm();
@@ -7020,6 +7025,8 @@ Prompt Studio目录下</p>
             try {
                 localStorage.removeItem('ops_prompt_history');
                 localStorage.removeItem('ops_active_cat');
+                localStorage.removeItem('ops_prefix_trigger_zh');
+                localStorage.removeItem('ops_suffix_trigger_zh');
                 // 保留 Dropbox 配置与文件选择
             } catch(e) {}
             resetPrompt();
@@ -7290,6 +7297,13 @@ Prompt Studio目录下</p>
                                 const tagIndex = result.index;
 
                                 if (tagIndex >= 0 && commonData[category]) {
+                                    // 设置关闭回调，编辑完成后刷新搜索结果
+                                    const originalHandler = window.__tagModalOnClose;
+                                    window.__tagModalOnClose = () => {
+                                        // 刷新搜索结果
+                                        searchInput.dispatchEvent(new Event('input'));
+                                        if (originalHandler) originalHandler();
+                                    };
                                     openTagModal(category, tagIndex, subcategory);
                                 }
                             });
