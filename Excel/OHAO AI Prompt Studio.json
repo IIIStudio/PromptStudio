@@ -1,0 +1,3307 @@
+{
+  "common": {
+    "画面镜头": {
+      "groups": {
+        "画面风格": [
+          {
+            "text": "Pop art",
+            "lang_zh": "波普艺术",
+            "pinned": true
+          },
+          {
+            "text": "Ghibli-like colours",
+            "lang_zh": "吉卜力色彩",
+            "pinned": true
+          },
+          {
+            "text": "Conceptual art",
+            "lang_zh": "概念艺术",
+            "pinned": false
+          },
+          {
+            "text": "Social realism",
+            "lang_zh": "社会现实主义",
+            "pinned": false
+          },
+          {
+            "text": "interior architecture",
+            "lang_zh": "室内建筑",
+            "pinned": false
+          },
+          {
+            "text": "modern",
+            "lang_zh": "现代",
+            "pinned": false
+          },
+          {
+            "text": "anime",
+            "lang_zh": "动漫",
+            "pinned": false
+          },
+          {
+            "text": "Minimalism",
+            "lang_zh": "极简主义",
+            "pinned": false
+          },
+          {
+            "text": "Romanticism",
+            "lang_zh": "浪漫主义",
+            "pinned": false
+          },
+          {
+            "text": "Gothic art",
+            "lang_zh": "哥特式艺术",
+            "pinned": false
+          },
+          {
+            "text": "American propaganda poster",
+            "lang_zh": "美国宣传海报",
+            "pinned": false
+          },
+          {
+            "text": "Expressionism",
+            "lang_zh": "表现主义",
+            "pinned": false
+          },
+          {
+            "text": "Realism",
+            "lang_zh": "现实主义",
+            "pinned": false
+          },
+          {
+            "text": "Contemporary art",
+            "lang_zh": "当代艺术",
+            "pinned": false
+          },
+          {
+            "text": "Dutch Golden Age painting",
+            "lang_zh": "荷兰黄金时期绘画",
+            "pinned": false
+          },
+          {
+            "text": "Monet",
+            "lang_zh": "莫奈",
+            "pinned": false
+          },
+          {
+            "text": "Northern Renaissance",
+            "lang_zh": "北方文艺复兴",
+            "pinned": false
+          },
+          {
+            "text": "Dadaism",
+            "lang_zh": "达达主义",
+            "pinned": false
+          },
+          {
+            "text": "Luminism",
+            "lang_zh": "明亮主义",
+            "pinned": false
+          },
+          {
+            "text": "hyperdetailed",
+            "lang_zh": "超写实",
+            "pinned": false
+          },
+          {
+            "text": "Art Deco",
+            "lang_zh": "装饰艺术",
+            "pinned": false
+          },
+          {
+            "text": "rococo style",
+            "lang_zh": "洛可可风格",
+            "pinned": false
+          },
+          {
+            "text": "Tonalism",
+            "lang_zh": "色调主义",
+            "pinned": false
+          },
+          {
+            "text": "3d rendering",
+            "lang_zh": "3D渲染",
+            "pinned": false
+          },
+          {
+            "text": "Fauvism",
+            "lang_zh": "野兽派",
+            "pinned": false
+          },
+          {
+            "text": "punk woman",
+            "lang_zh": "朋克女性",
+            "pinned": false
+          },
+          {
+            "text": "Carl Larsson",
+            "lang_zh": "卡尔·拉尔松风格的画作",
+            "pinned": false
+          },
+          {
+            "text": "Mannerism",
+            "lang_zh": "后期文艺复兴",
+            "pinned": false
+          },
+          {
+            "text": "Action painting",
+            "lang_zh": "行动绘画",
+            "pinned": false
+          },
+          {
+            "text": "Cubist Futurism",
+            "lang_zh": "立体派未来主义",
+            "pinned": false
+          },
+          {
+            "text": "Futurism",
+            "lang_zh": "未来主义",
+            "pinned": false
+          },
+          {
+            "text": "Neoclassicism",
+            "lang_zh": "新古典主义",
+            "pinned": false
+          },
+          {
+            "text": "Baroque",
+            "lang_zh": "巴洛克",
+            "pinned": false
+          },
+          {
+            "text": "Genre painting",
+            "lang_zh": "风俗画",
+            "pinned": false
+          },
+          {
+            "text": "Constructivism",
+            "lang_zh": "构成主义",
+            "pinned": false
+          },
+          {
+            "text": "by Alfons Mucha",
+            "lang_zh": "由阿尔方斯·穆卡制作",
+            "pinned": false
+          },
+          {
+            "text": "blind box toy style",
+            "lang_zh": "盲盒玩具风格",
+            "pinned": false
+          },
+          {
+            "text": "Ukiyo-e",
+            "lang_zh": "浮世绘",
+            "pinned": false
+          },
+          {
+            "text": "Rococo",
+            "lang_zh": "洛可可",
+            "pinned": false
+          },
+          {
+            "text": "high detail",
+            "lang_zh": "高细节",
+            "pinned": false
+          },
+          {
+            "text": "Op art",
+            "lang_zh": "视错觉艺术",
+            "pinned": false
+          },
+          {
+            "text": "Color Field painting",
+            "lang_zh": "色块画",
+            "pinned": false
+          },
+          {
+            "text": "Renaissance",
+            "lang_zh": "文艺复兴",
+            "pinned": false
+          },
+          {
+            "text": "Surrealism",
+            "lang_zh": "超现实主义",
+            "pinned": false
+          },
+          {
+            "text": "Bauhaus",
+            "lang_zh": "包豪斯",
+            "pinned": false
+          },
+          {
+            "text": "Abstract expressionism",
+            "lang_zh": "抽象表现主义",
+            "pinned": false
+          },
+          {
+            "text": "Pre-Raphaelite Brotherhood",
+            "lang_zh": "前拉斐尔派兄弟会",
+            "pinned": false
+          },
+          {
+            "text": "Impressionism",
+            "lang_zh": "印象派",
+            "pinned": false
+          },
+          {
+            "text": "Classicism",
+            "lang_zh": "古典主义",
+            "pinned": false
+          },
+          {
+            "text": "Hyperrealism",
+            "lang_zh": "超现实主义细节画派",
+            "pinned": false
+          },
+          {
+            "text": "Art Nouveau",
+            "lang_zh": "新艺术运动",
+            "pinned": false
+          },
+          {
+            "text": "Suprematism",
+            "lang_zh": "至高主义",
+            "pinned": false
+          },
+          {
+            "text": "Abstractionism",
+            "lang_zh": "抽象主义",
+            "pinned": false
+          },
+          {
+            "text": "pre-rephaëlite painting",
+            "lang_zh": "前拉斐尔派绘画",
+            "pinned": false
+          },
+          {
+            "text": "anime style",
+            "lang_zh": "动漫风格",
+            "pinned": false
+          },
+          {
+            "text": "Post-Impressionism",
+            "lang_zh": "后印象派",
+            "pinned": false
+          },
+          {
+            "text": "En plein air",
+            "lang_zh": "野外写生",
+            "pinned": false
+          },
+          {
+            "text": "Pointillism",
+            "lang_zh": "点彩派",
+            "pinned": false
+          },
+          {
+            "text": "Verism",
+            "lang_zh": "写实主义",
+            "pinned": false
+          },
+          {
+            "text": "raised fist",
+            "lang_zh": "扬起的拳头",
+            "pinned": false
+          },
+          {
+            "text": "Ashcan School",
+            "lang_zh": "垃圾桶派",
+            "pinned": false
+          },
+          {
+            "text": "Naïve art",
+            "lang_zh": "原始艺术",
+            "pinned": false
+          },
+          {
+            "text": "careful line drawing",
+            "lang_zh": "细心的线条绘画",
+            "pinned": false
+          },
+          {
+            "text": "Pixar",
+            "lang_zh": "皮克斯",
+            "pinned": false
+          },
+          {
+            "text": "Cubism",
+            "lang_zh": "立体主义",
+            "pinned": false
+          },
+          {
+            "text": "flat_color",
+            "lang_zh": "平涂",
+            "pinned": false
+          },
+          {
+            "text": "oil__painting",
+            "lang_zh": "油画风格（厚涂）",
+            "pinned": false
+          },
+          {
+            "text": "traditional_media",
+            "lang_zh": "纸质作画",
+            "pinned": false
+          },
+          {
+            "text": "faux_traditional_media",
+            "lang_zh": "签绘风格",
+            "pinned": false
+          },
+          {
+            "text": "watercolor_pencil",
+            "lang_zh": "彩铅",
+            "pinned": false
+          },
+          {
+            "text": "lineart",
+            "lang_zh": "线条变粗",
+            "pinned": false
+          },
+          {
+            "text": "sketch",
+            "lang_zh": "偏草稿",
+            "pinned": false
+          },
+          {
+            "text": "sketch,flat_color,",
+            "lang_zh": "线稿",
+            "pinned": false
+          },
+          {
+            "text": "color_trace",
+            "lang_zh": "原画",
+            "pinned": false
+          },
+          {
+            "text": "cropped_legs",
+            "lang_zh": "只画了一部分腿",
+            "pinned": false
+          },
+          {
+            "text": "cropped_torso",
+            "lang_zh": "只画了一部分躯干",
+            "pinned": false
+          },
+          {
+            "text": "cross-section",
+            "lang_zh": "截面图",
+            "pinned": false
+          },
+          {
+            "text": "cute_&_girly_(idolmaster)",
+            "lang_zh": "cute&girly (偶像大师)",
+            "pinned": false
+          },
+          {
+            "text": "partially_colored",
+            "lang_zh": "部分上色",
+            "pinned": false
+          },
+          {
+            "text": "cyberpunk",
+            "lang_zh": "赛博朋克",
+            "pinned": false
+          },
+          {
+            "text": "expression_chart",
+            "lang_zh": "角色的多表情展示",
+            "pinned": false
+          },
+          {
+            "text": "faux_figurine",
+            "lang_zh": "仿手办风格",
+            "pinned": false
+          },
+          {
+            "text": "flat_color",
+            "lang_zh": "平涂风格",
+            "pinned": false
+          },
+          {
+            "text": "fourth_wall",
+            "lang_zh": "虚实穿插|连接到现实的感觉|次元壁",
+            "pinned": false
+          },
+          {
+            "text": "full_body",
+            "lang_zh": "全身|画出了全身",
+            "pinned": false
+          },
+          {
+            "text": "gothic",
+            "lang_zh": "哥特式",
+            "pinned": false
+          },
+          {
+            "text": "greyscale",
+            "lang_zh": "纯黑白色|黑白照片化|灰度",
+            "pinned": false
+          },
+          {
+            "text": "high_contrast",
+            "lang_zh": "高对比度",
+            "pinned": false
+          },
+          {
+            "text": "letterboxed",
+            "lang_zh": "宽银幕格式",
+            "pinned": false
+          },
+          {
+            "text": "motion_blur",
+            "lang_zh": "运动导致的模糊",
+            "pinned": false
+          },
+          {
+            "text": "motion_lines",
+            "lang_zh": "体现运动的线",
+            "pinned": false
+          },
+          {
+            "text": "perspective",
+            "lang_zh": "用了透视画法",
+            "pinned": false
+          },
+          {
+            "text": "photo",
+            "lang_zh": "照片",
+            "pinned": false
+          },
+          {
+            "text": "photorealistic",
+            "lang_zh": "很像照片的画",
+            "pinned": false
+          },
+          {
+            "text": "spot_color",
+            "lang_zh": "在黑白的画中特意少量使用一些颜色",
+            "pinned": false
+          },
+          {
+            "text": "variations",
+            "lang_zh": "(变装、变化、变色、成长)对比图",
+            "pinned": false
+          },
+          {
+            "text": "viewfinder",
+            "lang_zh": "相机取景框",
+            "pinned": false
+          }
+        ],
+        "视角": [
+          {
+            "text": "profile",
+            "lang_zh": "侧颜",
+            "pinned": true
+          },
+          {
+            "text": "looking_back",
+            "lang_zh": "回眸",
+            "pinned": true
+          },
+          {
+            "text": "looking_down",
+            "lang_zh": "俯视",
+            "pinned": false
+          },
+          {
+            "text": "upskirt",
+            "lang_zh": "从人的下方往上瞥",
+            "pinned": false
+          },
+          {
+            "text": "facing_away",
+            "lang_zh": "面向别处",
+            "pinned": false
+          },
+          {
+            "text": "facing_viewer",
+            "lang_zh": "面向镜头",
+            "pinned": false
+          },
+          {
+            "text": "female_pov",
+            "lang_zh": "女性视角",
+            "pinned": false
+          },
+          {
+            "text": "from_above",
+            "lang_zh": "俯视镜头",
+            "pinned": false
+          },
+          {
+            "text": "from_behind",
+            "lang_zh": "背影",
+            "pinned": false
+          },
+          {
+            "text": "from_below",
+            "lang_zh": "仰视镜头",
+            "pinned": false
+          },
+          {
+            "text": "from_outside",
+            "lang_zh": "室外看向室内(的镜头)",
+            "pinned": false
+          },
+          {
+            "text": "from_side",
+            "lang_zh": "角色的侧面",
+            "pinned": false
+          },
+          {
+            "text": "looking_afar",
+            "lang_zh": "遥望",
+            "pinned": false
+          },
+          {
+            "text": "looking_at_phone",
+            "lang_zh": "看手机",
+            "pinned": false
+          },
+          {
+            "text": "looking_at_viewer",
+            "lang_zh": "看向阅图者",
+            "pinned": false
+          },
+          {
+            "text": "looking_away",
+            "lang_zh": "移开视线",
+            "pinned": false
+          },
+          {
+            "text": "looking_to_the_side",
+            "lang_zh": "看向侧面",
+            "pinned": false
+          },
+          {
+            "text": "looking_up",
+            "lang_zh": "仰视",
+            "pinned": false
+          },
+          {
+            "text": "pov_hands",
+            "lang_zh": "手伸来方向的视角",
+            "pinned": false
+          },
+          {
+            "text": "sideways_glance",
+            "lang_zh": "轻轻向侧面瞥",
+            "pinned": false
+          },
+          {
+            "text": "taking_picture",
+            "lang_zh": "拍照|自拍",
+            "pinned": false
+          },
+          {
+            "text": "upper_body",
+            "lang_zh": "上半身",
+            "pinned": false
+          },
+          {
+            "text": "upshirt",
+            "lang_zh": "从衬衫下方瞥",
+            "pinned": false
+          },
+          {
+            "text": "yokozuwari",
+            "lang_zh": "侧身坐",
+            "pinned": false
+          }
+        ],
+        "镜头焦点": [
+          {
+            "text": "lower_body",
+            "lang_zh": "下半身特写",
+            "pinned": false
+          },
+          {
+            "text": "blurry_foreground",
+            "lang_zh": "前景模糊",
+            "pinned": false
+          },
+          {
+            "text": "bokeh",
+            "lang_zh": "焦外成像",
+            "pinned": false
+          },
+          {
+            "text": "backlighting",
+            "lang_zh": "逆光",
+            "pinned": false
+          },
+          {
+            "text": "caustics",
+            "lang_zh": "焦散",
+            "pinned": false
+          },
+          {
+            "text": "close-up",
+            "lang_zh": "特写镜头",
+            "pinned": false
+          },
+          {
+            "text": "cowboy_shot",
+            "lang_zh": "七分身镜头",
+            "pinned": false
+          },
+          {
+            "text": "depth_of_field",
+            "lang_zh": "景深(画法)",
+            "pinned": false
+          },
+          {
+            "text": "dutch_angle",
+            "lang_zh": "德式倾斜镜头",
+            "pinned": false
+          },
+          {
+            "text": "fisheye",
+            "lang_zh": "鱼眼镜头",
+            "pinned": false
+          },
+          {
+            "text": "foreshortening",
+            "lang_zh": "正前缩距透视法",
+            "pinned": false
+          },
+          {
+            "text": "hatching_(texture)",
+            "lang_zh": "线影法(纹理)",
+            "pinned": false
+          },
+          {
+            "text": "portrait",
+            "lang_zh": "半身像",
+            "pinned": false
+          },
+          {
+            "text": "pov",
+            "lang_zh": "第一人称视角",
+            "pinned": false
+          },
+          {
+            "text": "solo_focus",
+            "lang_zh": "以单独人物为焦点",
+            "pinned": false
+          },
+          {
+            "text": "vanishing_point",
+            "lang_zh": "远景透视画法",
+            "pinned": false
+          },
+          {
+            "text": "wide_shot",
+            "lang_zh": "广角镜头",
+            "pinned": false
+          }
+        ]
+      }
+    },
+    "头发": [
+      {
+        "text": "streaked hair",
+        "lang_zh": "条染",
+        "pinned": false
+      },
+      {
+        "text": "multicolored hair",
+        "lang_zh": "多彩头发",
+        "pinned": false
+      },
+      {
+        "text": "colored inner hair",
+        "lang_zh": "内侧染色",
+        "pinned": false
+      },
+      {
+        "text": "blonde hair",
+        "lang_zh": "金发",
+        "pinned": false
+      },
+      {
+        "text": "silver hair",
+        "lang_zh": "银发",
+        "pinned": false
+      },
+      {
+        "text": "grey hair",
+        "lang_zh": "灰发",
+        "pinned": false
+      },
+      {
+        "text": "white hair",
+        "lang_zh": "白发",
+        "pinned": false
+      },
+      {
+        "text": "brown hair",
+        "lang_zh": "茶发",
+        "pinned": false
+      },
+      {
+        "text": "light brown hair",
+        "lang_zh": "浅褐发",
+        "pinned": false
+      },
+      {
+        "text": "black hair",
+        "lang_zh": "黑发",
+        "pinned": false
+      },
+      {
+        "text": "purple hair",
+        "lang_zh": "紫发",
+        "pinned": false
+      },
+      {
+        "text": "red hair",
+        "lang_zh": "红发",
+        "pinned": false
+      },
+      {
+        "text": "blue hair",
+        "lang_zh": "蓝发/水色发",
+        "pinned": false
+      },
+      {
+        "text": "dark blue hair",
+        "lang_zh": "深蓝发",
+        "pinned": false
+      },
+      {
+        "text": "light blue hair",
+        "lang_zh": "浅蓝发",
+        "pinned": false
+      },
+      {
+        "text": "green hair",
+        "lang_zh": "绿发",
+        "pinned": false
+      },
+      {
+        "text": "pink hair",
+        "lang_zh": "粉发",
+        "pinned": false
+      },
+      {
+        "text": "gradient hair",
+        "lang_zh": "渐变发色",
+        "pinned": false
+      },
+      {
+        "text": "rainbow hair",
+        "lang_zh": "彩虹发",
+        "pinned": false
+      },
+      {
+        "text": "ahoge",
+        "lang_zh": "呆毛",
+        "pinned": false
+      },
+      {
+        "text": "asymmetrical hair",
+        "lang_zh": "非对称发型",
+        "pinned": false
+      },
+      {
+        "text": "bangs",
+        "lang_zh": "刘海",
+        "pinned": false
+      },
+      {
+        "text": "blunt bangs",
+        "lang_zh": "齐刘海",
+        "pinned": false
+      },
+      {
+        "text": "braid",
+        "lang_zh": "辫子",
+        "pinned": false
+      },
+      {
+        "text": "braided ponytail",
+        "lang_zh": "编织马尾辫",
+        "pinned": false
+      },
+      {
+        "text": "curly hair",
+        "lang_zh": "卷发",
+        "pinned": false
+      },
+      {
+        "text": "curtained hair",
+        "lang_zh": "窗帘/瀑布发型",
+        "pinned": false
+      },
+      {
+        "text": "double bun",
+        "lang_zh": "双团子头",
+        "pinned": false
+      },
+      {
+        "text": "drill hair",
+        "lang_zh": "钻头卷/公主卷",
+        "pinned": false
+      },
+      {
+        "text": "twin drills",
+        "lang_zh": "双钻头卷",
+        "pinned": false
+      },
+      {
+        "text": "quad drills",
+        "lang_zh": "多钻头卷",
+        "pinned": false
+      },
+      {
+        "text": "side drill",
+        "lang_zh": "单侧钻头卷",
+        "pinned": false
+      },
+      {
+        "text": "french braid",
+        "lang_zh": "法式辫",
+        "pinned": false
+      },
+      {
+        "text": "hair behind ear",
+        "lang_zh": "耳后发",
+        "pinned": false
+      },
+      {
+        "text": "hair between eyes",
+        "lang_zh": "眼间刘海",
+        "pinned": false
+      },
+      {
+        "text": "crossed bangs",
+        "lang_zh": "交错刘海",
+        "pinned": false
+      },
+      {
+        "text": "hair bun",
+        "lang_zh": "团子头",
+        "pinned": false
+      },
+      {
+        "text": "hair intakes",
+        "lang_zh": "进气口发型",
+        "pinned": false
+      },
+      {
+        "text": "hair over shoulder",
+        "lang_zh": "披肩发",
+        "pinned": false
+      },
+      {
+        "text": "hime cut",
+        "lang_zh": "姬发式",
+        "pinned": false
+      },
+      {
+        "text": "long hair",
+        "lang_zh": "长发",
+        "pinned": false
+      },
+      {
+        "text": "messy hair",
+        "lang_zh": "凌乱发型",
+        "pinned": false
+      },
+      {
+        "text": "parted bangs",
+        "lang_zh": "分开的刘海",
+        "pinned": false
+      },
+      {
+        "text": "ponytail",
+        "lang_zh": "马尾",
+        "pinned": false
+      },
+      {
+        "text": "short hair",
+        "lang_zh": "短发",
+        "pinned": false
+      },
+      {
+        "text": "short ponytail",
+        "lang_zh": "短马尾",
+        "pinned": false
+      },
+      {
+        "text": "side swept bangs",
+        "lang_zh": "朝一个方向的刘海",
+        "pinned": false
+      },
+      {
+        "text": "side ponytail",
+        "lang_zh": "侧马尾",
+        "pinned": false
+      },
+      {
+        "text": "twin braids",
+        "lang_zh": "双辫子",
+        "pinned": false
+      },
+      {
+        "text": "twintails",
+        "lang_zh": "双马尾",
+        "pinned": false
+      },
+      {
+        "text": "very long hair",
+        "lang_zh": "很长的头发",
+        "pinned": false
+      },
+      {
+        "text": "front ponytail",
+        "lang_zh": "前马尾",
+        "pinned": false
+      },
+      {
+        "text": "short twintails",
+        "lang_zh": "短双马尾",
+        "pinned": false
+      },
+      {
+        "text": "folded ponytail",
+        "lang_zh": "折叠马尾",
+        "pinned": false
+      },
+      {
+        "text": "quad tails",
+        "lang_zh": "四马尾",
+        "pinned": false
+      },
+      {
+        "text": "single braid",
+        "lang_zh": "单辫",
+        "pinned": false
+      },
+      {
+        "text": "low twin braids",
+        "lang_zh": "低双辫",
+        "pinned": false
+      },
+      {
+        "text": "side braid",
+        "lang_zh": "侧辫",
+        "pinned": false
+      },
+      {
+        "text": "crown braid",
+        "lang_zh": "冠型织辫",
+        "pinned": false
+      },
+      {
+        "text": "dreadlocks",
+        "lang_zh": "脏辫",
+        "pinned": false
+      },
+      {
+        "text": "cone hair bun",
+        "lang_zh": "锥形发髻",
+        "pinned": false
+      },
+      {
+        "text": "braided bun",
+        "lang_zh": "辫子髻",
+        "pinned": false
+      },
+      {
+        "text": "doughnut hair bun",
+        "lang_zh": "圆环发髻",
+        "pinned": false
+      },
+      {
+        "text": "heart hair bun",
+        "lang_zh": "心形发髻",
+        "pinned": false
+      },
+      {
+        "text": "wavy hair",
+        "lang_zh": "自然卷",
+        "pinned": false
+      },
+      {
+        "text": "asymmetrical bangs",
+        "lang_zh": "不对称刘海",
+        "pinned": false
+      },
+      {
+        "text": "swept bangs",
+        "lang_zh": "扫浏海",
+        "pinned": false
+      },
+      {
+        "text": "sidelocks",
+        "lang_zh": "耳前发",
+        "pinned": false
+      },
+      {
+        "text": "single sidelock",
+        "lang_zh": "单耳前发",
+        "pinned": false
+      },
+      {
+        "text": "hair pulled back",
+        "lang_zh": "头发后梳",
+        "pinned": false
+      },
+      {
+        "text": "half updo",
+        "lang_zh": "侧发后梳",
+        "pinned": false
+      },
+      {
+        "text": "hair one side up",
+        "lang_zh": "一侧绑发",
+        "pinned": false
+      },
+      {
+        "text": "hair two side up",
+        "lang_zh": "双侧绑发",
+        "pinned": false
+      },
+      {
+        "text": "hair spread out",
+        "lang_zh": "散发",
+        "pinned": false
+      },
+      {
+        "text": "floating hair",
+        "lang_zh": "漂浮的头发",
+        "pinned": false
+      },
+      {
+        "text": "straight hair",
+        "lang_zh": "直发",
+        "pinned": false
+      },
+      {
+        "text": "big hair",
+        "lang_zh": "头发很多的",
+        "pinned": false
+      },
+      {
+        "text": "crystal hair",
+        "lang_zh": "水晶状的头发",
+        "pinned": false
+      },
+      {
+        "text": "expressive hair",
+        "lang_zh": "富有表现力的头发",
+        "pinned": false
+      },
+      {
+        "text": "hair over eyes",
+        "lang_zh": "头发遮着双眼",
+        "pinned": false
+      },
+      {
+        "text": "hair strand",
+        "lang_zh": "强调一缕一缕感的发型/发丝",
+        "pinned": false
+      },
+      {
+        "text": "hair over one eye",
+        "lang_zh": "头发遮住了一只眼睛",
+        "pinned": false
+      },
+      {
+        "text": "shiny hair",
+        "lang_zh": "有光泽的头发",
+        "pinned": false
+      },
+      {
+        "text": "wet hair",
+        "lang_zh": "湿头发",
+        "pinned": false
+      },
+      {
+        "text": "hair slicked back",
+        "lang_zh": "垂下的长鬈发",
+        "pinned": false
+      },
+      {
+        "text": "high ponytail",
+        "lang_zh": "披在两侧的两条辫子",
+        "pinned": false
+      },
+      {
+        "text": "long braid",
+        "lang_zh": "侧马尾",
+        "pinned": false
+      },
+      {
+        "text": "low-tied long hair",
+        "lang_zh": "直发",
+        "pinned": false
+      },
+      {
+        "text": "low ponytail",
+        "lang_zh": "低扎马尾",
+        "pinned": false
+      },
+      {
+        "text": "low twintails",
+        "lang_zh": "低扎双尾",
+        "pinned": false
+      },
+      {
+        "text": "medium hair",
+        "lang_zh": "中等长发",
+        "pinned": false
+      },
+      {
+        "text": "ringlets",
+        "lang_zh": "垂下的长鬈发",
+        "pinned": false
+      },
+      {
+        "text": "side braids",
+        "lang_zh": "披在两侧的两条辫子",
+        "pinned": false
+      },
+      {
+        "text": "side bun",
+        "lang_zh": "披在两侧的发髻",
+        "pinned": false
+      },
+      {
+        "text": "split ponytail",
+        "lang_zh": "尾部散开的单马尾发型",
+        "pinned": false
+      },
+      {
+        "text": "two side up",
+        "lang_zh": "小型双股辫",
+        "pinned": false
+      },
+      {
+        "text": "absurdly long hair",
+        "lang_zh": "超长的头发",
+        "pinned": false
+      },
+      {
+        "text": "cloud hair",
+        "lang_zh": "云絮状发型",
+        "pinned": false
+      },
+      {
+        "text": "flipped hair",
+        "lang_zh": "外卷发型",
+        "pinned": false
+      },
+      {
+        "text": "tentacle hair",
+        "lang_zh": "触手头发",
+        "pinned": false
+      },
+      {
+        "text": "very short hair",
+        "lang_zh": "很短的头发",
+        "pinned": false
+      },
+      {
+        "text": "bangs pinned back",
+        "lang_zh": "掀起的刘海",
+        "pinned": false
+      },
+      {
+        "text": "braided bangs",
+        "lang_zh": "辫子刘海",
+        "pinned": false
+      },
+      {
+        "text": "diagonal bangs",
+        "lang_zh": "斜刘海",
+        "pinned": false
+      },
+      {
+        "text": "single hair intake",
+        "lang_zh": "单侧进气口发型",
+        "pinned": false
+      },
+      {
+        "text": "hair ears",
+        "lang_zh": "耳状头发",
+        "pinned": false
+      },
+      {
+        "text": "bald",
+        "lang_zh": "秃头",
+        "pinned": false
+      },
+      {
+        "text": "bald girl",
+        "lang_zh": "秃头女孩",
+        "pinned": false
+      },
+      {
+        "text": "bowl cut",
+        "lang_zh": "锅盖头",
+        "pinned": false
+      },
+      {
+        "text": "buzz cut",
+        "lang_zh": "寸头",
+        "pinned": false
+      },
+      {
+        "text": "chonmage",
+        "lang_zh": "丁髷",
+        "pinned": false
+      },
+      {
+        "text": "crew cut",
+        "lang_zh": "平头/板寸头",
+        "pinned": false
+      },
+      {
+        "text": "flattop",
+        "lang_zh": "平顶",
+        "pinned": false
+      },
+      {
+        "text": "okappa",
+        "lang_zh": "河童头",
+        "pinned": false
+      },
+      {
+        "text": "pixie cut",
+        "lang_zh": "精灵头",
+        "pinned": false
+      },
+      {
+        "text": "undercut",
+        "lang_zh": "帽盔式发型",
+        "pinned": false
+      },
+      {
+        "text": "bob cut",
+        "lang_zh": "波波头",
+        "pinned": false
+      },
+      {
+        "text": "cornrows",
+        "lang_zh": "玉米垄发型",
+        "pinned": false
+      },
+      {
+        "text": "mullet",
+        "lang_zh": "鲻鱼头",
+        "pinned": false
+      },
+      {
+        "text": "bow-shaped hair",
+        "lang_zh": "弓形头发",
+        "pinned": false
+      },
+      {
+        "text": "front braid",
+        "lang_zh": "前辫",
+        "pinned": false
+      },
+      {
+        "text": "multiple braids",
+        "lang_zh": "多股(麻花)辫",
+        "pinned": false
+      },
+      {
+        "text": "tri braids",
+        "lang_zh": "三股辫",
+        "pinned": false
+      },
+      {
+        "text": "quad braids",
+        "lang_zh": "四股辫",
+        "pinned": false
+      },
+      {
+        "text": "triple bun",
+        "lang_zh": "三发髻",
+        "pinned": false
+      },
+      {
+        "text": "hair rings",
+        "lang_zh": "发圈",
+        "pinned": false
+      },
+      {
+        "text": "tied hair",
+        "lang_zh": "扎头发",
+        "pinned": false
+      },
+      {
+        "text": "single hair ring",
+        "lang_zh": "单发圈",
+        "pinned": false
+      },
+      {
+        "text": "one side up",
+        "lang_zh": "只扎了一边的头发",
+        "pinned": false
+      },
+      {
+        "text": "low-braided long hair",
+        "lang_zh": "低辫长发",
+        "pinned": false
+      },
+      {
+        "text": "mizura",
+        "lang_zh": "角发",
+        "pinned": false
+      },
+      {
+        "text": "multi-tied hair",
+        "lang_zh": "多扎头发",
+        "pinned": false
+      },
+      {
+        "text": "nihongami",
+        "lang_zh": "日本发",
+        "pinned": false
+      },
+      {
+        "text": "topknot",
+        "lang_zh": "丸子头",
+        "pinned": false
+      },
+      {
+        "text": "uneven twintails",
+        "lang_zh": "两股辫子大小不一",
+        "pinned": false
+      },
+      {
+        "text": "tri tails",
+        "lang_zh": "有三股辫子",
+        "pinned": false
+      },
+      {
+        "text": "quin tails",
+        "lang_zh": "有五股辫子",
+        "pinned": false
+      },
+      {
+        "text": "afro",
+        "lang_zh": "鸟窝头/爆炸头",
+        "pinned": false
+      },
+      {
+        "text": "huge afro",
+        "lang_zh": "超大鸟窝头",
+        "pinned": false
+      },
+      {
+        "text": "beehive hairdo",
+        "lang_zh": "蜂窝头",
+        "pinned": false
+      },
+      {
+        "text": "pompadour",
+        "lang_zh": "蓬帕杜发型",
+        "pinned": false
+      },
+      {
+        "text": "quiff",
+        "lang_zh": "蓬松感油头",
+        "pinned": false
+      },
+      {
+        "text": "hair flaps",
+        "lang_zh": "在摆动的头发",
+        "pinned": false
+      },
+      {
+        "text": "pointy hair",
+        "lang_zh": "带着尖角的发型",
+        "pinned": false
+      },
+      {
+        "text": "spiked hair",
+        "lang_zh": "刺刺的头发",
+        "pinned": false
+      },
+      {
+        "text": "widow's peak",
+        "lang_zh": "美人尖",
+        "pinned": false
+      },
+      {
+        "text": "heart ahoge",
+        "lang_zh": "心形呆毛",
+        "pinned": false
+      },
+      {
+        "text": "huge ahoge",
+        "lang_zh": "大呆毛",
+        "pinned": false
+      },
+      {
+        "text": "antenna hair",
+        "lang_zh": "多根呆毛",
+        "pinned": false
+      },
+      {
+        "text": "comb over",
+        "lang_zh": "遮盖头发稀少部分",
+        "pinned": false
+      },
+      {
+        "text": "mohawk",
+        "lang_zh": "莫霍克发型",
+        "pinned": false
+      },
+      {
+        "text": "lone nape hair",
+        "lang_zh": "孤颈毛",
+        "pinned": false
+      },
+      {
+        "text": "hair bikini",
+        "lang_zh": "头发比基尼",
+        "pinned": false
+      },
+      {
+        "text": "hair scarf",
+        "lang_zh": "头发围巾",
+        "pinned": false
+      }
+    ],
+    "头饰": [
+      {
+        "text": "halo",
+        "lang_zh": "头顶光环",
+        "pinned": false
+      },
+      {
+        "text": "tokin hat",
+        "lang_zh": "东金帽子",
+        "pinned": false
+      },
+      {
+        "text": "mini top hat",
+        "lang_zh": "迷你礼帽",
+        "pinned": false
+      },
+      {
+        "text": "beret",
+        "lang_zh": "贝雷帽",
+        "pinned": false
+      },
+      {
+        "text": "hood",
+        "lang_zh": "兜帽",
+        "pinned": false
+      },
+      {
+        "text": "nurse cap",
+        "lang_zh": "护士帽",
+        "pinned": false
+      },
+      {
+        "text": "tiara",
+        "lang_zh": "三重冕",
+        "pinned": false
+      },
+      {
+        "text": "crown",
+        "lang_zh": "皇冠",
+        "pinned": false
+      },
+      {
+        "text": "hairpin",
+        "lang_zh": "发卡",
+        "pinned": false
+      },
+      {
+        "text": "hairband",
+        "lang_zh": "头箍",
+        "pinned": false
+      },
+      {
+        "text": "hairclip",
+        "lang_zh": "发夹",
+        "pinned": false
+      },
+      {
+        "text": "hair ribbon",
+        "lang_zh": "发带",
+        "pinned": false
+      },
+      {
+        "text": "hair flower",
+        "lang_zh": "发花",
+        "pinned": false
+      },
+      {
+        "text": "hair ornament",
+        "lang_zh": "头饰",
+        "pinned": false
+      },
+      {
+        "text": "hair bow",
+        "lang_zh": "蝴蝶结发饰",
+        "pinned": false
+      },
+      {
+        "text": "maid headdress",
+        "lang_zh": "女仆头饰",
+        "pinned": false
+      },
+      {
+        "text": "ribbon",
+        "lang_zh": "丝带",
+        "pinned": false
+      },
+      {
+        "text": "sunglasses",
+        "lang_zh": "太阳镜",
+        "pinned": false
+      },
+      {
+        "text": "blindfold",
+        "lang_zh": "眼罩",
+        "pinned": false
+      },
+      {
+        "text": "eyepatch",
+        "lang_zh": "单眼罩",
+        "pinned": false
+      },
+      {
+        "text": "mask",
+        "lang_zh": "面具/眼罩/口罩",
+        "pinned": false
+      },
+      {
+        "text": "jewelry",
+        "lang_zh": "首饰",
+        "pinned": false
+      },
+      {
+        "text": "bell",
+        "lang_zh": "铃铛",
+        "pinned": false
+      },
+      {
+        "text": "facepaint",
+        "lang_zh": "面纹",
+        "pinned": false
+      },
+      {
+        "text": "horns",
+        "lang_zh": "兽角",
+        "pinned": false
+      },
+      {
+        "text": "antlers",
+        "lang_zh": "鹿角",
+        "pinned": false
+      },
+      {
+        "text": "clover hair ornament",
+        "lang_zh": "三叶草发饰",
+        "pinned": false
+      },
+      {
+        "text": "crescent hair ornament",
+        "lang_zh": "月牙发饰",
+        "pinned": false
+      },
+      {
+        "text": "demon horns",
+        "lang_zh": "恶魔的角",
+        "pinned": false
+      },
+      {
+        "text": "jeweled branch of hourai",
+        "lang_zh": "蓬莱玉枝",
+        "pinned": false
+      },
+      {
+        "text": "fish hair ornament",
+        "lang_zh": "鱼形发饰",
+        "pinned": false
+      },
+      {
+        "text": "forehead jewel",
+        "lang_zh": "额前有宝石",
+        "pinned": false
+      },
+      {
+        "text": "forehead mark",
+        "lang_zh": "额前有图案",
+        "pinned": false
+      },
+      {
+        "text": "forehead protector",
+        "lang_zh": "护额",
+        "pinned": false
+      },
+      {
+        "text": "kanzashi",
+        "lang_zh": "簪子",
+        "pinned": false
+      },
+      {
+        "text": "hair bobbles",
+        "lang_zh": "头绳",
+        "pinned": false
+      },
+      {
+        "text": "hairpods",
+        "lang_zh": "头发上成对的像无线蓝牙的发饰",
+        "pinned": false
+      },
+      {
+        "text": "hair bell",
+        "lang_zh": "头发上系着铃铛",
+        "pinned": false
+      },
+      {
+        "text": "heart-shaped eyewear",
+        "lang_zh": "心形眼镜",
+        "pinned": false
+      },
+      {
+        "text": "goggles",
+        "lang_zh": "护目镜",
+        "pinned": false
+      },
+      {
+        "text": "rimless eyewear",
+        "lang_zh": "无框眼镜",
+        "pinned": false
+      },
+      {
+        "text": "over-rim eyewear",
+        "lang_zh": "下半无框眼镜",
+        "pinned": false
+      },
+      {
+        "text": "kamina shades",
+        "lang_zh": "卡米纳墨镜",
+        "pinned": false
+      },
+      {
+        "text": "goggles on head",
+        "lang_zh": "头上别着护目镜",
+        "pinned": false
+      },
+      {
+        "text": "goggles on headwear",
+        "lang_zh": "帽子上别着护目镜",
+        "pinned": false
+      },
+      {
+        "text": "head mounted display",
+        "lang_zh": "戴着头戴显示设备",
+        "pinned": false
+      },
+      {
+        "text": "bandage on",
+        "lang_zh": "贴有绷带的脸",
+        "pinned": false
+      },
+      {
+        "text": "bandage over one eye",
+        "lang_zh": "缠着绷带的单眼",
+        "pinned": false
+      },
+      {
+        "text": "scar across eye",
+        "lang_zh": "眼睛上的疤痕",
+        "pinned": false
+      },
+      {
+        "text": "scar on cheek",
+        "lang_zh": "脸颊上的疤痕",
+        "pinned": false
+      },
+      {
+        "text": "covered eyes",
+        "lang_zh": "蒙住的眼",
+        "pinned": false
+      },
+      {
+        "text": "surgical mask",
+        "lang_zh": "医用口罩",
+        "pinned": false
+      },
+      {
+        "text": "mouth mask",
+        "lang_zh": "口罩",
+        "pinned": false
+      },
+      {
+        "text": "mouth veil",
+        "lang_zh": "面纱",
+        "pinned": false
+      },
+      {
+        "text": "coke-bottle glasses",
+        "lang_zh": "厚如玻璃瓶底的圆眼镜",
+        "pinned": false
+      },
+      {
+        "text": "tengu mask",
+        "lang_zh": "天狗面具",
+        "pinned": false
+      },
+      {
+        "text": "fox mask",
+        "lang_zh": "狐狸面具",
+        "pinned": false
+      },
+      {
+        "text": "mask on head",
+        "lang_zh": "掀到头上的面具",
+        "pinned": false
+      },
+      {
+        "text": "mask pull",
+        "lang_zh": "拉着口罩",
+        "pinned": false
+      },
+      {
+        "text": "mask removed",
+        "lang_zh": "摘下的面具",
+        "pinned": false
+      },
+      {
+        "text": "gas mask",
+        "lang_zh": "防毒面具",
+        "pinned": false
+      },
+      {
+        "text": "anchor choker",
+        "lang_zh": "锚形项圈",
+        "pinned": false
+      },
+      {
+        "text": "bead necklace",
+        "lang_zh": "珠子项链",
+        "pinned": false
+      },
+      {
+        "text": "headphones",
+        "lang_zh": "耳机",
+        "pinned": false
+      },
+      {
+        "text": "behind-the-head headphones",
+        "lang_zh": "从后脑戴上的耳机",
+        "pinned": false
+      },
+      {
+        "text": "whistle around neck",
+        "lang_zh": "脖子上挂着口哨",
+        "pinned": false
+      },
+      {
+        "text": "animal hood",
+        "lang_zh": "兽耳头罩",
+        "pinned": false
+      },
+      {
+        "text": "bespectacled",
+        "lang_zh": "戴眼镜的",
+        "pinned": false
+      },
+      {
+        "text": "fedora",
+        "lang_zh": "软呢帽",
+        "pinned": false
+      },
+      {
+        "text": "witch hat",
+        "lang_zh": "女巫帽",
+        "pinned": false
+      },
+      {
+        "text": "wizard hat",
+        "lang_zh": "法师帽",
+        "pinned": false
+      },
+      {
+        "text": "winged helmet",
+        "lang_zh": "带翅膀的头盔",
+        "pinned": false
+      },
+      {
+        "text": "hood down",
+        "lang_zh": "放下的兜帽",
+        "pinned": false
+      },
+      {
+        "text": "hood up",
+        "lang_zh": "戴起来的兜帽",
+        "pinned": false
+      },
+      {
+        "text": "sailor hat",
+        "lang_zh": "水手帽",
+        "pinned": false
+      },
+      {
+        "text": "santa hat",
+        "lang_zh": "圣诞帽",
+        "pinned": false
+      },
+      {
+        "text": "peaked cap",
+        "lang_zh": "类似警帽的帽子",
+        "pinned": false
+      },
+      {
+        "text": "elbow pads",
+        "lang_zh": "护肘",
+        "pinned": false
+      },
+      {
+        "text": "dragon horns",
+        "lang_zh": "龙角",
+        "pinned": false
+      },
+      {
+        "text": "eyewear on head",
+        "lang_zh": "眼镜别在头上",
+        "pinned": false
+      },
+      {
+        "text": "mole under mouth",
+        "lang_zh": "嘴角有痣/美人痣",
+        "pinned": false
+      },
+      {
+        "text": "x hair ornament",
+        "lang_zh": "x发饰",
+        "pinned": false
+      },
+      {
+        "text": "black hairband",
+        "lang_zh": "黑色发带",
+        "pinned": false
+      },
+      {
+        "text": "hair scrunchie",
+        "lang_zh": "发箍",
+        "pinned": false
+      },
+      {
+        "text": "white hairband",
+        "lang_zh": "白色发带",
+        "pinned": false
+      },
+      {
+        "text": "hair tie",
+        "lang_zh": "发带",
+        "pinned": false
+      },
+      {
+        "text": "frog hair ornament",
+        "lang_zh": "青蛙发饰",
+        "pinned": false
+      },
+      {
+        "text": "food-themed hair ornament",
+        "lang_zh": "食物发饰",
+        "pinned": false
+      },
+      {
+        "text": "star hair ornament",
+        "lang_zh": "星星发饰",
+        "pinned": false
+      },
+      {
+        "text": "heart hair ornament",
+        "lang_zh": "心形发饰",
+        "pinned": false
+      },
+      {
+        "text": "red hairband",
+        "lang_zh": "红色发带",
+        "pinned": false
+      },
+      {
+        "text": "butterfly hair ornament",
+        "lang_zh": "蝴蝶发饰",
+        "pinned": false
+      },
+      {
+        "text": "snake hair ornament",
+        "lang_zh": "蛇发饰",
+        "pinned": false
+      },
+      {
+        "text": "lolita hairband",
+        "lang_zh": "洛丽塔发带",
+        "pinned": false
+      },
+      {
+        "text": "feather hair ornament",
+        "lang_zh": "羽毛头饰",
+        "pinned": false
+      },
+      {
+        "text": "blue hairband",
+        "lang_zh": "蓝色发带",
+        "pinned": false
+      },
+      {
+        "text": "anchor hair ornament",
+        "lang_zh": "锚发饰",
+        "pinned": false
+      },
+      {
+        "text": "leaf hair ornament",
+        "lang_zh": "叶发饰",
+        "pinned": false
+      },
+      {
+        "text": "bunny hair ornament",
+        "lang_zh": "兔子头饰",
+        "pinned": false
+      },
+      {
+        "text": "skull hair ornament",
+        "lang_zh": "骷髅头饰",
+        "pinned": false
+      },
+      {
+        "text": "yellow hairband",
+        "lang_zh": "黄色发带",
+        "pinned": false
+      },
+      {
+        "text": "pink hairband",
+        "lang_zh": "粉色发带",
+        "pinned": false
+      },
+      {
+        "text": "bow hairband",
+        "lang_zh": "蝴蝶结发带",
+        "pinned": false
+      },
+      {
+        "text": "cat hair ornament",
+        "lang_zh": "猫头饰",
+        "pinned": false
+      },
+      {
+        "text": "musical note hair ornament",
+        "lang_zh": "音符发饰",
+        "pinned": false
+      },
+      {
+        "text": "carrot hair ornament",
+        "lang_zh": "胡萝卜发饰",
+        "pinned": false
+      },
+      {
+        "text": "purple hairband",
+        "lang_zh": "紫色发带",
+        "pinned": false
+      },
+      {
+        "text": "hair beads",
+        "lang_zh": "发珠",
+        "pinned": false
+      },
+      {
+        "text": "multiple hair bows",
+        "lang_zh": "多个蝴蝶结",
+        "pinned": false
+      },
+      {
+        "text": "bat hair ornament",
+        "lang_zh": "蝙蝠发饰",
+        "pinned": false
+      },
+      {
+        "text": "bone hair ornament",
+        "lang_zh": "骨发饰",
+        "pinned": false
+      },
+      {
+        "text": "orange hairband",
+        "lang_zh": "橙色发带",
+        "pinned": false
+      },
+      {
+        "text": "snowflake hair ornament",
+        "lang_zh": "雪花发饰",
+        "pinned": false
+      },
+      {
+        "text": "flower on head",
+        "lang_zh": "头上有花",
+        "pinned": false
+      },
+      {
+        "text": "head wreath",
+        "lang_zh": "头上戴着花冠",
+        "pinned": false
+      }
+    ],
+    "眼睛": [
+      {
+        "text": "mole under eye",
+        "lang_zh": "眼下痣",
+        "pinned": false
+      },
+      {
+        "text": "heart-shaped pupils",
+        "lang_zh": "爱心瞳",
+        "pinned": false
+      },
+      {
+        "text": "rolling eyes",
+        "lang_zh": "翻白眼",
+        "pinned": false
+      },
+      {
+        "text": "crazy eyes",
+        "lang_zh": "疯狂的眼睛",
+        "pinned": false
+      },
+      {
+        "text": "raised eyebrows",
+        "lang_zh": "挑眉",
+        "pinned": false
+      },
+      {
+        "text": "furrowed brow",
+        "lang_zh": "下眉毛",
+        "pinned": false
+      },
+      {
+        "text": "dashed eyes",
+        "lang_zh": "黑眼圈中的水平线",
+        "pinned": false
+      },
+      {
+        "text": "multicolored eyes",
+        "lang_zh": "多色的黑眼睛",
+        "pinned": false
+      },
+      {
+        "text": "mismatched pupils",
+        "lang_zh": "左右眼颜色不同",
+        "pinned": false
+      },
+      {
+        "text": "mismatched sclera",
+        "lang_zh": "左右眼不同颜色的眼白",
+        "pinned": false
+      },
+      {
+        "text": "no pupils",
+        "lang_zh": "没有眼睛",
+        "pinned": false
+      },
+      {
+        "text": "empty eyes",
+        "lang_zh": "空洞眼睛",
+        "pinned": false
+      },
+      {
+        "text": "blank eyes",
+        "lang_zh": "白眼球",
+        "pinned": false
+      },
+      {
+        "text": "dilated pupils",
+        "lang_zh": "瞳孔扩张",
+        "pinned": false
+      },
+      {
+        "text": "hollow eyes",
+        "lang_zh": "漆黑的眼睛",
+        "pinned": false
+      },
+      {
+        "text": "constricted pupils",
+        "lang_zh": "收缩的瞳孔",
+        "pinned": false
+      },
+      {
+        "text": "symbol-shaped pupils",
+        "lang_zh": "符号眼",
+        "pinned": false
+      },
+      {
+        "text": "star-shaped pupils",
+        "lang_zh": "星形眼睛",
+        "pinned": false
+      },
+      {
+        "text": "x-shaped pupils",
+        "lang_zh": "X 形眼睛",
+        "pinned": false
+      },
+      {
+        "text": "button eyes",
+        "lang_zh": "纽扣眼",
+        "pinned": false
+      },
+      {
+        "text": "eye reflection",
+        "lang_zh": "眼睛反射",
+        "pinned": false
+      },
+      {
+        "text": "closed eyes",
+        "lang_zh": "闭上眼睛",
+        "pinned": false
+      },
+      {
+        "text": "one eye closed",
+        "lang_zh": "闭上一只眼",
+        "pinned": false
+      },
+      {
+        "text": "half-closed eyes",
+        "lang_zh": "半闭眼睛",
+        "pinned": false
+      },
+      {
+        "text": "eyes closed",
+        "lang_zh": "闭眼",
+        "pinned": false
+      },
+      {
+        "text": "wince",
+        "lang_zh": "闭一只眼",
+        "pinned": false
+      },
+      {
+        "text": "tsurime",
+        "lang_zh": "吊眼角",
+        "pinned": false
+      },
+      {
+        "text": "eyeball",
+        "lang_zh": "盯着看",
+        "pinned": false
+      },
+      {
+        "text": "tears",
+        "lang_zh": "眼泪",
+        "pinned": false
+      },
+      {
+        "text": "gradient eyes",
+        "lang_zh": "渐变瞳色",
+        "pinned": false
+      },
+      {
+        "text": "aqua eyes",
+        "lang_zh": "水汪汪大眼",
+        "pinned": false
+      },
+      {
+        "text": "crying with eyes open",
+        "lang_zh": "睁着眼落泪",
+        "pinned": false
+      },
+      {
+        "text": "glowing eyes",
+        "lang_zh": "发光眼睛",
+        "pinned": false
+      },
+      {
+        "text": "half-closed eye",
+        "lang_zh": "半闭的眼睛(单眼)",
+        "pinned": false
+      },
+      {
+        "text": "happy tears",
+        "lang_zh": "开心的眼泪",
+        "pinned": false
+      },
+      {
+        "text": "sparkling eyes",
+        "lang_zh": "星星眼",
+        "pinned": false
+      },
+      {
+        "text": "glaring",
+        "lang_zh": "轻蔑/怒视",
+        "pinned": false
+      },
+      {
+        "text": "streaming tears",
+        "lang_zh": "流泪",
+        "pinned": false
+      },
+      {
+        "text": "eyebrows behind hair",
+        "lang_zh": "挡在头发下的眉毛",
+        "pinned": false
+      },
+      {
+        "text": "wide eyes",
+        "lang_zh": "睁大眼睛",
+        "pinned": false
+      },
+      {
+        "text": "gradient_eyes",
+        "lang_zh": "渐变眼",
+        "pinned": false
+      },
+      {
+        "text": "cross-eyed",
+        "lang_zh": "斗鸡眼",
+        "pinned": false
+      },
+      {
+        "text": "slit pupils",
+        "lang_zh": "竖瞳孔/猫眼",
+        "pinned": false
+      },
+      {
+        "text": "bloodshot eyes",
+        "lang_zh": "布满血丝的眼睛",
+        "pinned": false
+      },
+      {
+        "text": "tareme",
+        "lang_zh": "下垂的眼睛",
+        "pinned": false
+      },
+      {
+        "text": "devil eyes",
+        "lang_zh": "恶魔眼",
+        "pinned": false
+      },
+      {
+        "text": "devil pupils",
+        "lang_zh": "魔瞳",
+        "pinned": false
+      },
+      {
+        "text": "snake pupils",
+        "lang_zh": "蛇瞳",
+        "pinned": false
+      },
+      {
+        "text": "heterochromia",
+        "lang_zh": "异色瞳",
+        "pinned": false
+      },
+      {
+        "text": "purple eyes",
+        "lang_zh": "紫眼",
+        "pinned": false
+      },
+      {
+        "text": "red eyes",
+        "lang_zh": "红眼",
+        "pinned": false
+      },
+      {
+        "text": "white eyes",
+        "lang_zh": "白眼",
+        "pinned": false
+      },
+      {
+        "text": "yellow eyes",
+        "lang_zh": "金眼",
+        "pinned": false
+      },
+      {
+        "text": "sanpaku",
+        "lang_zh": "三白眼",
+        "pinned": false
+      },
+      {
+        "text": "upturned eyes",
+        "lang_zh": "上翘的眼睛",
+        "pinned": false
+      },
+      {
+        "text": "wide-eyed",
+        "lang_zh": "睁开眼睛",
+        "pinned": false
+      },
+      {
+        "text": "ringed eyes",
+        "lang_zh": "眼圈",
+        "pinned": false
+      },
+      {
+        "text": "pupils sparkling",
+        "lang_zh": "闪闪发光瞳",
+        "pinned": false
+      },
+      {
+        "text": "flower-shaped pupils",
+        "lang_zh": "花形瞳孔",
+        "pinned": false
+      },
+      {
+        "text": "color contact lenses",
+        "lang_zh": "美瞳",
+        "pinned": false
+      },
+      {
+        "text": "longeyelashes",
+        "lang_zh": "长睫毛",
+        "pinned": false
+      },
+      {
+        "text": "colored eyelashes",
+        "lang_zh": "彩色睫毛",
+        "pinned": false
+      },
+      {
+        "text": "solid circle eyes",
+        "lang_zh": "实心圆眼睛",
+        "pinned": false
+      },
+      {
+        "text": "heart-shaped eyes",
+        "lang_zh": "心形眼",
+        "pinned": false
+      },
+      {
+        "text": "@ @",
+        "lang_zh": "晕眼",
+        "pinned": false
+      },
+      {
+        "text": "orange eyes",
+        "lang_zh": "橙色的眼镜",
+        "pinned": false
+      },
+      {
+        "text": "pink eyes",
+        "lang_zh": "粉红色的眼睛",
+        "pinned": false
+      },
+      {
+        "text": "amber eyes",
+        "lang_zh": "琥珀色眼",
+        "pinned": false
+      },
+      {
+        "text": "pac-man eyes",
+        "lang_zh": "吃豆人形眼",
+        "pinned": false
+      },
+      {
+        "text": "horizontal pupils",
+        "lang_zh": "一字型瞳孔/蛙眼",
+        "pinned": false
+      },
+      {
+        "text": "diamond-shaped pupils",
+        "lang_zh": "钻石形瞳孔",
+        "pinned": false
+      }
+    ],
+    "耳朵": [
+      {
+        "text": "animal ears",
+        "lang_zh": "动物耳朵",
+        "pinned": false
+      },
+      {
+        "text": "fox ears",
+        "lang_zh": "狐狸耳朵",
+        "pinned": false
+      },
+      {
+        "text": "cat ears",
+        "lang_zh": "猫耳",
+        "pinned": false
+      },
+      {
+        "text": "dog ears",
+        "lang_zh": "狗耳",
+        "pinned": false
+      },
+      {
+        "text": "mouse ears",
+        "lang_zh": "老鼠耳朵",
+        "pinned": false
+      },
+      {
+        "text": "pointy ears",
+        "lang_zh": "尖耳",
+        "pinned": false
+      },
+      {
+        "text": "heart earrings",
+        "lang_zh": "心形耳环",
+        "pinned": false
+      },
+      {
+        "text": "hoop earrings",
+        "lang_zh": "环状耳环",
+        "pinned": false
+      },
+      {
+        "text": "crystal earrings",
+        "lang_zh": "水晶耳环",
+        "pinned": false
+      },
+      {
+        "text": "earrings",
+        "lang_zh": "耳环",
+        "pinned": false
+      },
+      {
+        "text": "crescent earrings",
+        "lang_zh": "月牙耳环",
+        "pinned": false
+      },
+      {
+        "text": "cat ear headphones",
+        "lang_zh": "猫耳式耳机",
+        "pinned": false
+      },
+      {
+        "text": "bat ears",
+        "lang_zh": "蝙蝠耳朵",
+        "pinned": false
+      },
+      {
+        "text": "raccoon ears",
+        "lang_zh": "浣熊耳朵",
+        "pinned": false
+      },
+      {
+        "text": "long pointy ears",
+        "lang_zh": "尖尖的长耳朵",
+        "pinned": false
+      },
+      {
+        "text": "covering ears",
+        "lang_zh": "遮住耳朵",
+        "pinned": false
+      },
+      {
+        "text": "bear ears",
+        "lang_zh": "熊耳朵",
+        "pinned": false
+      },
+      {
+        "text": "rabbit ears",
+        "lang_zh": "兔子耳朵",
+        "pinned": false
+      },
+      {
+        "text": "cow ears",
+        "lang_zh": "牛耳朵",
+        "pinned": false
+      },
+      {
+        "text": "deer ears",
+        "lang_zh": "鹿耳朵",
+        "pinned": false
+      },
+      {
+        "text": "ferret ears",
+        "lang_zh": "鼬耳朵",
+        "pinned": false
+      },
+      {
+        "text": "goat ears",
+        "lang_zh": "山羊耳朵",
+        "pinned": false
+      },
+      {
+        "text": "horse ears",
+        "lang_zh": "马耳",
+        "pinned": false
+      },
+      {
+        "text": "kemonomimi mode",
+        "lang_zh": "兽耳萝莉模式",
+        "pinned": false
+      },
+      {
+        "text": "lion ears",
+        "lang_zh": "狮子耳朵",
+        "pinned": false
+      },
+      {
+        "text": "monkey ears",
+        "lang_zh": "猴耳",
+        "pinned": false
+      },
+      {
+        "text": "panda ears",
+        "lang_zh": "熊猫耳朵",
+        "pinned": false
+      },
+      {
+        "text": "pikachu ears",
+        "lang_zh": "皮卡丘耳朵",
+        "pinned": false
+      },
+      {
+        "text": "pig ears",
+        "lang_zh": "猪耳朵",
+        "pinned": false
+      },
+      {
+        "text": "sheep ears",
+        "lang_zh": "羊耳",
+        "pinned": false
+      },
+      {
+        "text": "squirrel ears",
+        "lang_zh": "松鼠耳朵",
+        "pinned": false
+      },
+      {
+        "text": "tiger ears",
+        "lang_zh": "虎耳",
+        "pinned": false
+      },
+      {
+        "text": "wolf ears",
+        "lang_zh": "狼耳朵",
+        "pinned": false
+      },
+      {
+        "text": "fake animal ears",
+        "lang_zh": "仿制的动物耳朵",
+        "pinned": false
+      }
+    ],
+    "表情": [
+      {
+        "text": "heavy breathing",
+        "lang_zh": "喘粗气",
+        "pinned": false
+      },
+      {
+        "text": "makeup",
+        "lang_zh": "浓装",
+        "pinned": false
+      },
+      {
+        "text": "food on face",
+        "lang_zh": "食物在脸上",
+        "pinned": false
+      },
+      {
+        "text": "smelling",
+        "lang_zh": "闻",
+        "pinned": false
+      },
+      {
+        "text": "nosebleed",
+        "lang_zh": "鼻血",
+        "pinned": false
+      },
+      {
+        "text": "clenched teeth",
+        "lang_zh": "咬牙",
+        "pinned": false
+      },
+      {
+        "text": "open mouth",
+        "lang_zh": "张口",
+        "pinned": false
+      },
+      {
+        "text": "pout",
+        "lang_zh": "努嘴",
+        "pinned": false
+      },
+      {
+        "text": "sigh",
+        "lang_zh": "叹气",
+        "pinned": false
+      },
+      {
+        "text": "smile",
+        "lang_zh": "微笑",
+        "pinned": false
+      },
+      {
+        "text": "light smile",
+        "lang_zh": "浅笑",
+        "pinned": false
+      },
+      {
+        "text": "grin",
+        "lang_zh": "露齿而笑",
+        "pinned": false
+      },
+      {
+        "text": "evil smile",
+        "lang_zh": "坏笑",
+        "pinned": false
+      },
+      {
+        "text": "angry",
+        "lang_zh": "生气的",
+        "pinned": false
+      },
+      {
+        "text": "annoyed",
+        "lang_zh": "苦恼的",
+        "pinned": false
+      },
+      {
+        "text": "crazy",
+        "lang_zh": "疯狂的",
+        "pinned": false
+      },
+      {
+        "text": "shy",
+        "lang_zh": "害羞的",
+        "pinned": false
+      },
+      {
+        "text": "embarrassed",
+        "lang_zh": "尴尬的",
+        "pinned": false
+      },
+      {
+        "text": "blush",
+        "lang_zh": "脸红的",
+        "pinned": false
+      },
+      {
+        "text": "sleepy",
+        "lang_zh": "困乏的",
+        "pinned": false
+      },
+      {
+        "text": "sad",
+        "lang_zh": "悲伤的",
+        "pinned": false
+      },
+      {
+        "text": "drunk",
+        "lang_zh": "喝醉的",
+        "pinned": false
+      },
+      {
+        "text": "frown",
+        "lang_zh": "皱眉/蹙额",
+        "pinned": false
+      },
+      {
+        "text": "fangs",
+        "lang_zh": "尖牙",
+        "pinned": false
+      },
+      {
+        "text": "tongue",
+        "lang_zh": "舌头",
+        "pinned": false
+      },
+      {
+        "text": "no nose",
+        "lang_zh": "没有鼻子",
+        "pinned": false
+      },
+      {
+        "text": "saliva",
+        "lang_zh": "唾液",
+        "pinned": false
+      },
+      {
+        "text": "facial hair",
+        "lang_zh": "胡子",
+        "pinned": false
+      },
+      {
+        "text": "fingersmile",
+        "lang_zh": "用手指做出笑脸",
+        "pinned": false
+      },
+      {
+        "text": "mouth hold",
+        "lang_zh": "嘴咬住",
+        "pinned": false
+      },
+      {
+        "text": "parted lips",
+        "lang_zh": "嘴唇微张",
+        "pinned": false
+      },
+      {
+        "text": "closed mouth",
+        "lang_zh": "闭嘴",
+        "pinned": false
+      },
+      {
+        "text": "tongue out",
+        "lang_zh": "吐舌头",
+        "pinned": false
+      },
+      {
+        "text": "licking lips",
+        "lang_zh": "舔嘴唇",
+        "pinned": false
+      },
+      {
+        "text": "pain",
+        "lang_zh": "疼痛",
+        "pinned": false
+      },
+      {
+        "text": "crying",
+        "lang_zh": "哭",
+        "pinned": false
+      },
+      {
+        "text": "fume",
+        "lang_zh": "气得冒烟(漫画)",
+        "pinned": false
+      },
+      {
+        "text": "grimace",
+        "lang_zh": "厌恶的怪相",
+        "pinned": false
+      },
+      {
+        "text": "screaming",
+        "lang_zh": "尖叫",
+        "pinned": false
+      },
+      {
+        "text": "v-shaped eyebrows",
+        "lang_zh": "V形眉(表高傲或愤怒)",
+        "pinned": false
+      },
+      {
+        "text": "scared",
+        "lang_zh": "害怕的",
+        "pinned": false
+      },
+      {
+        "text": "scowl",
+        "lang_zh": "怒视/嫌弃/不满",
+        "pinned": false
+      },
+      {
+        "text": "serious",
+        "lang_zh": "严肃的",
+        "pinned": false
+      },
+      {
+        "text": "tearing up",
+        "lang_zh": "要哭的表情",
+        "pinned": false
+      },
+      {
+        "text": "bored",
+        "lang_zh": "无聊的",
+        "pinned": false
+      },
+      {
+        "text": "gloom (expression)",
+        "lang_zh": "消沉(表情)",
+        "pinned": false
+      },
+      {
+        "text": "jealous",
+        "lang_zh": "嫉妒的",
+        "pinned": false
+      },
+      {
+        "text": "jitome",
+        "lang_zh": "轻蔑的眼神",
+        "pinned": false
+      },
+      {
+        "text": "nervous",
+        "lang_zh": "不安的",
+        "pinned": false
+      },
+      {
+        "text": "nervous smile",
+        "lang_zh": "不安地微笑",
+        "pinned": false
+      },
+      {
+        "text": "shaded",
+        "lang_zh": "阴沉脸",
+        "pinned": false
+      },
+      {
+        "text": "turn pale",
+        "lang_zh": "脸色苍白",
+        "pinned": false
+      },
+      {
+        "text": "expressionless",
+        "lang_zh": "无口",
+        "pinned": false
+      },
+      {
+        "text": "expressions",
+        "lang_zh": "表情",
+        "pinned": false
+      },
+      {
+        "text": "unconscious",
+        "lang_zh": "失神",
+        "pinned": false
+      },
+      {
+        "text": "bright pupils",
+        "lang_zh": "明亮的瞳孔",
+        "pinned": false
+      },
+      {
+        "text": "ear blush",
+        "lang_zh": "耳红",
+        "pinned": false
+      },
+      {
+        "text": "holding breath",
+        "lang_zh": "憋气",
+        "pinned": false
+      },
+      {
+        "text": "puckered lips",
+        "lang_zh": "撅起的嘴唇",
+        "pinned": false
+      },
+      {
+        "text": "seductive smile",
+        "lang_zh": "诱人的微笑",
+        "pinned": false
+      },
+      {
+        "text": "smiley",
+        "lang_zh": "笑脸",
+        "pinned": false
+      },
+      {
+        "text": "smirk",
+        "lang_zh": "傻笑/得意的笑",
+        "pinned": false
+      },
+      {
+        "text": "doyagao",
+        "lang_zh": "得意脸",
+        "pinned": false
+      },
+      {
+        "text": "flustered",
+        "lang_zh": "慌乱的",
+        "pinned": false
+      },
+      {
+        "text": "full blush",
+        "lang_zh": "整张脸泛红",
+        "pinned": false
+      },
+      {
+        "text": "heart in eye",
+        "lang_zh": "眼里冒爱心",
+        "pinned": false
+      },
+      {
+        "text": "moaning",
+        "lang_zh": "呻吟",
+        "pinned": false
+      },
+      {
+        "text": "smug",
+        "lang_zh": "得意脸",
+        "pinned": false
+      },
+      {
+        "text": "spit take",
+        "lang_zh": "惊讶或无语到喷了",
+        "pinned": false
+      },
+      {
+        "text": "surprised",
+        "lang_zh": "惊讶",
+        "pinned": false
+      },
+      {
+        "text": "tsundere",
+        "lang_zh": "傲娇",
+        "pinned": false
+      },
+      {
+        "text": "drooling",
+        "lang_zh": "流口水",
+        "pinned": false
+      },
+      {
+        "text": "torogao",
+        "lang_zh": "诱惑的表情",
+        "pinned": false
+      },
+      {
+        "text": "ahegao",
+        "lang_zh": "阿嘿颜",
+        "pinned": false
+      },
+      {
+        "text": "naughty face",
+        "lang_zh": "下流的表情",
+        "pinned": false
+      },
+      {
+        "text": "naughty",
+        "lang_zh": "下流的表情",
+        "pinned": false
+      },
+      {
+        "text": "endured face",
+        "lang_zh": "忍耐的表情",
+        "pinned": false
+      },
+      {
+        "text": "glint",
+        "lang_zh": "眼中闪现强烈的情感",
+        "pinned": false
+      },
+      {
+        "text": "happy",
+        "lang_zh": "快乐/幸福",
+        "pinned": false
+      },
+      {
+        "text": "laughing",
+        "lang_zh": "在笑的",
+        "pinned": false
+      },
+      {
+        "text": "troll",
+        "lang_zh": "嚣张脸",
+        "pinned": false
+      },
+      {
+        "text": "yandere",
+        "lang_zh": "病娇",
+        "pinned": false
+      },
+      {
+        "text": "saliva trail",
+        "lang_zh": "唾液拉丝",
+        "pinned": false
+      },
+      {
+        "text": "red lips",
+        "lang_zh": "朱唇",
+        "pinned": false
+      },
+      {
+        "text": "skin fang",
+        "lang_zh": "虎牙状",
+        "pinned": false
+      },
+      {
+        "text": "upper teeth",
+        "lang_zh": "露出上排牙齿",
+        "pinned": false
+      },
+      {
+        "text": "fang",
+        "lang_zh": "虎牙",
+        "pinned": false
+      },
+      {
+        "text": "fang out",
+        "lang_zh": "露出虎牙/露出尖牙",
+        "pinned": false
+      },
+      {
+        "text": "long tongue",
+        "lang_zh": "长舌头",
+        "pinned": false
+      },
+      {
+        "text": "forehead",
+        "lang_zh": "额头",
+        "pinned": false
+      },
+      {
+        "text": "light blush",
+        "lang_zh": "淡淡的腮红",
+        "pinned": false
+      },
+      {
+        "text": "cheek-to-cheek",
+        "lang_zh": "脸贴脸",
+        "pinned": false
+      },
+      {
+        "text": "cheek bulge",
+        "lang_zh": "鼓着腮帮",
+        "pinned": false
+      },
+      {
+        "text": "cheek pinching",
+        "lang_zh": "捏脸颊",
+        "pinned": false
+      },
+      {
+        "text": "cheek poking",
+        "lang_zh": "戳脸颊",
+        "pinned": false
+      },
+      {
+        "text": "cheek pull",
+        "lang_zh": "扯脸颊",
+        "pinned": false
+      },
+      {
+        "text": "chin grab",
+        "lang_zh": "抬下巴",
+        "pinned": false
+      },
+      {
+        "text": "covering eyes",
+        "lang_zh": "遮住眼睛",
+        "pinned": false
+      },
+      {
+        "text": "covering",
+        "lang_zh": "挡住脸",
+        "pinned": false
+      },
+      {
+        "text": "covering mouth",
+        "lang_zh": "挡住嘴巴",
+        "pinned": false
+      },
+      {
+        "text": "face-to-face",
+        "lang_zh": "脸贴脸",
+        "pinned": false
+      },
+      {
+        "text": "facing another",
+        "lang_zh": "二人面对面(脸贴得很近)",
+        "pinned": false
+      },
+      {
+        "text": "forehead-to-forehead",
+        "lang_zh": "额头贴额头",
+        "pinned": false
+      },
+      {
+        "text": "teeth",
+        "lang_zh": "牙",
+        "pinned": false
+      },
+      {
+        "text": "excited",
+        "lang_zh": "兴奋",
+        "pinned": false
+      },
+      {
+        "text": "nose blush",
+        "lang_zh": "害羞",
+        "pinned": false
+      },
+      {
+        "text": "expressionless eyes",
+        "lang_zh": "失神",
+        "pinned": false
+      },
+      {
+        "text": "anger vein",
+        "lang_zh": "青筋",
+        "pinned": false
+      },
+      {
+        "text": "blush stickers",
+        "lang_zh": "表情贴纸",
+        "pinned": false
+      },
+      {
+        "text": "full-face blush",
+        "lang_zh": "整张脸泛红",
+        "pinned": false
+      },
+      {
+        "text": "confused",
+        "lang_zh": "疑惑",
+        "pinned": false
+      },
+      {
+        "text": "determined",
+        "lang_zh": "有决心的",
+        "pinned": false
+      },
+      {
+        "text": "disappointed",
+        "lang_zh": "失望的",
+        "pinned": false
+      },
+      {
+        "text": "disdain",
+        "lang_zh": "蔑视",
+        "pinned": false
+      },
+      {
+        "text": "disgust",
+        "lang_zh": "恶心",
+        "pinned": false
+      },
+      {
+        "text": "despair",
+        "lang_zh": "绝望",
+        "pinned": false
+      },
+      {
+        "text": "envy",
+        "lang_zh": "嫉妒",
+        "pinned": false
+      },
+      {
+        "text": "evil",
+        "lang_zh": "邪恶",
+        "pinned": false
+      },
+      {
+        "text": "facepalm",
+        "lang_zh": "以手掩面",
+        "pinned": false
+      },
+      {
+        "text": "frustrated",
+        "lang_zh": "沮丧",
+        "pinned": false
+      },
+      {
+        "text": "guilt",
+        "lang_zh": "有罪的",
+        "pinned": false
+      },
+      {
+        "text": "kubrick stare",
+        "lang_zh": "库布里克凝视",
+        "pinned": false
+      },
+      {
+        "text": "lonely",
+        "lang_zh": "孤独的",
+        "pinned": false
+      },
+      {
+        "text": "raised eyebrow",
+        "lang_zh": "扬起的眉毛",
+        "pinned": false
+      },
+      {
+        "text": "rape face",
+        "lang_zh": "强硬的表情",
+        "pinned": false
+      },
+      {
+        "text": "depressed",
+        "lang_zh": "压抑的/郁闷的",
+        "pinned": false
+      },
+      {
+        "text": "panicking",
+        "lang_zh": "恐慌的",
+        "pinned": false
+      },
+      {
+        "text": "worried",
+        "lang_zh": "担忧的",
+        "pinned": false
+      },
+      {
+        "text": "tired",
+        "lang_zh": "累",
+        "pinned": false
+      },
+      {
+        "text": "sulking",
+        "lang_zh": "闷闷不乐",
+        "pinned": false
+      },
+      {
+        "text": "thinking",
+        "lang_zh": "思考",
+        "pinned": false
+      },
+      {
+        "text": "pensive",
+        "lang_zh": "沉思的",
+        "pinned": false
+      },
+      {
+        "text": "upset",
+        "lang_zh": "气愤",
+        "pinned": false
+      },
+      {
+        "text": "crazy smile",
+        "lang_zh": "疯狂地笑",
+        "pinned": false
+      },
+      {
+        "text": "forced smile",
+        "lang_zh": "强迫笑",
+        "pinned": false
+      },
+      {
+        "text": "glasgow smile",
+        "lang_zh": "格拉斯哥微笑",
+        "pinned": false
+      },
+      {
+        "text": "sad smile",
+        "lang_zh": "苦笑",
+        "pinned": false
+      },
+      {
+        "text": "stifled laugh",
+        "lang_zh": "憋笑",
+        "pinned": false
+      },
+      {
+        "text": "color drain",
+        "lang_zh": "惊讶到掉色",
+        "pinned": false
+      },
+      {
+        "text": "horrified",
+        "lang_zh": "恐惧表情",
+        "pinned": false
+      },
+      {
+        "text": "sobbing",
+        "lang_zh": "啜泣",
+        "pinned": false
+      },
+      {
+        "text": "oral invitation",
+        "lang_zh": "伸出舌头",
+        "pinned": false
+      }
+    ]
+  },
+  "history": [
+    {
+      "ts": 1758702132152,
+      "text": "colored inner hair, clover hair ornament, eyebrows behind hair, kemonomimi mode, spit take"
+    }
+  ],
+  "menus": [
+    {
+      "icon": "fas fa-search",
+      "name": "谷歌翻译",
+      "url": "https://translate.google.com/?source=osdd&sl=auto&tl=zh-CN&text={{中文}}"
+    }
+  ]
+}
