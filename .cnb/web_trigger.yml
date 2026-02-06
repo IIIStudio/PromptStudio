@@ -1,0 +1,11 @@
+branch:
+  - buttons:
+      - name: 测回
+        event: web_trigger
+        description: "测回提交"
+        inputs:
+          commit:
+            name: commit
+            description: "提交哈希值或者HEAD~1"
+            placeholder: "提交哈希值或者HEAD~1"
+            required: true

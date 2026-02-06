@@ -1,8 +1,10 @@
 # IIIStudio - AI绘画提示词工具
 
-一个纯前端的提示词管理与编辑页面。支持分类/分组管理、标签拖拽排序、历史快照存储、翻译、JSON 导入/导出、本地持久化，以及可选的 Dropbox 云同步；同时提供一键导出提示词区域为图片（html2canvas）。
+PromptStudio是AIGC提示词可视化编辑器纯前端网站，支持AI绘画提示词管理、分类、翻译和云端同步，兼容Stable Diffusion、Midjourney、ComfyUI等主流AI绘画工具。
 
 B站演示：https://www.bilibili.com/video/BV1VgykBQEp5/
+
+更新后标签演示：https://www.bilibili.com/video/BV1wRF7zzE11/
 
 ## 更新日志
 2026-02-04

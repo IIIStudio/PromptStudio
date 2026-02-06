@@ -26,3 +26,11 @@ main:
             branch: main
             sync_mode: mirror  # 镜像模式，直接覆盖
             force: true
+  web_trigger:
+    - runner:
+        cpus: 1
+      stages:
+        - name: 测回
+          script: |
+            git reset --hard ${commit}
+            git push -f origin main
