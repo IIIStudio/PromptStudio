@@ -42,10 +42,65 @@ B站演示：https://www.bilibili.com/video/BV1VgykBQEp5/
 
 ## 功能一览
 
-![](./image/1.jpg)
-![](./image/2.jpg)
-![](./image/3.jpg)
-![](./image/4.jpg)
+<table>
+  <tr>
+    <td align="center">
+      <a href="./image/1.jpg" target="_blank">
+        <img src="./image/1.jpg" alt="1.jpg" width="200"><br>
+      </a>
+      <sub>1.jpg</sub>
+    </td>
+    <td align="center">
+      <a href="./image/2.jpg" target="_blank">
+        <img src="./image/2.jpg" alt="2.jpg" width="200"><br>
+      </a>
+      <sub>2.jpg</sub>
+    </td>
+    <td align="center">
+      <a href="./image/3.jpg" target="_blank">
+        <img src="./image/3.jpg" alt="3.jpg" width="200"><br>
+      </a>
+      <sub>3.jpg</sub>
+    </td>
+    <td align="center">
+      <a href="./image/4.jpg" target="_blank">
+        <img src="./image/4.jpg" alt="4.jpg" width="200"><br>
+      </a>
+      <sub>4.jpg</sub>
+    </td>
+  </tr>
+</table>
+
+更新后
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="./image/5.jpg" target="_blank">
+        <img src="./image/5.jpg" alt="5.jpg" width="200"><br>
+      </a>
+      <sub>5.jpg</sub>
+    </td>
+    <td align="center">
+      <a href="./image/8.jpg" target="_blank">
+        <img src="./image/8.jpg" alt="8.jpg" width="200"><br>
+      </a>
+      <sub>8.jpg</sub>
+    </td>
+    <td align="center">
+      <a href="./image/6.jpg" target="_blank">
+        <img src="./image/6.jpg" alt="6.jpg" width="200"><br>
+      </a>
+      <sub>6.jpg</sub>
+    </td>
+    <td align="center">
+      <a href="./image/7.jpg" target="_blank">
+        <img src="./image/7.jpg" alt="7.jpg" width="200"><br>
+      </a>
+      <sub>7.jpg</sub>
+    </td>
+  </tr>
+</table>
 
 - 分类管理
   - 新建/编辑/删除分类
@@ -110,10 +165,16 @@ B站演示：https://www.bilibili.com/video/BV1VgykBQEp5/
   - 操作 Methods：GET, PUT, POST, DELETE, HEAD
   - 其他默认
 
-使用JS：[cos-js-sdk-v5](https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js)
-
 ## 彩云api（可选）
 
 - 地址：https://platform.caiyunapp.com/login
 - 好像是每月100万字翻译字符数，完全够用
 - 创建应用获取Token
+
+## 来源
+
+使用JS：[cos-js-sdk-v5](https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js)
+
+默认标签.csv 来源：https://cnb.cool/cnb-xu/
+
+https://cnb.cool/IIIStudio/AI/comfyui-xu/-/blob/main/user/default/prompt-assistant/tags/%E9%BB%98%E8%AE%A4%E6%A0%87%E7%AD%BE.csv
