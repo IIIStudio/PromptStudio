@@ -1509,6 +1509,9 @@ Prompt Studio目录下</p>
     </div>
 
     <script>
+        // 默认 JSON 文件名常量
+        const DEFAULT_JSON_FILENAME = 'OHAO AI Prompt Studio.json';
+
         // 主题切换功能（持久化 + 跟随系统偏好）
         const themeToggle = document.getElementById('theme-toggle');
         const THEME_KEY = 'ops_theme';
@@ -2600,8 +2603,8 @@ Prompt Studio目录下</p>
         function getDropboxSelectedFilename() {
             try {
                 const v = localStorage.getItem('ops_dbx_filename');
-                return v && v.trim() ? v.trim() : '/OHAO AI Prompt Studio.json';
-            } catch(e) { return '/OHAO AI Prompt Studio.json'; }
+                return v && v.trim() ? v.trim() : '/' + DEFAULT_JSON_FILENAME;
+            } catch(e) { return '/' + DEFAULT_JSON_FILENAME; }
         }
         function isDropboxEnabled() {
             try { return localStorage.getItem('ops_cloud_enabled') === '1'; } catch(e) { return false; }
@@ -2784,12 +2787,12 @@ Prompt Studio目录下</p>
                 // 确保默认配置存在
                 const hasDefault = configs.some(c => c.name === '默认');
                 if (!hasDefault) {
-                    configs.unshift({ name: '默认', filename: 'OHAO AI Prompt Studio.json' });
+                    configs.unshift({ name: '默认', filename: DEFAULT_JSON_FILENAME });
                     localStorage.setItem(S3_CONFIGS_KEY, JSON.stringify(configs));
                 }
-                return Array.isArray(configs) ? configs : [{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }];
+                return Array.isArray(configs) ? configs : [{ name: '默认', filename: DEFAULT_JSON_FILENAME }];
             } catch(e) {
-                return [{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }];
+                return [{ name: '默认', filename: DEFAULT_JSON_FILENAME }];
             }
         }
 
@@ -2823,8 +2826,8 @@ Prompt Studio目录下</p>
                 if (config && config.filename) {
                     return config.filename;
                 }
-                return 'OHAO AI Prompt Studio.json';
-            } catch(e) { return 'OHAO AI Prompt Studio.json'; }
+                return DEFAULT_JSON_FILENAME;
+            } catch(e) { return DEFAULT_JSON_FILENAME; }
         }
 
         function isS3Enabled() {
@@ -3135,7 +3138,7 @@ Prompt Studio目录下</p>
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'OHAO AI Prompt Studio.json';
+            a.download = DEFAULT_JSON_FILENAME;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -3294,7 +3297,7 @@ Prompt Studio目录下</p>
                 if (!ok) return;
 
                 // 从同目录读取默认测试数据
-                const res = await fetch('OHAO AI Prompt Studio.json');
+                const res = await fetch(DEFAULT_JSON_FILENAME);
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const text = await res.text();
                 await importJsonText(text);
@@ -3633,9 +3636,9 @@ Prompt Studio目录下</p>
                                 return;
                             }
                             // 保留默认配置，其他配置从云端获取
-                            const configs = [{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }];
+                            const configs = [{ name: '默认', filename: DEFAULT_JSON_FILENAME }];
                             const existingNames = new Set(['默认']);
-                            const defaultFilename = 'OHAO AI Prompt Studio.json';
+                            const defaultFilename = DEFAULT_JSON_FILENAME;
                             let addedCount = 0;
 
                             if (data.Contents && data.Contents.length > 0) {
@@ -4135,7 +4138,7 @@ Prompt Studio目录下</p>
                             localStorage.removeItem('ops_s3_region');
                             localStorage.removeItem('ops_s3_bucket');
                             // 重置配置列表为只包含默认配置
-                            localStorage.setItem('ops_s3_configs', JSON.stringify([{ name: '默认', filename: 'OHAO AI Prompt Studio.json' }]));
+                            localStorage.setItem('ops_s3_configs', JSON.stringify([{ name: '默认', filename: DEFAULT_JSON_FILENAME }]));
                             localStorage.removeItem('ops_s3_selected_config');
                             if (s3SecretIdEl) s3SecretIdEl.value = '';
                             if (s3SecretKeyEl) s3SecretKeyEl.value = '';
