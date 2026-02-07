@@ -3098,9 +3098,11 @@ Prompt Studio目录下</p>
             });
         }
 
-        async function downloadJson() {
-            // 同时导出"常用提示词"和"提示词历史"
-            const exportObj = {
+        // ========== 统一的数据导出/导入管理 ==========
+
+        // 导出完整数据对象（包含常用提示词、历史记录、菜单、触发词）
+        function exportFullDataObject() {
+            return {
                 common: commonData || {},
                 history: (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
                 menus: (function(){ try { const raw = localStorage.getItem('ops_ctx_menu_items'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
@@ -3109,6 +3111,29 @@ Prompt Studio目录下</p>
                     suffix: localStorage.getItem('ops_suffix_trigger_zh') || ''
                 }
             };
+        }
+
+        // 统一上传函数 - 根据provider选择对应的云存储
+        async function uploadToCloud(filename, dataStr, provider) {
+            if (provider === 's3') {
+                return await uploadToS3(filename, dataStr);
+            } else {
+                return await uploadToDropbox(filename, dataStr);
+            }
+        }
+
+        // 统一下载函数 - 根据provider选择对应的云存储
+        async function downloadFromCloud(filename, provider) {
+            if (provider === 's3') {
+                return await downloadFromS3(filename);
+            } else {
+                return await downloadFromDropbox(filename);
+            }
+        }
+
+        // 下载JSON - 支持本地下载或云端上传
+        async function downloadJson() {
+            const exportObj = exportFullDataObject();
             const dataStr = JSON.stringify(exportObj, null, 2);
             const useCloud = isCloudEnabled();
             const provider = getSyncProvider();
@@ -3121,13 +3146,13 @@ Prompt Studio目录下</p>
                         showInfo('未配置 S3 信息，请在同步配置中填写。', '提示');
                         return;
                     }
-                    uploadToS3(filename, dataStr)
+                    uploadToCloud(filename, dataStr, provider)
                         .then(() => showInfo('已上传到 S3: ' + filename, '上传成功'))
                         .catch(err => showInfo('S3 上传失败：' + (err?.message || err), '上传失败'));
                 } else {
                     const { token } = getDropboxConfig();
                     if (!token) { showInfo('未登录 Dropbox，请先在同步配置中完成登录。', '提示'); return; }
-                    uploadToDropbox(filename, dataStr)
+                    uploadToCloud(filename, dataStr, provider)
                         .then(() => showInfo('已上传到 Dropbox: ' + filename, '上传成功'))
                         .catch(err => showInfo('Dropbox 上传失败：' + (err?.message || err), '上传失败'));
                 }
@@ -3145,7 +3170,8 @@ Prompt Studio目录下</p>
             URL.revokeObjectURL(url);
         }
 
-        async function importJsonText(text, showNotification = true) {
+        // 统一导入函数 - 支持合并或替换模式
+        async function importJsonText(text, showNotification = true, clearExisting = false) {
             const data = JSON.parse(text);
             if (!data || typeof data !== 'object') throw new Error('无效JSON');
 
@@ -3156,6 +3182,7 @@ Prompt Studio目录下</p>
             let nextCommon = {};
             let nextHistory = [];
             let nextMenus = Array.isArray(data?.menus) ? data.menus : null;
+            let nextTriggerWords = data?.triggerWords || null;
 
             function importCategoryValue(val) {
                 if (Array.isArray(val)) {
@@ -3200,28 +3227,44 @@ Prompt Studio目录下</p>
                 });
             }
 
-            commonData = nextCommon;
-            saveCommonData();
-            if (nextHistory.length) {
+            // 如果是替换模式，清空现有数据
+            if (clearExisting) {
+                commonData = nextCommon;
                 try { localStorage.setItem('ops_prompt_history', JSON.stringify(nextHistory)); } catch(e) {}
+                if (Array.isArray(nextMenus)) {
+                    try { localStorage.setItem('ops_ctx_menu_items', JSON.stringify(nextMenus)); } catch(e) {}
+                }
+            } else {
+                // 合并模式：合并common、history、menus
+                Object.keys(nextCommon).forEach(k => {
+                    commonData[k] = nextCommon[k];
+                });
+                if (nextHistory.length) {
+                    const existing = (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })();
+                    const merged = [...nextHistory, ...existing];
+                    try { localStorage.setItem('ops_prompt_history', JSON.stringify(merged)); } catch(e) {}
+                }
+                if (Array.isArray(nextMenus)) {
+                    try { localStorage.setItem('ops_ctx_menu_items', JSON.stringify(nextMenus)); } catch(e) {}
+                }
             }
-            if (Array.isArray(nextMenus)) {
-                try { localStorage.setItem('ops_ctx_menu_items', JSON.stringify(nextMenus)); } catch(e) {}
-            }
+
             // 导入触发词设置
-            if (data.triggerWords && typeof data.triggerWords === 'object') {
+            if (nextTriggerWords && typeof nextTriggerWords === 'object') {
                 try {
-                    if (data.triggerWords.prefix !== undefined) {
-                        localStorage.setItem('ops_prefix_trigger_zh', String(data.triggerWords.prefix));
+                    if (nextTriggerWords.prefix !== undefined) {
+                        localStorage.setItem('ops_prefix_trigger_zh', String(nextTriggerWords.prefix));
                     }
-                    if (data.triggerWords.suffix !== undefined) {
-                        localStorage.setItem('ops_suffix_trigger_zh', String(data.triggerWords.suffix));
+                    if (nextTriggerWords.suffix !== undefined) {
+                        localStorage.setItem('ops_suffix_trigger_zh', String(nextTriggerWords.suffix));
                     }
                 } catch(e) {}
             }
+            saveCommonData();
             renderSidebar();
             if (showNotification) {
-                showInfo('JSON 导入完成' + (nextHistory.length ? '（含历史）' : ''), '导入成功');
+                const modeText = clearExisting ? '（替换模式）' : '（合并模式）';
+                showInfo('JSON 导入完成' + modeText + (nextHistory.length ? '，含历史' : ''), '导入成功');
             }
         }
 
@@ -3238,8 +3281,8 @@ Prompt Studio目录下</p>
         async function importFromDropbox() {
             try {
                 const filename = getDropboxSelectedFilename();
-                const text = await downloadFromDropbox(filename);
-                await importJsonText(text, false);
+                const text = await downloadFromCloud(filename, 'dropbox');
+                await importJsonText(text, false, false); // 使用默认的合并模式
                 showInfo('已从 Dropbox 导入 ' + filename, '导入成功');
             } catch (e) {
                 showInfo('从 Dropbox 下载失败：' + (e?.message || e), '下载失败');
@@ -3249,8 +3292,8 @@ Prompt Studio目录下</p>
         async function importFromS3() {
             try {
                 const filename = getS3SelectedFilename();
-                const text = await downloadFromS3(filename);
-                await importJsonText(text, false);
+                const text = await downloadFromCloud(filename, 's3');
+                await importJsonText(text, false, false); // 使用默认的合并模式
                 showInfo('已从 S3 导入 ' + filename, '导入成功');
             } catch (e) {
                 showInfo('从 S3 下载失败：' + (e?.message || e), '下载失败');
@@ -4005,7 +4048,7 @@ Prompt Studio目录下</p>
             const onS3Save = async () => {
                 try {
                     // 检查是否已经加密（通过检查localStorage中是否有加密数据）
-                    const hasEncryptedData = localStorage.getItem('ops_s3_secret_id') || 
+                    const hasEncryptedData = localStorage.getItem('ops_s3_secret_id') ||
                                            localStorage.getItem('ops_s3_secret_key') ||
                                            localStorage.getItem('ops_s3_region') ||
                                            localStorage.getItem('ops_s3_bucket');
@@ -4020,7 +4063,7 @@ Prompt Studio目录下</p>
                         // 检查配置是否发生变化
                         const currentSelectedName = getSelectedS3Config();
                         const originalSelectedName = localStorage.getItem('ops_s3_selected_config_original');
-                        
+
                         if (originalSelectedName && currentSelectedName !== originalSelectedName) {
                             // 配置发生变化，需要上传当前文件并下载新选择的文件
                             try {
@@ -4038,21 +4081,19 @@ Prompt Studio目录下</p>
                                 const configs = getS3Configs();
                                 const currentConfig = configs.find(c => c.name === currentSelectedName);
                                 const originalConfig = configs.find(c => c.name === originalSelectedName);
-                                
+
                                 if (currentConfig && originalConfig) {
-                                    // 先上传当前文件（使用原配置的文件名）
-                                    const exportObj = {
-                                        common: commonData || {},
-                                        history: (function(){ try { const raw = localStorage.getItem('ops_prompt_history'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })(),
-                                        menus: (function(){ try { const raw = localStorage.getItem('ops_ctx_menu_items'); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch(e){ return []; } })()
-                                    };
+                                    // 使用统一的导出函数
+                                    const exportObj = exportFullDataObject();
                                     const dataStr = JSON.stringify(exportObj, null, 2);
+
+                                    // 先上传当前文件（使用原配置的文件名）
                                     await uploadToS3Internal(originalConfig.filename, dataStr, secretId, secretKey, region, bucket);
                                     showInfo('已上传到 S3: ' + originalConfig.filename, '上传成功');
-                                    
-                                    // 下载新选择的文件
+
+                                    // 下载新选择的文件（使用替换模式清空原先数据）
                                     const text = await downloadFromS3Internal(currentConfig.filename, secretId, secretKey, region, bucket);
-                                    await importJsonText(text);
+                                    await importJsonText(text, false, true);
                                     showInfo('已从 S3 导入 ' + currentConfig.filename, '导入成功');
                                 }
                             } catch (e) {
@@ -4061,7 +4102,7 @@ Prompt Studio目录下</p>
                                 return;
                             }
                         }
-                        
+
                         cleanup();
                         return;
                     }
